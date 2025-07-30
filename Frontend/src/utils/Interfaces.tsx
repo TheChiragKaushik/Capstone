@@ -30,7 +30,16 @@ export interface RoleConfiguration {
     routes: {
       [path: string]: RouteComponent;
     };
+    notifications?: {
+      panel: React.FC<NotificationPanelProps>;
+      dialog: React.FC;
+    };
   };
+}
+
+export interface NotificationPanelProps {
+  visibility: string;
+  onClose: () => void;
 }
 
 export interface LoggedInUser {
@@ -40,7 +49,8 @@ export interface LoggedInUser {
 }
 
 export interface RouteComponentProps {
-  pathname: string;
+  user?: PatientEO | PharmacyEO | ProviderEO;
+  pathname?: string;
   userId?: string;
 }
 
@@ -49,6 +59,10 @@ export interface PatientDashboardPageProps extends RouteComponentProps {}
 export interface PatientRemindersPageProps extends RouteComponentProps {}
 
 export interface PatientRefillRequestsPageProps extends RouteComponentProps {}
+
+export interface PatientCalenderRequestPageProps extends RouteComponentProps {}
+
+export interface PatientProfileRequestPageProps extends RouteComponentProps {}
 
 export interface Contact {
   email: string;

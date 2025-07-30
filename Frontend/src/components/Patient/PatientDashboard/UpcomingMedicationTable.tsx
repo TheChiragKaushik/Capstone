@@ -1,149 +1,275 @@
-const UpcomingMedicationTable = () => (
-  <div className="bg-white rounded-lg shadow-sm p-6 border border-beige-100 mb-8">
-    <div className="flex justify-between items-center mb-6">
-      <h3 className="text-lg font-medium text-brown-700">
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Button,
+  Box,
+} from "@mui/material";
+import { colors } from "../../../utils/Constants";
+import type { PatientEO } from "../../../utils/Interfaces";
+import type React from "react";
+
+type UpcomingMedicationTableProps = {
+  user?: PatientEO;
+};
+
+const TableHeaders = ["Medication", "Dosage", "Time", "Instructions", "Status"];
+
+const UpcomingMedicationTable: React.FC<UpcomingMedicationTableProps> = ({
+  user,
+}) => (
+
+  
+  <Paper
+    className="rounded-lg shadow-sm p-6 border mb-8"
+    style={{ borderColor: colors.beige100, background: "#fff" }}
+    elevation={0}
+  >
+    <Box className="flex justify-between items-center mb-6">
+      <Typography
+        variant="h6"
+        className="font-semibold"
+        sx={{ color: colors.brown700, fontSize: "1.25rem" }}
+      >
         Upcoming Medications
-      </h3>
-      <a
-        href="#"
-        className="text-sm text-brown-500 hover:text-brown-600 flex items-center"
+      </Typography>
+      <Button
+        variant="text"
+        size="small"
+        className="flex items-center"
+        sx={{
+          color: colors.brown500,
+          fontSize: "0.875rem",
+          textTransform: "none",
+          "&:hover": { color: colors.brown600, background: "none" },
+        }}
+        endIcon={<i className="fas fa-chevron-right text-xs" />}
       >
         View all
-        <i className="fas fa-chevron-right ml-1 text-xs"></i>
-      </a>
-    </div>
+      </Button>
+    </Box>
 
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-beige-200">
-        <thead className="bg-beige-50">
-          <tr>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider"
-            >
-              Medication
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider"
-            >
-              Dosage
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider"
-            >
-              Time
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider"
-            >
-              Instructions
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-brown-500 uppercase tracking-wider"
-            >
-              Status
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-beige-100">
-          <tr>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
-                  <i className="fas fa-capsules"></i>
-                </div>
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-brown-700">
+    <TableContainer className="overflow-x-auto">
+      <Table className="min-w-full">
+        <TableHead>
+          <TableRow style={{ background: colors.beige50 }}>
+            {TableHeaders.map((header) => (
+              <TableCell
+                key={header}
+                className="px-6 py-3"
+                sx={{
+                  color: colors.brown500,
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  fontSize: "0.75rem",
+                  letterSpacing: 1,
+                  borderBottom: `1px solid ${colors.beige200}`,
+                  background: colors.beige50,
+                }}
+              >
+                {header}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {/* Row 1 */}
+          <TableRow>
+            <TableCell className="px-6 py-4">
+              <Box className="flex items-center">
+                <Box
+                  className="flex items-center justify-center"
+                  sx={{
+                    background: "#DBEAFE", // bg-blue-100
+                    color: "#3B82F6", // text-blue-500
+                    borderRadius: "9999px",
+                    width: 32,
+                    height: 32,
+                  }}
+                >
+                  <i className="fas fa-capsules" />
+                </Box>
+                <Box ml={2}>
+                  <Typography
+                    sx={{
+                      color: colors.brown700,
+                      fontSize: 14,
+                      fontWeight: 500,
+                    }}
+                  >
                     Metformin
-                  </div>
-                  <div className="text-xs text-brown-400">500mg tablet</div>
-                </div>
-              </div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="text-sm text-brown-700">1 tablet</div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="text-sm text-brown-700">1:00 PM</div>
-              <div className="text-xs text-brown-400">Today</div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="text-sm text-brown-700">Take with lunch</div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                  </Typography>
+                  <Typography sx={{ color: colors.brown400, fontSize: 12 }}>
+                    500mg tablet
+                  </Typography>
+                </Box>
+              </Box>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <Typography sx={{ color: colors.brown700, fontSize: 14 }}>
+                1 tablet
+              </Typography>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <Typography sx={{ color: colors.brown700, fontSize: 14 }}>
+                1:00 PM
+              </Typography>
+              <Typography sx={{ color: colors.brown400, fontSize: 12 }}>
+                Today
+              </Typography>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <Typography sx={{ color: colors.brown700, fontSize: 14 }}>
+                Take with lunch
+              </Typography>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <span
+                className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                style={{
+                  background: "#FEF08A", // bg-yellow-100
+                  color: "#854D0E", // text-yellow-800
+                }}
+              >
                 Upcoming
               </span>
-            </td>
-          </tr>
-          <tr>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-500">
-                  <i className="fas fa-pills"></i>
-                </div>
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-brown-700">
+            </TableCell>
+          </TableRow>
+
+          {/* Row 2 */}
+          <TableRow>
+            <TableCell className="px-6 py-4">
+              <Box className="flex items-center">
+                <Box
+                  className="flex items-center justify-center"
+                  sx={{
+                    background: "#E9D5FF", // bg-purple-100
+                    color: "#A78BFA", // text-purple-500
+                    borderRadius: "9999px",
+                    width: 32,
+                    height: 32,
+                  }}
+                >
+                  <i className="fas fa-pills" />
+                </Box>
+                <Box ml={2}>
+                  <Typography
+                    sx={{
+                      color: colors.brown700,
+                      fontSize: 14,
+                      fontWeight: 500,
+                    }}
+                  >
                     Atorvastatin
-                  </div>
-                  <div className="text-xs text-brown-400">20mg tablet</div>
-                </div>
-              </div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="text-sm text-brown-700">1 tablet</div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="text-sm text-brown-700">8:00 PM</div>
-              <div className="text-xs text-brown-400">Today</div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="text-sm text-brown-700">Take before bedtime</div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                  </Typography>
+                  <Typography sx={{ color: colors.brown400, fontSize: 12 }}>
+                    20mg tablet
+                  </Typography>
+                </Box>
+              </Box>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <Typography sx={{ color: colors.brown700, fontSize: 14 }}>
+                1 tablet
+              </Typography>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <Typography sx={{ color: colors.brown700, fontSize: 14 }}>
+                8:00 PM
+              </Typography>
+              <Typography sx={{ color: colors.brown400, fontSize: 12 }}>
+                Today
+              </Typography>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <Typography sx={{ color: colors.brown700, fontSize: 14 }}>
+                Take before bedtime
+              </Typography>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <span
+                className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                style={{
+                  background: "#FEF08A", // bg-yellow-100
+                  color: "#854D0E", // text-yellow-800
+                }}
+              >
                 Upcoming
               </span>
-            </td>
-          </tr>
-          <tr>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-500">
-                  <i className="fas fa-tablets"></i>
-                </div>
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-brown-700">
+            </TableCell>
+          </TableRow>
+
+          {/* Row 3 */}
+          <TableRow>
+            <TableCell className="px-6 py-4">
+              <Box className="flex items-center">
+                <Box
+                  className="flex items-center justify-center"
+                  sx={{
+                    background: "#BBF7D0", // bg-green-100
+                    color: "#22C55E", // text-green-500
+                    borderRadius: "9999px",
+                    width: 32,
+                    height: 32,
+                  }}
+                >
+                  <i className="fas fa-tablets" />
+                </Box>
+                <Box ml={2}>
+                  <Typography
+                    sx={{
+                      color: colors.brown700,
+                      fontSize: 14,
+                      fontWeight: 500,
+                    }}
+                  >
                     Lisinopril
-                  </div>
-                  <div className="text-xs text-brown-400">10mg tablet</div>
-                </div>
-              </div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="text-sm text-brown-700">1 tablet</div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="text-sm text-brown-700">8:00 AM</div>
-              <div className="text-xs text-brown-400">Tomorrow</div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="text-sm text-brown-700">Take with breakfast</div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                  </Typography>
+                  <Typography sx={{ color: colors.brown400, fontSize: 12 }}>
+                    10mg tablet
+                  </Typography>
+                </Box>
+              </Box>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <Typography sx={{ color: colors.brown700, fontSize: 14 }}>
+                1 tablet
+              </Typography>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <Typography sx={{ color: colors.brown700, fontSize: 14 }}>
+                8:00 AM
+              </Typography>
+              <Typography sx={{ color: colors.brown400, fontSize: 12 }}>
+                Tomorrow
+              </Typography>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <Typography sx={{ color: colors.brown700, fontSize: 14 }}>
+                Take with breakfast
+              </Typography>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+              <span
+                className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                style={{
+                  background: "#DBEAFE", // bg-blue-100
+                  color: "#1D4ED8", // text-blue-800
+                }}
+              >
                 Tomorrow
               </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </Paper>
 );
 
 export default UpcomingMedicationTable;

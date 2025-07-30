@@ -35,9 +35,9 @@ export const AppTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "0.5rem", 
-          textTransform: "none", 
-          fontWeight: 700, 
+          borderRadius: "0.5rem",
+          textTransform: "none",
+          fontWeight: 700,
         },
       },
     },
@@ -52,3 +52,21 @@ export const AppTheme = createTheme({
     },
   },
 });
+
+export const colors = {
+  beige50: "oklch(0.9885 0.0057 84.57)",
+  beige100: "oklch(0.971 0.0114 84.58)",
+  beige200: "oklch(0.9385 0.0254 86.87)",
+  beige300: "oklch(0.8968 0.0395 87.57)",
+  beige400: "oklch(0.8386 0.0533 89.04)",
+  brown50: "oklch(0.9741 0.0034 67.78)",
+  brown100: "oklch(0.9108 0.0139 67.65)",
+  brown200: "oklch(0.8109 0.0353 71.57)",
+  brown300: "oklch(0.7162 0.0542 74.44)",
+  brown400: "oklch(0.6032 0.0666 72.41)",
+  brown500: "oklch(0.5083 0.0606 67.57)",
+  brown600: "oklch(0.4388 0.0508 68.1)",
+  brown700: "oklch(0.3655 0.0414 64.47)",
+  brown800: "oklch(0.2896 0.0294 61.86)",
+  brown900: "oklch(0.2125 0.0172 58.53)",
+};

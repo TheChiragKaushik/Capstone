@@ -2,20 +2,16 @@ import * as React from "react";
 import { useEffect } from "react";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
-import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
 import type { Session } from "@toolpad/core/AppProvider";
 import { useLocation, useNavigate } from "react-router";
 import RoleConfig from "../utils/RoleConfig";
 import { useDemoRouter } from "@toolpad/core/internal";
-import AppTitle from "../components/AppTitle";
-import { Account } from "@toolpad/core/Account";
-import Button from "@mui/material/Button";
-import NotificationPanel from "../components/NotificationPanel";
+import AppTitle from "../components/MainApp/AppTitle";
 import { AppTheme } from "../utils/Constants";
 import axios from "axios";
 import { APIEndpoints } from "../api/api";
 import type { PatientEO, PharmacyEO, ProviderEO } from "../utils/Interfaces";
-import PatientNotification from "../components/Patient/PatientNotification";
+import PatientNotification from "../components/Patient/PatientNotification/PatientNotification";
 import PharmacyNotification from "../components/Pharmacy/PharmacyNotification";
 import {
   addListener,
@@ -23,26 +19,7 @@ import {
   disconnectUserQueue,
   removeListener,
 } from "../utils/WebSocket";
-
-const ToolbarActionsSearch = () => {
-  const [handleAside, setHandleAside] = React.useState(false);
-
-  const handleToggleAside = () => {
-    setHandleAside((prev) => !prev);
-  };
-  return (
-    <>
-      <Button onClick={handleToggleAside}>
-        <CircleNotificationsIcon />
-      </Button>
-      <NotificationPanel
-        onClose={handleToggleAside}
-        visibility={`${handleAside ? "visible" : "hidden"}`}
-      />
-      <Account />
-    </>
-  );
-};
+import ToolbarActionsSearch from "../components/MainApp/ToolbarActionsSearch";
 
 const MainApp = () => {
   const location = useLocation();
@@ -74,7 +51,17 @@ const MainApp = () => {
         const user = await axios.get(
           `${APIEndpoints.UserProfile}?${role}Id=${userId}`
         );
-        setUser(user.data);
+        const fetchedUser = user.data;
+        if (role === "Patient") {
+          setUser(fetchedUser as PatientEO);
+        } else if (role === "Doctor") {
+          setUser(fetchedUser as ProviderEO);
+        } else if (role === "Pharmacy") {
+          setUser(fetchedUser as PharmacyEO);
+        } else {
+          setUser(undefined);
+          console.warn("Unknown role, cannot assign user type");
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -105,7 +92,7 @@ const MainApp = () => {
 
   const handleLogout = () => {
     setSession(null);
-    navigate("/", { replace: true });
+    navigate("/logon", { replace: true });
   };
 
   const authentication = React.useMemo(
@@ -119,36 +106,41 @@ const MainApp = () => {
   const ComponentToRender = routes[pathname] || (() => <h1>Not Found</h1>);
 
   return (
-    <AppProvider
-      navigation={navigation}
-      router={router}
-      theme={AppTheme}
-      authentication={authentication}
-      session={session}
-    >
-      <DashboardLayout
-        defaultSidebarCollapsed
-        slots={{
-          appTitle: AppTitle,
-          toolbarActions: ToolbarActionsSearch,
-        }}
-        sx={{
-          "& .MuiStack-root > .MuiStack-root:nth-of-type(1)": {
-            width: "65%",
-            justifyContent: "space-between",
-          },
-        }}
+    <>
+      <AppProvider
+        navigation={navigation}
+        router={router}
+        theme={AppTheme}
+        authentication={authentication}
+        session={session}
       >
-        <ComponentToRender user={user} userId={userId} pathname={pathname} />
-        {role === "Patient" || role === "Pharmacy" ? (
-          role === "Patient" ? (
-            <PatientNotification />
-          ) : (
-            <PharmacyNotification />
-          )
-        ) : null}
-      </DashboardLayout>
-    </AppProvider>
+        <DashboardLayout
+          defaultSidebarCollapsed
+          slots={{
+            appTitle: AppTitle,
+            toolbarActions: () => <ToolbarActionsSearch role={role} />,
+          }}
+          sx={{
+            "& .MuiStack-root > .MuiStack-root:nth-of-type(1)": {
+              width: {
+                xs: "70%",
+                sm: "65%",
+              },
+              justifyContent: "space-between",
+            },
+          }}
+        >
+          <ComponentToRender user={user} userId={userId} pathname={pathname} />
+        </DashboardLayout>
+      </AppProvider>
+      {role === "Patient" || role === "Pharmacy" ? (
+        role === "Patient" ? (
+          <PatientNotification />
+        ) : (
+          <PharmacyNotification />
+        )
+      ) : null}
+    </>
   );
 };
 

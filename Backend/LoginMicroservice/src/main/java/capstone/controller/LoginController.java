@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import capstone.entities.PatientEO;
-import capstone.entities.PharmacyEO;
-import capstone.entities.ProviderEO;
 import capstone.entities.RequestBody.LoginRequest;
+import capstone.entities.RequestBody.SignUpRequest;
 import capstone.services.LoginServices;
 import reactor.core.publisher.Mono;
 
@@ -40,13 +38,14 @@ public class LoginController {
 	}
 
 	@PostMapping("/signup")
-	public Mono<?> signUpUser(Object user) {
-		if (user instanceof PatientEO) {
-			return loginServicesRef.signUpPatient((PatientEO) user);
-		} else if (user instanceof ProviderEO) {
-			return loginServicesRef.signUpProvider((ProviderEO) user);
-		} else if (user instanceof PharmacyEO) {
-			return loginServicesRef.signUpPharmacy((PharmacyEO) user);
+	public Mono<?> signUpUser(@RequestBody SignUpRequest signUpRequest) {
+		String email = signUpRequest.getContact().getEmail();
+		if (email.contains("@capstone.com")) {
+			return loginServicesRef.signUpPatient(signUpRequest);
+		} else if (email.contains("@capstone.care")) {
+			return loginServicesRef.signUpProvider(signUpRequest);
+		} else if (email.contains("@capstone.med")) {
+			return loginServicesRef.signUpPharmacy(signUpRequest);
 		} else {
 			return Mono.error(new IllegalArgumentException("Invalid user type"));
 		}

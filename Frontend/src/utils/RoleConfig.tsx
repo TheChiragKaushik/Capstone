@@ -1,8 +1,4 @@
-import type {
-  RoleConfiguration,
-  RouteComponentProps,
-} from "./Interfaces";
-
+import type { RoleConfiguration, RouteComponentProps } from "./Interfaces";
 
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -11,10 +7,13 @@ import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import HistoryToggleOffIcon from "@mui/icons-material/HistoryToggleOff";
 import RepeatOneOnIcon from "@mui/icons-material/RepeatOneOn";
 import GridViewIcon from "@mui/icons-material/GridView";
-import PatientReminders from "../components/Patient/PatientReminders";
-import PatientRefillRequests from "../components/Patient/PatientRefillRequests";
 import PatientDashboard from "../components/Patient/PatientDashboard/PatientDashboard";
-
+import PatientReminders from "../components/Patient/PatientReminders/PatientReminders";
+import PatientRefillRequests from "../components/Patient/PatientRefillRequests/PatientRefillRequests";
+import PatientCalender from "../components/Patient/PatientCalender/PatientCalender";
+import PatientProfile from "../components/Patient/PatientProfile/PatientProfile";
+import PatientNotification from "../components/Patient/PatientNotification/PatientNotification";
+import PatientNotificationPanel from "../components/Patient/PatientNotification/PatientNotificationPanel";
 
 const RoleConfig: RoleConfiguration = {
   Patient: {
@@ -55,8 +54,12 @@ const RoleConfig: RoleConfiguration = {
       refillRequests: (props: RouteComponentProps) => (
         <PatientRefillRequests {...props} />
       ),
-      calender: () => <h1>Calendar</h1>,
-      profile: () => <h1>Profile</h1>,
+      calender: (props: RouteComponentProps) => <PatientCalender {...props} />,
+      profile: (props: RouteComponentProps) => <PatientProfile {...props} />,
+    },
+    notifications: {
+      panel: PatientNotificationPanel,
+      dialog: PatientNotification,
     },
   },
   Provider: {
@@ -101,6 +104,10 @@ const RoleConfig: RoleConfiguration = {
     routes: {
       dashboard: () => <h1>Dashboard</h1>,
       orders: () => <h1>Orders</h1>,
+    },
+    notifications: {
+      panel: PatientNotificationPanel,
+      dialog: PatientNotification,
     },
   },
 };
