@@ -1,0 +1,129 @@
+spring:
+  application:
+    name: ApiGatewayMicroservice
+  cloud:
+    gateway:
+      server:
+        webflux:
+          pass-through-headers: true
+          routes:
+            - id: AdminMicroservice
+              uri: http://localhost:9090
+              predicates:
+                - Path=/api/admin/**
+              metadata:
+                cors:
+                  allowedOrigins: http://localhost:5173
+                  allowedMethods:
+                    - GET
+                    - POST
+                    - PUT
+                    - DELETE
+                    - OPTIONS
+                  allowedHeaders: "*"
+                  allowCredentials: true
+                  maxAge: 3600
+            - id: CustomNotificationMicroservice
+              uri: http://localhost:9091
+              predicates:
+                - Path=/api/custom/**
+              metadata:
+                cors:
+                  allowedOrigins: http://localhost:5173
+                  allowedMethods:
+                    - GET
+                    - POST
+                    - PUT
+                    - DELETE
+                    - OPTIONS
+                  allowedHeaders: "*"
+                  allowCredentials: true
+                  maxAge: 3600
+            - id: LoginMicroservice
+              uri: http://localhost:9092
+              predicates:
+                - Path=/api/logon/**
+              metadata:
+                cors:
+                  allowedOrigins: http://localhost:5173
+                  allowedMethods:
+                    - GET
+                    - POST
+                    - PUT
+                    - DELETE
+                    - OPTIONS
+                  allowedHeaders: "*"
+                  allowCredentials: true
+                  maxAge: 3600
+            - id: PatientMicroservice
+              uri: http://localhost:9093
+              predicates:
+                - Path=/api/patients/**
+              metadata:
+                cors:
+                  allowedOrigins: http://localhost:5173
+                  allowedMethods:
+                    - GET
+                    - POST
+                    - PUT
+                    - DELETE
+                    - OPTIONS
+                  allowedHeaders: "*"
+                  allowCredentials: true
+                  maxAge: 3600
+            - id: PharmacyMicroservice
+              uri: http://localhost:9095
+              predicates:
+                - Path=/api/pharmacy/**
+              metadata:
+                cors:
+                  allowedOrigins: http://localhost:5173
+                  allowedMethods:
+                    - GET
+                    - POST
+                    - PUT
+                    - DELETE
+                    - OPTIONS
+                  allowedHeaders: "*"
+                  allowCredentials: true
+                  maxAge: 3600
+            - id: ProviderMicroservice
+              uri: http://localhost:9096
+              predicates:
+                - Path=/api/providers/**
+              metadata:
+                cors:
+                  allowedOrigins: http://localhost:5173
+                  allowedMethods:
+                    - GET
+                    - POST
+                    - PUT
+                    - DELETE
+                    - OPTIONS
+                  allowedHeaders: "*"
+                  allowCredentials: true
+                  maxAge: 3600
+            - id: ScheduledNotificationMicroservice
+              uri: http://localhost:9097
+              predicates:
+                - Path=/api/**
+              metadata:
+                cors:
+                  allowedOrigins: http://localhost:5173
+                  allowedMethods:
+                    - GET
+                    - POST
+                    - PUT
+                    - DELETE
+                    - OPTIONS
+                  allowedHeaders: "*"
+                  allowCredentials: true
+                  maxAge: 3600
+            - id: ScheduledNotificationMicroservice-WS
+              uri: http://localhost:9097
+              predicates:
+                - Path=/ws/**
+              
+
+server:
+  port: 8989
