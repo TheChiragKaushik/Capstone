@@ -70,3 +70,47 @@ export const colors = {
   brown800: "oklch(0.2896 0.0294 61.86)",
   brown900: "oklch(0.2125 0.0172 58.53)",
 };
+
+export const stringAvatar = (name: string) => {
+  const parts = name.trim().split(" ");
+  const first = parts[0]?.[0] ?? "";
+  const second = parts[1]?.[0] ?? "";
+  return {
+    sx: {
+      bgcolor: colors.brown500,
+    },
+    children: `${first}${second}` || first,
+  };
+};
+
+export const genderDropdownValues = [
+  { value: "Male", label: "Male" },
+  { value: "Female", label: "Female" },
+  { value: "Other", label: "Other" },
+];
+
+export const bloodGroupDropdownValues = [
+  { value: "A+", label: "A+" },
+  { value: "A-", label: "A-" },
+  { value: "B+", label: "B+" },
+  { value: "B-", label: "B-" },
+  { value: "AB+", label: "AB+" },
+  { value: "AB-", label: "AB-" },
+  { value: "O+", label: "O+" },
+  { value: "O-", label: "O-" },
+];
+
+export const IndicatorLegend = ({
+  indicatorStyle,
+  heading,
+}: {
+  indicatorStyle?: string;
+  heading?: string;
+}) => {
+  return (
+    <div className="flex items-center">
+      <div className={`w-3 h-3 ${indicatorStyle} rounded-full mr-2`}></div>
+      <span className="text-xs text-brown-500">{heading}</span>
+    </div>
+  );
+};

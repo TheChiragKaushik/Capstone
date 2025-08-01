@@ -12,6 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import capstone.entities.PatientEO.Prescription.MedicationPrescribed.Medication;
+
 @Data
 @Document(collection = "patients")
 public class PatientEO {
@@ -197,4 +199,29 @@ public class PatientEO {
         private Contact contact;
         private Address address;
     }
+    
+    @Data
+    public static class MedicationRefill {
+    	    	
+    	private List<Refill> refill;
+    	
+    	
+    	@Data
+    	public static class Refill {
+    		private String refillId;
+    		private String patientId;
+        	private String pharmacyId;
+        	private Medication medication;
+        	private String status;
+        	private Integer refillQuantity;
+        	private String requestDate;
+        	private String lastRefillDate;
+        	
+        	public Refill() {
+        		this.refillId = UUID.randomUUID().toString();
+        	}    		
+    	}
+    }
+    
+    
 }

@@ -1,12 +1,15 @@
-import type React from "react";
-import RemindersHeading from "./RemindersHeading";
-import type { PatientRemindersPageProps } from "../../../utils/Interfaces";
 import ModifyReminders from "./ModifyReminders";
+import CommonHeading from "../../Common/CommonHeading";
+import type { CommonRouteProps } from "../../../utils/Interfaces";
 
-const PatientReminders: React.FC<PatientRemindersPageProps> = () => {
+const PatientReminders = ({ user }: CommonRouteProps) => {
+  console.log(user);
   return (
     <div className="w-full mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <RemindersHeading />
+      <CommonHeading
+        heading={`Medication Reminders`}
+        subHeading={`Set up and manage your medication reminders`}
+      />
       <ModifyReminders />
     </div>
   );

@@ -7,8 +7,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import capstone.entities.Constants.Contact;
 import capstone.entities.PatientEO;
-import capstone.entities.PatientEO.Contact;
 import capstone.entities.PharmacyEO;
 import capstone.entities.ProviderEO;
 import capstone.entities.RequestBody.SignUpRequest;
@@ -70,7 +70,7 @@ public class LoginServicesImpl implements LoginServices {
 		providerEO.setLastName(signUpRequest.getLastName());
 		providerEO.setPassword(signUpRequest.getPassword());
 		
-		capstone.entities.ProviderEO.Contact contact = new capstone.entities.ProviderEO.Contact();
+		Contact contact = new Contact();
 		contact.setEmail(signUpRequest.getContact().getEmail());
 		contact.setPhone(signUpRequest.getContact().getPhone());
 		providerEO.setContact(contact);
@@ -105,7 +105,7 @@ public class LoginServicesImpl implements LoginServices {
 		PharmacyEO pharmacyEO = new PharmacyEO();
 		pharmacyEO.setName(pharmacy.getName());
 		pharmacyEO.setPassword(pharmacy.getPassword());
-		capstone.entities.PharmacyEO.Contact contact = new capstone.entities.PharmacyEO.Contact();
+		Contact contact = new Contact();
 		contact.setEmail(pharmacy.getContact().getEmail());
 		contact.setPhone(pharmacy.getContact().getPhone());
 		pharmacyEO.setContact(contact);

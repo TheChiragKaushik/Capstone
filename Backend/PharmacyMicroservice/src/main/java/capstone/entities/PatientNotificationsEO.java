@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
 
 import lombok.Data;
 
@@ -20,7 +19,7 @@ public class PatientNotificationsEO {
 	
 	private Integer totalRefillNotifications;
 	private Integer totalRefillNotificationsChecked;
-	private List<RefillRequestsNotificationsEO> refillRequests;
+//	private List<RefillRequestsNotificationsEO> refillRequests;
 	
 	@JsonProperty("_id")
 	public String get_id_asString() {

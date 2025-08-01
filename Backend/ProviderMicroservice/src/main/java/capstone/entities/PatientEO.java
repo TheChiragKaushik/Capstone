@@ -12,6 +12,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import capstone.entities.Constants.Address;
+import capstone.entities.Constants.Allergy;
+import capstone.entities.Constants.AssociatedPharmacy;
+import capstone.entities.Constants.AssociatedProvider;
+import capstone.entities.Constants.Contact;
+import capstone.entities.Constants.Medication;
+import capstone.entities.Constants.Refill;
+
 @Data
 @Document(collection = "patients")
 public class PatientEO {
@@ -35,7 +43,9 @@ public class PatientEO {
     
     private List<Prescription> prescriptions;
     
-    private List<Provider> providers;
+    private List<AssociatedProvider> providers;
+    
+    private List<Refill> refillMedications;
     
     private String password;
     private String createdAt;
@@ -45,29 +55,7 @@ public class PatientEO {
 		return _id != null ? _id.toHexString() : null;
 	}
 
-    @Data
-    public static class Contact {
-        private String email;
-        private String phone;
-    }
-
-    @Data
-    public static class Address {
-        private String street;
-        private String city;
-        private String state;
-        private String zipCode;
-        private String country;
-    }
-
-    @Data
-    public static class Allergy {
-        private String allergyId;
-        private String name;
-        private String type;
-        private String description;
-        private List<String> sideEffects;
-    }
+    
 
     @Data
     public static class ExistingCondition {
@@ -85,7 +73,7 @@ public class PatientEO {
     @Data
     public static class Prescription {
         private String prescriptionId;
-        private PrescribedBy prescribedBy;
+        private AssociatedProvider prescribedBy;
         private List<MedicationPrescribed> medicationsPrescribed;
         private AssociatedPharmacy associatedPharmacy;
         private List<MedicationTracking> medicationTracking;
@@ -94,15 +82,7 @@ public class PatientEO {
         	this.prescriptionId = UUID.randomUUID().toString();
         }
         
-        @Data
-        public static class PrescribedBy {
-            private String providerId;
-            private String firstName;
-            private String lastName;
-            private String specialization;
-            private Contact contact; 
-            private Address address;
-        }
+        
 
         @Data
         public static class MedicationPrescribed {
@@ -116,22 +96,13 @@ public class PatientEO {
             private String endDate;
             private List<Schedule> schedule;
             private Boolean refillsAllowed;
-            private Boolean refillRequired;
-            private List<RefillQuantity> refillQuantity;
+            private Boolean refillRequired;            
             
             public MedicationPrescribed() {
 				this.medicationPrescribedId = UUID.randomUUID().toString();
 			}
 
-            @Data
-            public static class Medication {
-                private String medicationId;
-                private String name;
-                private String description;
-                private Integer oneTablet;
-                private Integer tabletsInPack;
-                private String unitMeasure;
-            }
+            
 
             @Data
             public static class Schedule {
@@ -146,25 +117,6 @@ public class PatientEO {
                 	this.scheduleId = UUID.randomUUID().toString();
                 }
             }
-
-            @Data
-            public static class RefillQuantity {
-                private String refillId;
-                private Boolean requestStatus;
-                private Integer tabletsRefilled;
-                
-                public RefillQuantity() {
-					this.refillId = UUID.randomUUID().toString();
-				}
-            }
-        }
-
-        @Data
-        public static class AssociatedPharmacy {
-            private String pharmacyId;
-            private String name;
-            private Address address;
-            private Contact contact;
         }
 
         @Data
@@ -186,15 +138,5 @@ public class PatientEO {
                 }
             }
         }
-    }
-
-    @Data
-    public static class Provider {
-        private String providerId;
-        private String firstName;
-        private String lastName;
-        private String specialization;
-        private Contact contact;
-        private Address address;
     }
 }

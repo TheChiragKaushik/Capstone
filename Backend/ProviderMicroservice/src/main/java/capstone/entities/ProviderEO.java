@@ -7,6 +7,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import capstone.entities.Constants.Address;
+import capstone.entities.Constants.Contact;
 import lombok.Data;
 
 @Data
@@ -26,21 +28,6 @@ public class ProviderEO {
     public String get_id_asString() {
 		return _id != null ? _id.toHexString() : null;
 	}
-
-    @Data
-    public static class Contact {
-        private String email;
-        private String phone;
-    }
-
-    @Data
-    public static class Address {
-        private String street;
-        private String city;
-        private String state;
-        private String zipCode;
-        private String country;
-    }
 
     @Data
     public static class PatientRef { 

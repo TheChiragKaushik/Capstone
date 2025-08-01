@@ -11,8 +11,6 @@ import { AppTheme } from "../utils/Constants";
 import axios from "axios";
 import { APIEndpoints } from "../api/api";
 import type { PatientEO, PharmacyEO, ProviderEO } from "../utils/Interfaces";
-import PatientNotification from "../components/Patient/PatientNotification/PatientNotification";
-import PharmacyNotification from "../components/Pharmacy/PharmacyNotification";
 import {
   addListener,
   connectUserQueue,
@@ -85,7 +83,7 @@ const MainApp = () => {
   }, []);
 
   const navigate = useNavigate();
-  const { navigation, routes } = RoleConfig[role];
+  const { navigation, routes, notifications } = RoleConfig[role];
   const [session, setSession] = React.useState<Session | null>(dynamicSession);
   const router = useDemoRouter("/dashboard");
   const pathname = router.pathname.replace("/", "") || "dashboard";
@@ -103,6 +101,7 @@ const MainApp = () => {
     []
   );
 
+  const NoticiationComponent = notifications?.dialog;
   const ComponentToRender = routes[pathname] || (() => <h1>Not Found</h1>);
 
   return (
@@ -118,7 +117,9 @@ const MainApp = () => {
           defaultSidebarCollapsed
           slots={{
             appTitle: AppTitle,
-            toolbarActions: () => <ToolbarActionsSearch role={role} />,
+            toolbarActions: () => (
+              <ToolbarActionsSearch role={role} user={user} />
+            ),
           }}
           sx={{
             "& .MuiStack-root > .MuiStack-root:nth-of-type(1)": {
@@ -130,16 +131,16 @@ const MainApp = () => {
             },
           }}
         >
-          <ComponentToRender user={user} userId={userId} pathname={pathname} />
+          <ComponentToRender
+            user={user}
+            userId={userId}
+            pathname={pathname}
+            navigateToRoute={router}
+          />
         </DashboardLayout>
       </AppProvider>
-      {role === "Patient" || role === "Pharmacy" ? (
-        role === "Patient" ? (
-          <PatientNotification />
-        ) : (
-          <PharmacyNotification />
-        )
-      ) : null}
+
+      {NoticiationComponent && <NoticiationComponent />}
     </>
   );
 };

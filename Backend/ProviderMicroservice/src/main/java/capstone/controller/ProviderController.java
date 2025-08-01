@@ -14,9 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mongodb.client.result.UpdateResult;
 
+import capstone.entities.Constants.Address;
+import capstone.entities.Constants.Contact;
 import capstone.entities.PatientEO.Prescription;
 import capstone.entities.ProviderEO;
-import capstone.entities.ProviderEO.Contact;
 import capstone.entities.ProviderEO.PatientRef;
 import capstone.services.ProviderServices;
 import reactor.core.publisher.Flux;
@@ -47,7 +48,7 @@ public class ProviderController {
 	}
 	
 	@PutMapping("/{providerId}/addressdetails")
-	public Mono<UpdateResult> updateProviderAddressDetails(@PathVariable String providerId, @RequestBody ProviderEO.Address addressEO) {
+	public Mono<UpdateResult> updateProviderAddressDetails(@PathVariable String providerId, @RequestBody Address addressEO) {
 		ObjectId id = new ObjectId(providerId);
 		return providerServices.updateProviderAddress(id, addressEO);
 	}

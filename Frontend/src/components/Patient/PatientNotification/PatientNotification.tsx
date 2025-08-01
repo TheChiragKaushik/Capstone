@@ -55,7 +55,7 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
           />
           <CardContent sx={{ flex: 1, py: 1, px: 0 }}>
             <Typography variant="body1" sx={{ fontWeight: 500 }}>
-              {message}
+              {message} patient
             </Typography>
           </CardContent>
           {onClose && (

@@ -17,7 +17,7 @@ public class PharmacyNotificationsEO {
 	
 	private Integer totalRefillRequests;
 	private Integer totalRefillRequestsChecked;
-	private List<RefillRequestsNotificationsEO> refillRequestsNotifications;
+//	private List<RefillRequestsNotificationsEO> refillRequestsNotifications;
 	
 	private Integer totalPharmacyInventoryRestockReminderNotifications;
 	private Integer totalPharmacyInventoryRestockReminderNotificationsChecked;

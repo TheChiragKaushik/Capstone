@@ -16,7 +16,6 @@ const LoginPage: React.FC = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState("Patient");
 
   const navigate = useNavigate();
 
@@ -49,14 +48,6 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    if (email.includes("@capstone.com")) {
-      setRole("Patient");
-    } else if (email.includes("@capstone.care")) {
-      setRole("Provider");
-    } else if (email.includes("@capstone.med")) {
-      setRole("Pharmacy");
-    }
-
     let name;
     let userId;
     let loggedInUser: LoggedInUser | null = null;
@@ -77,7 +68,19 @@ const LoginPage: React.FC = () => {
         throw new Error("Login failed. No user data received.");
       }
 
-      name = loggedInUser.firstName + " " + loggedInUser.lastName;
+      let role: string = "Patient";
+
+      if (email.includes("@capstone.com")) {
+        role = "Patient";
+        name = loggedInUser.firstName + " " + loggedInUser.lastName;
+      } else if (email.includes("@capstone.care")) {
+        role = "Provider";
+        name = loggedInUser.firstName + " " + loggedInUser.lastName;
+      } else if (email.includes("@capstone.med")) {
+        role = "Pharmacy";
+        name = loggedInUser.name;
+      }
+
       userId = loggedInUser._id;
 
       navigate("/app", {
@@ -197,6 +200,11 @@ const LoginPage: React.FC = () => {
             "& .MuiInputLabel-root.Mui-focused": {
               color: colors.brown500,
             },
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleLogin(e);
+            }
           }}
         />
       </div>

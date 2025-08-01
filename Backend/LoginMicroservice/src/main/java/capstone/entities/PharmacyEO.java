@@ -6,6 +6,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import capstone.entities.Constants.Address;
+import capstone.entities.Constants.Contact;
+import capstone.entities.Constants.Medication;
+import capstone.entities.Constants.Refill;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -21,8 +26,9 @@ public class PharmacyEO {
     private Contact contact;
     private String password;
     private List<PharmacyInventory> pharmacyInventory;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private List<Refill> refillMedication;
+    private String createdAt;
+    private String updatedAt;
     
     @JsonProperty("_id")
     public String get_id_asString() {
@@ -30,22 +36,8 @@ public class PharmacyEO {
 	}
 
     @Data
-    public static class Address {
-        private String street;
-        private String city;
-        private String state;
-        private String zipCode;
-        private String country;
-    }
-
-    @Data
-    public static class Contact {
-        private String email;
-        private String phone;
-    }
-
-    @Data
     public static class PharmacyInventory {
+    	private String medicationId;
         private Medication medication;
         private Instant lastRestockDate;
         private Integer currentStockTablets;
@@ -57,22 +49,4 @@ public class PharmacyEO {
         }
     }
 
-    @Data
-    public static class Medication {
-        private ObjectId medicationId;
-        private String name;
-        private String description;
-        private Integer oneUnit;
-        private List<PotentialAllergy> potentialAllergiess;
-        private String unitMeasure;
-    }
-
-    @Data
-    public static class PotentialAllergy {
-        private ObjectId allergyId;
-        private String name;
-        private String type;
-        private String description;
-        private List<String> sideEffects;
-    }
 }

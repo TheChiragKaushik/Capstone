@@ -20,6 +20,8 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
+import capstone.entities.Constants.Address;
+import capstone.entities.Constants.Contact;
 import capstone.entities.PatientEO;
 import capstone.entities.PatientEO.Prescription;
 import capstone.entities.PatientEO.Prescription.MedicationPrescribed.Schedule;
@@ -28,8 +30,6 @@ import capstone.entities.PatientEO.Prescription.MedicationTracking.Tracker;
 import capstone.entities.PatientEO.Prescription.MedicationTracking.Tracker.Dose;
 import capstone.entities.PatientNotificationsRequestsEO;
 import capstone.entities.ProviderEO;
-import capstone.entities.ProviderEO.Address;
-import capstone.entities.ProviderEO.Contact;
 import capstone.entities.ProviderEO.PatientRef;
 import capstone.services.ProviderServices;
 import reactor.core.publisher.Flux;

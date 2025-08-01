@@ -21,9 +21,9 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
+import capstone.entities.Constants.Address;
+import capstone.entities.Constants.Contact;
 import capstone.entities.PatientEO;
-import capstone.entities.PatientEO.Address;
-import capstone.entities.PatientEO.Contact;
 import capstone.entities.PatientEO.Prescription;
 import capstone.entities.PatientEO.Prescription.MedicationPrescribed;
 import capstone.entities.PatientEO.Prescription.MedicationTracking;

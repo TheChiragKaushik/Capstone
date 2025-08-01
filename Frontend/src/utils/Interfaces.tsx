@@ -2,6 +2,7 @@ import type {
   NavigationDividerItem,
   NavigationPageItem,
   NavigationSubheaderItem,
+  Router,
 } from "@toolpad/core/AppProvider";
 
 export interface MainAppProps {
@@ -10,9 +11,10 @@ export interface MainAppProps {
 }
 
 export interface CommonRouteProps {
-  pathname: string;
-  userId: string | undefined;
+  pathname?: string;
+  userId?: string | undefined;
   user?: PatientEO | PharmacyEO | ProviderEO;
+  navigateToRoute?: Router;
 }
 
 type RouteComponent = React.ComponentType<CommonRouteProps>;
@@ -31,8 +33,8 @@ export interface RoleConfiguration {
       [path: string]: RouteComponent;
     };
     notifications?: {
-      panel: React.FC<NotificationPanelProps>;
-      dialog: React.FC;
+      panel?: React.FC<NotificationPanelProps>;
+      dialog?: React.FC;
     };
   };
 }
@@ -45,24 +47,9 @@ export interface NotificationPanelProps {
 export interface LoggedInUser {
   firstName: string;
   lastName: string;
+  name?: string;
   _id: string;
 }
-
-export interface RouteComponentProps {
-  user?: PatientEO | PharmacyEO | ProviderEO;
-  pathname?: string;
-  userId?: string;
-}
-
-export interface PatientDashboardPageProps extends RouteComponentProps {}
-
-export interface PatientRemindersPageProps extends RouteComponentProps {}
-
-export interface PatientRefillRequestsPageProps extends RouteComponentProps {}
-
-export interface PatientCalenderRequestPageProps extends RouteComponentProps {}
-
-export interface PatientProfileRequestPageProps extends RouteComponentProps {}
 
 export interface Contact {
   email: string;
@@ -87,7 +74,7 @@ export interface Allergy {
 
 export interface ExistingCondition {
   name: string;
-  severity: string;
+  severity?: string;
 }
 
 export interface EmergencyContact {

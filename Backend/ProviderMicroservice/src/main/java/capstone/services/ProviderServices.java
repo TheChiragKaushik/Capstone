@@ -4,9 +4,10 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.client.result.UpdateResult;
 
+import capstone.entities.Constants.Address;
+import capstone.entities.Constants.Contact;
 import capstone.entities.PatientEO.Prescription;
 import capstone.entities.ProviderEO;
-import capstone.entities.ProviderEO.Contact;
 import capstone.entities.ProviderEO.PatientRef;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -21,7 +22,7 @@ public interface ProviderServices {
 	
 	public Mono<UpdateResult> updateProviderContact(ObjectId providerId, Contact contact);
 	
-	public Mono<UpdateResult> updateProviderAddress(ObjectId providerId, ProviderEO.Address address);
+	public Mono<UpdateResult> updateProviderAddress(ObjectId providerId, Address address);
 	
 	public Mono<Void> deleteProviderById(ObjectId providerId);
 	

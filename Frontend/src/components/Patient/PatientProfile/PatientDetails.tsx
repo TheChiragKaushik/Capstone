@@ -1,14 +1,41 @@
-const PatientDetails = () => {
+import type React from "react";
+import type { PatientEO } from "../../../utils/Interfaces";
+import { Avatar, Button, MenuItem } from "@mui/material";
+import {
+  bloodGroupDropdownValues,
+  colors,
+  genderDropdownValues,
+  stringAvatar,
+} from "../../../utils/Constants";
+import CommonTextfield from "../../Common/CommonTextfield";
+import { useState } from "react";
+
+type PatientDetailsProps = {
+  user?: PatientEO;
+};
+
+const PatientDetails: React.FC<PatientDetailsProps> = ({ user }) => {
+  console.log(user?.gender);
+  const [edit, setEdit] = useState(false);
+
+  const handleSubmitChanges = () => {
+    console.log("submit");
+  };
+
+  // const [userDetails, setUserDetails] = useState<PatientEO>();
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-beige-100 mb-8">
       <div className="bg-brown-500 px-6 py-4">
         <div className="flex items-center">
           <div className="h-20 w-20 rounded-full bg-white flex items-center justify-center text-brown-500 text-2xl font-bold">
-            JD
+            <Avatar {...stringAvatar(user?.firstName + " " + user?.lastName)} />
           </div>
           <div className="ml-6">
-            <h3 className="text-xl font-semibold text-white">John Doe</h3>
-            <p className="text-beige-100">Patient ID: P-12345678</p>
+            <h3 className="text-xl font-semibold text-white">
+              {user?.firstName}&nbsp;{user?.lastName}
+            </h3>
+            <p className="text-beige-100">Patient ID: {user?._id}</p>
           </div>
         </div>
       </div>
@@ -19,210 +46,161 @@ const PatientDetails = () => {
             <h4 className="text-lg font-medium text-brown-700 mb-4">
               Personal Information
             </h4>
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="profile-name"
-                  className="block text-sm font-medium text-brown-700 mb-1"
-                >
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="profile-name"
-                  className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                  value="John Doe"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="profile-email"
-                  className="block text-sm font-medium text-brown-700 mb-1"
-                >
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="profile-email"
-                  className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                  value="john.doe@example.com"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="profile-phone"
-                  className="block text-sm font-medium text-brown-700 mb-1"
-                >
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="profile-phone"
-                  className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                  value="(555) 123-4567"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="profile-dob"
-                  className="block text-sm font-medium text-brown-700 mb-1"
-                >
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  id="profile-dob"
-                  className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                  value="1985-06-15"
-                />
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CommonTextfield
+                label="First Name"
+                type="text"
+                value={user?.firstName}
+                disabled={!edit}
+              />
+              <CommonTextfield
+                label="Last Name"
+                type="text"
+                value={user?.lastName}
+                disabled={!edit}
+              />
+              <CommonTextfield
+                label="Email"
+                type="email"
+                value={user?.contact?.email}
+                disabled={!edit}
+              />
+              <CommonTextfield
+                label="Phone"
+                type="text"
+                value={user?.contact?.phone}
+                disabled={!edit}
+              />
+              <CommonTextfield
+                label="Date of Birth"
+                type="date"
+                value={user?.dateOfBirth}
+                disabled={!edit}
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                }}
+              />
+              <CommonTextfield
+                label="Gender"
+                isSelect
+                value={user?.gender}
+                disabled={!edit}
+              >
+                {genderDropdownValues.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </CommonTextfield>
+              <CommonTextfield
+                label="Blood Group"
+                isSelect
+                value={user?.bloodGroup}
+                disabled={!edit}
+              >
+                {bloodGroupDropdownValues.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </CommonTextfield>
             </div>
           </div>
-
           <div>
             <h4 className="text-lg font-medium text-brown-700 mb-4">
               Address Information
             </h4>
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="profile-address"
-                  className="block text-sm font-medium text-brown-700 mb-1"
-                >
-                  Street Address
-                </label>
-                <input
-                  type="text"
-                  id="profile-address"
-                  className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                  value="123 Main Street"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="profile-city"
-                  className="block text-sm font-medium text-brown-700 mb-1"
-                >
-                  City
-                </label>
-                <input
-                  type="text"
-                  id="profile-city"
-                  className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                  value="Anytown"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="profile-state"
-                    className="block text-sm font-medium text-brown-700 mb-1"
-                  >
-                    State
-                  </label>
-                  <input
-                    type="text"
-                    id="profile-state"
-                    className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                    value="CA"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="profile-zip"
-                    className="block text-sm font-medium text-brown-700 mb-1"
-                  >
-                    ZIP Code
-                  </label>
-                  <input
-                    type="text"
-                    id="profile-zip"
-                    className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                    value="12345"
-                  />
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CommonTextfield
+                label="Street"
+                type="text"
+                value={user?.address?.street}
+                disabled={!edit}
+              />
+              <CommonTextfield
+                label="City"
+                type="text"
+                value={user?.address?.city}
+                disabled={!edit}
+              />
+              <CommonTextfield
+                label="State"
+                type="text"
+                value={user?.address?.state}
+                disabled={!edit}
+              />
+              <CommonTextfield
+                label="ZipCode"
+                type="text"
+                value={user?.address?.zipCode}
+                disabled={!edit}
+              />
             </div>
           </div>
-        </div>
-
-        <div className="mt-8">
-          <h4 className="text-lg font-medium text-brown-700 mb-4">
-            Emergency Contact
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="profile-emergency-name"
-                className="block text-sm font-medium text-brown-700 mb-1"
-              >
-                Contact Name
-              </label>
-              <input
+          <div className="mt-8">
+            <h4 className="text-lg font-medium text-brown-700 mb-4">
+              Emergency Contact
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CommonTextfield
+                label="Contact Name"
+                value={user?.emergencyContact?.name}
                 type="text"
-                id="profile-emergency-name"
-                className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                value="Jane Doe"
+                disabled={!edit}
+                className="md:col-span-2"
               />
-            </div>
-            <div>
-              <label
-                htmlFor="profile-emergency-relation"
-                className="block text-sm font-medium text-brown-700 mb-1"
-              >
-                Relationship
-              </label>
-              <input
+              <CommonTextfield
+                label="Relationship"
+                value={user?.emergencyContact?.relationship}
                 type="text"
-                id="profile-emergency-relation"
-                className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                value="Spouse"
+                disabled={!edit}
               />
-            </div>
-            <div>
-              <label
-                htmlFor="profile-emergency-phone"
-                className="block text-sm font-medium text-brown-700 mb-1"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="profile-emergency-phone"
-                className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                value="(555) 987-6543"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="profile-emergency-email"
-                className="block text-sm font-medium text-brown-700 mb-1"
-              >
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="profile-emergency-email"
-                className="bg-beige-50 border border-beige-200 text-brown-700 text-sm rounded-lg focus:ring-brown-400 focus:border-brown-400 block w-full p-2.5"
-                value="jane.doe@example.com"
+              <CommonTextfield
+                label="Phone"
+                value={user?.emergencyContact?.phone}
+                type="text"
+                disabled={!edit}
               />
             </div>
           </div>
         </div>
 
         <div className="mt-8 flex justify-end">
-          <button
+          <Button
             type="button"
-            className="bg-beige-100 text-brown-600 hover:bg-beige-200 mr-2 py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-300"
+            onClick={() => setEdit(false)}
+            sx={{
+              backgroundColor: colors.beige100,
+              color: colors.brown600,
+              "&:hover": {
+                backgroundColor: colors.beige200,
+              },
+              marginRight: 1,
+              paddingX: 1,
+              paddingY: 1,
+            }}
+            className="rounded-lg text-sm font-medium transition-colors duration-300"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            className="bg-brown-500 hover:bg-brown-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-300"
+            onClick={edit ? () => handleSubmitChanges() : () => setEdit(true)}
+            sx={{
+              backgroundColor: colors.brown500,
+              color: "white",
+              paddingX: 1,
+              paddingY: 1,
+              "&:hover": {
+                backgroundColor: colors.brown600,
+              },
+            }}
+            className="rounded-lg text-sm font-medium transition-colors duration-300"
           >
-            Save Changes
-          </button>
+            {edit ? "Save Changes" : "Edit"}
+          </Button>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 package capstone.entities;
 
-import capstone.entities.PatientEO.Contact;
+import capstone.entities.Constants.Contact;
 import lombok.Data;
 
 @Data
