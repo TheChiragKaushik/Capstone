@@ -1,4 +1,5 @@
 import { createTheme } from "@mui/material/styles";
+import type { PharmacyInventory } from "./Interfaces";
 
 export const AppTheme = createTheme({
   palette: {
@@ -113,4 +114,52 @@ export const IndicatorLegend = ({
       <span className="text-xs text-brown-500">{heading}</span>
     </div>
   );
+};
+
+export const MedicationForTypes: string[] = [
+  "Pain Relievers (Analgesics)",
+  "Antibiotics",
+  "Antivirals",
+  "Antifungals",
+  "Antihistamines",
+  "Antidepressants",
+  "Antianxiety Medications",
+  "Antihypertensives (for Blood Pressure)",
+  "Antidiabetics (for Diabetes)",
+  "Statins (for Cholesterol)",
+  "Anti-inflammatories",
+  "Antacids",
+  "Anticonvulsants",
+  "Antineoplastics (for Cancer)",
+  "Hormone Replacements",
+  "Bronchodilators (for Respiratory issues)",
+  "Anticoagulants (Blood Thinners)",
+];
+
+export const ErrorPlaceholder = () => (
+  <span style={{ visibility: "hidden" }}>ErrorPlaceholder</span>
+);
+
+export const getStatus = (item: PharmacyInventory) => {
+  if (
+    item.currentStockTablets !== undefined &&
+    item.reorderThresholdTablets !== undefined
+  ) {
+    if (item.currentStockTablets === 0 || item.currentStockTablets === null)
+      return { status: "Out of Stock", color: "red" };
+    if (item.currentStockTablets < item.reorderThresholdTablets)
+      return { status: "Low Stock", color: "yellow" };
+    return { status: "In Stock", color: "green" };
+  }
+  if (
+    item.currentStockVolume !== undefined &&
+    item.reorderThresholdVolume !== undefined
+  ) {
+    if (item.currentStockVolume === 0 || item.currentStockTablets === null)
+      return { status: "Out of Stock", color: "red" };
+    if (item.currentStockVolume <= item.reorderThresholdVolume)
+      return { status: "Low Stock", color: "yellow" };
+    return { status: "In Stock", color: "green" };
+  }
+  return { status: "Unknown", color: "gray" };
 };

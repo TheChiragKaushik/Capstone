@@ -10,7 +10,6 @@ import {
   Typography,
   Box,
   InputAdornment,
-  MenuItem,
   TablePagination,
   Collapse,
 } from "@mui/material";
@@ -83,7 +82,7 @@ const RefillQueue = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 

@@ -15,7 +15,7 @@ const CommonTextfield: React.FC<CommonTextfieldProps> = ({
 }) => {
   return (
     <TextField
-      className="text-sm font-medium text-brown-500 mb-1 w-full px-4 py-3 rounded-lg bg-beige-50 focus:outline-none"
+      className="text-sm font-medium text-brown-500 mb-1 w-full px-4 py-3 rounded-lg focus:outline-none"
       sx={{
         "& .MuiOutlinedInput-root": {
           borderRadius: "0.5rem",

@@ -22,110 +22,91 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
-	
+
 	@Autowired
 	private AdminServices adminServicesRef;
-	
+
 	@PostMapping("/medications")
 	public Mono<MedicationEO> addNewMedication(@RequestBody MedicationEO medicationEO) {
-	    return adminServicesRef.addNewMedication(medicationEO)
-	        .onErrorResume(ex -> {
-	            return Mono.error(new ResponseStatusException(
-	                HttpStatus.BAD_REQUEST,
-	                "Failed to add new medication: " + ex.getMessage(),
-	                ex
-	            ));
-	        });
+		return adminServicesRef.addNewMedication(medicationEO).onErrorResume(ex -> {
+			return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Failed to add new medication: " + ex.getMessage(), ex));
+		});
 	}
-	
+
 	@PostMapping("/allergies")
 	public Mono<AllergyEO> addNewAllergy(@RequestBody AllergyEO allergyEO) {
-	    return adminServicesRef.addNewAllergy(allergyEO)
-	        .onErrorResume(ex -> Mono.error(new ResponseStatusException(
-	            HttpStatus.BAD_REQUEST,
-	            "Failed to add new allergy: " + ex.getMessage(),
-	            ex
-	        )));
+		return adminServicesRef.addNewAllergy(allergyEO)
+				.onErrorResume(ex -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Failed to add new allergy: " + ex.getMessage(), ex)));
 	}
 
-
 	@GetMapping("/medications")
-    public Mono<?> getMedications(@RequestParam(value = "MedicationId", required = false) String medicationId) {
-        if (medicationId != null && !medicationId.isEmpty()) {
-            return adminServicesRef.findMedicationById(medicationId)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Medication not found")));
-        }
-        return adminServicesRef.findAllMedications()
-            .collectList()
-            .flatMap(medications -> {
-                if (medications.isEmpty()) {
-                    return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No medications found"));
-                }
-                return Mono.just(medications);
-            });
-    }
-
+	public Mono<?> getMedications(@RequestParam(value = "MedicationId", required = false) String medicationId,
+			@RequestParam(required = false) String type) {
+		if (medicationId != null && !medicationId.isEmpty()) {
+			return adminServicesRef.findMedicationById(medicationId).switchIfEmpty(
+					Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Medication not found")));
+		} else if (type != null && !type.isEmpty()) {
+			return adminServicesRef.findMedicationsByType(type).collectList().flatMap(medications -> {
+				if (medications.isEmpty()) {
+					return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No medications for this type found"));
+				}
+				return Mono.just(medications);
+			});
+		}
+		return adminServicesRef.findAllMedications().collectList().flatMap(medications -> {
+			if (medications.isEmpty()) {
+				return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No medications found"));
+			}
+			return Mono.just(medications);
+		});
+	}
 
 	@GetMapping("/allergies")
 	public Mono<?> getAllergies(@RequestParam(value = "AllergyId", required = false) String allergyId) {
-	    if (allergyId != null && !allergyId.isEmpty()) {
-	        return adminServicesRef.findAllergyById(allergyId)
-	        		 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Medication not found")));
-	    }
-	    return adminServicesRef.findAllAllergies()
-	    		.collectList()
-	            .flatMap(allergies -> {
-	                if (allergies.isEmpty()) {
-	                    return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No medications found"));
-	                }
-	                return Mono.just(allergies);
-	            });
+		if (allergyId != null && !allergyId.isEmpty()) {
+			return adminServicesRef.findAllergyById(allergyId).switchIfEmpty(
+					Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Medication not found")));
+		}
+		return adminServicesRef.findAllAllergies().collectList().flatMap(allergies -> {
+			if (allergies.isEmpty()) {
+				return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No medications found"));
+			}
+			return Mono.just(allergies);
+		});
 	}
 
 	@PutMapping("/medications")
 	public Mono<UpdateResult> updateMedications(
-	        @RequestParam(value = "MedicationId", required = true) String medicationId,
-	        @RequestBody MedicationEO medicationEO) {
-	    return adminServicesRef.updateMedicationById(medicationId, medicationEO)
-	        .onErrorResume(ex -> Mono.error(new ResponseStatusException(
-	            HttpStatus.BAD_REQUEST,
-	            "Failed to update medication: " + ex.getMessage(),
-	            ex
-	        )));
+			@RequestParam(value = "MedicationId", required = true) String medicationId,
+			@RequestBody MedicationEO medicationEO) {
+		return adminServicesRef.updateMedicationById(medicationId, medicationEO)
+				.onErrorResume(ex -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Failed to update medication: " + ex.getMessage(), ex)));
 	}
-
 
 	@PutMapping("/allergies")
-	public Mono<UpdateResult> updateAllergies(
-	        @RequestParam(value = "AllergyId", required = true) String allergyId,
-	        @RequestBody AllergyEO allergyEO) {
-	    return adminServicesRef.updateAllergyById(allergyId, allergyEO)
-	        .onErrorResume(ex -> Mono.error(new ResponseStatusException(
-	            HttpStatus.BAD_REQUEST,
-	            "Failed to update allergy: " + ex.getMessage(),
-	            ex
-	        )));
+	public Mono<UpdateResult> updateAllergies(@RequestParam(value = "AllergyId", required = true) String allergyId,
+			@RequestBody AllergyEO allergyEO) {
+		return adminServicesRef.updateAllergyById(allergyId, allergyEO)
+				.onErrorResume(ex -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Failed to update allergy: " + ex.getMessage(), ex)));
 	}
-	
-	
+
 	@DeleteMapping("/medications")
-	public Mono<MedicationEO> deleteMedications(@RequestParam(value = "MedicationId", required = true) String medicationId) {
-	    return adminServicesRef.deleteMedicationById(medicationId)
-	        .onErrorResume(ex -> Mono.error(new ResponseStatusException(
-	            HttpStatus.BAD_REQUEST,
-	            "Failed to update medication: " + ex.getMessage(),
-	            ex
-	        )));
+	public Mono<MedicationEO> deleteMedications(
+			@RequestParam(value = "MedicationId", required = true) String medicationId) {
+		return adminServicesRef.deleteMedicationById(medicationId)
+				.onErrorResume(ex -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Failed to update medication: " + ex.getMessage(), ex)));
 	}
-	
+
 	@DeleteMapping("/allergies")
 	public Mono<AllergyEO> deleteAllergies(@RequestParam(value = "AllergyId", required = true) String allergyId) {
-	    return adminServicesRef.deleteAllergyById(allergyId)
-	        .onErrorResume(ex -> Mono.error(new ResponseStatusException(
-	            HttpStatus.BAD_REQUEST,
-	            "Failed to update medication: " + ex.getMessage(),
-	            ex
-	        )));
+		return adminServicesRef.deleteAllergyById(allergyId)
+				.onErrorResume(ex -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Failed to update medication: " + ex.getMessage(), ex)));
 	}
 
 }

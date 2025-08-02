@@ -74,6 +74,7 @@ public class PatientEO {
     @Data
     public static class Prescription {
         private String prescriptionId;
+        private String providerId;
         private AssociatedProvider prescribedBy;
         private List<MedicationPrescribed> medicationsPrescribed;
         private String associatedPharmacyId;
@@ -94,6 +95,9 @@ public class PatientEO {
             private Integer totalTabletToTake;
             private Integer totalTabletsTook;
             private Integer currentTabletsInHand;
+            private Integer totalVolumeToTake;
+            private Integer totalVolumeTook;
+            private Integer currentVolumeInhand;
             private Integer refillAlertThreshold;
             private String startDate;
             private String endDate;
@@ -114,6 +118,7 @@ public class PatientEO {
                 private String instruction;
                 private String scheduledTime;
                 private Integer doseTablets;
+                private String doseVolume;
                 
                 
                 public Schedule() {
@@ -137,6 +142,7 @@ public class PatientEO {
                     private String scheduleId;
                     private Boolean taken;
                     private Integer tabletsTaken;
+                    private Integer volumeTaken;
                     private String actualTimeTaken;
                 }
             }

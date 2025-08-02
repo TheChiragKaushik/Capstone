@@ -29,4 +29,6 @@ public interface AdminServices {
 
 	public Flux<AllergyEO> findAllAllergies();
 
+	public Flux<MedicationEO> findMedicationsByType(String type);
+
 }

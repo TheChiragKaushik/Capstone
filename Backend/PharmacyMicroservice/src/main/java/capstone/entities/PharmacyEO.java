@@ -11,7 +11,6 @@ import capstone.entities.Constants.Contact;
 import capstone.entities.Constants.Medication;
 import capstone.entities.Constants.Refill;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,9 +36,12 @@ public class PharmacyEO {
 
     @Data
     public static class PharmacyInventory {
+    	private String medicationId;
         private Medication medication;
-        private Instant lastRestockDate;
+        private String lastRestockDate;
         private Integer currentStockTablets;
+        private Integer currentStockVolume;
+        private Integer reorderThresholdVolume;
         private Integer reorderThresholdTablets;
         private String inventoryId;
         

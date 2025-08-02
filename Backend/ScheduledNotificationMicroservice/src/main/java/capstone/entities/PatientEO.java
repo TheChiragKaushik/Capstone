@@ -35,6 +35,7 @@ public class PatientEO {
     private String bloodGroup;
     private String dateOfBirth;
     
+    private List<String> allergyIds;
     private List<Allergy> allergies;
     
     private List<ExistingCondition> existingConditions;
@@ -43,6 +44,8 @@ public class PatientEO {
     
     private List<Prescription> prescriptions;
     
+
+    private List<String> providerIds;
     private List<AssociatedProvider> providers;
     
     private List<Refill> refillMedications;
@@ -54,8 +57,6 @@ public class PatientEO {
     public String get_id_asString() {
 		return _id != null ? _id.toHexString() : null;
 	}
-
-    
 
     @Data
     public static class ExistingCondition {
@@ -73,8 +74,10 @@ public class PatientEO {
     @Data
     public static class Prescription {
         private String prescriptionId;
+        private String providerId;
         private AssociatedProvider prescribedBy;
         private List<MedicationPrescribed> medicationsPrescribed;
+        private String associatedPharmacyId;
         private AssociatedPharmacy associatedPharmacy;
         private List<MedicationTracking> medicationTracking;
 
@@ -87,10 +90,14 @@ public class PatientEO {
         @Data
         public static class MedicationPrescribed {
             private String medicationPrescribedId;
+            private String medicationId;
             private Medication medication;
             private Integer totalTabletToTake;
             private Integer totalTabletsTook;
             private Integer currentTabletsInHand;
+            private Integer totalVolumeToTake;
+            private Integer totalVolumeTook;
+            private Integer currentVolumeInhand;
             private Integer refillAlertThreshold;
             private String startDate;
             private String endDate;
@@ -111,6 +118,7 @@ public class PatientEO {
                 private String instruction;
                 private String scheduledTime;
                 private Integer doseTablets;
+                private String doseVolume;
                 
                 
                 public Schedule() {
@@ -134,6 +142,7 @@ public class PatientEO {
                     private String scheduleId;
                     private Boolean taken;
                     private Integer tabletsTaken;
+                    private Integer volumeTaken;
                     private String actualTimeTaken;
                 }
             }

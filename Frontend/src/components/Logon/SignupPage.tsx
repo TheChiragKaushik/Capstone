@@ -96,23 +96,35 @@ const SignupPage: React.FC = () => {
 
     if (
       fnValidation ||
-      lnValidation ||
+      (role !== Role.pharmacy && lnValidation) ||
       mobileValidation ||
       emailValidation ||
       passwordValidation
     ) {
+      console.log({
+        fnValidation,
+        lnValidation,
+        mobileValidation,
+        emailValidation,
+        passwordValidation,
+      });
       return;
     }
 
-    const payload = {
-      firstName: user.firstName,
-      lastName: user.lastName,
+    const payload: any = {
       contact: {
         email: user.contact.email + getEmailSuffix(role),
         phone: user.contact.phone,
       },
       password: user.password,
     };
+
+    if (role === Role.pharmacy) {
+      payload.name = user.firstName;
+    } else {
+      payload.firstName = user.firstName;
+      payload.lastName = user.lastName;
+    }
 
     try {
       const response = await axios.post<PatientEO | ProviderEO | PharmacyEO>(
@@ -145,7 +157,7 @@ const SignupPage: React.FC = () => {
   };
 
   return (
-    <Box component="form" onSubmit={handleSignup} className="space-y-6">
+    <Box className="space-y-6">
       <Typography
         component="h1"
         variant="h5"
@@ -346,7 +358,7 @@ const SignupPage: React.FC = () => {
           helperText={emailError}
           InputProps={{
             endAdornment: (
-              <InputAdornment position="end">
+              <InputAdornment style={{ pointerEvents: "none" }} position="end">
                 {getEmailSuffix(role)}
               </InputAdornment>
             ),
@@ -397,7 +409,7 @@ const SignupPage: React.FC = () => {
           label="Password"
           type={showPassword ? "text" : "password"}
           id="password"
-          autoComplete="new-password" // Changed to new-password for signup
+          autoComplete="new-password"
           value={user.password}
           onChange={handleUserChange}
           error={!!passwordError}
@@ -437,7 +449,7 @@ const SignupPage: React.FC = () => {
         />
       </div>
       <Button
-        type="submit" // Set type to submit for form submission
+        onClick={handleSignup}
         sx={{
           width: "100%",
           backgroundColor: colors.brown500,

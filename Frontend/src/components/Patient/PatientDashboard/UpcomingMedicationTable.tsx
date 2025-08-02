@@ -20,11 +20,9 @@ type UpcomingMedicationTableProps = {
 
 const TableHeaders = ["Medication", "Dosage", "Time", "Instructions", "Status"];
 
-const UpcomingMedicationTable: React.FC<UpcomingMedicationTableProps> = ({
-  user,
-}) => (
-
-  
+const UpcomingMedicationTable: React.FC<
+  UpcomingMedicationTableProps
+> = ({}) => (
   <Paper
     className="rounded-lg shadow-sm p-6 border mb-8"
     style={{ borderColor: colors.beige100, background: "#fff" }}

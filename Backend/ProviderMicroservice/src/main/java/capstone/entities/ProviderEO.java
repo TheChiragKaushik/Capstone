@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import capstone.entities.Constants.Address;
 import capstone.entities.Constants.Contact;
+import capstone.entities.Constants.PatientRef;
 import lombok.Data;
 
 @Data
@@ -21,6 +22,7 @@ public class ProviderEO {
     private Contact contact;
     private Address address;
     private String password;
+    private List<String> patientIds;
     private List<PatientRef> patients;
     private String createdAt;
     
@@ -29,16 +31,4 @@ public class ProviderEO {
 		return _id != null ? _id.toHexString() : null;
 	}
 
-    @Data
-    public static class PatientRef { 
-        
-		private String patientId;
-        private Contact contact;
-        private String firstName;
-        private String lastName;
-        private Address address;
-        private String gender;
-        private String dateOfBirth;
-       
-    }
 }

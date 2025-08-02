@@ -21,7 +21,6 @@ public class Constants {
 		private String city;
 		private String state;
 		private String zipCode;
-		private String country;
 	}
 
 	@Data
@@ -49,10 +48,8 @@ public class Constants {
 		private String name;
 		private String description;
 		private Integer oneTablet;
-		private Integer tabletsInPack;
 		private String unitMeasure;
 		private Integer volumePerDose;
-		private Integer totalVolume;
 		private String liquidUnitMeasure;
 		private String type;
 	}
@@ -98,9 +95,11 @@ public class Constants {
 		private String refillId;
 		private String patientId;
 		private String pharmacyId;
+		private String medicationId;
 		private Medication medication;
 		private String status;
-		private Integer refillQuantity;
+		private Integer refillQuantityTablets;
+		private Integer refillQuantityVolume;
 		private String requestDate;
 		private String lastRefillDate;
 

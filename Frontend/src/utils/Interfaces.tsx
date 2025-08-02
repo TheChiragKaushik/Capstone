@@ -51,17 +51,36 @@ export interface LoggedInUser {
   _id: string;
 }
 
+export interface PharmacyInventoryPayload {
+  medicationId: string;
+  lastRestockDate: string;
+  currentStockTablets?: number;
+  currentStockVolume?: number;
+  reorderThresholdTablets?: number;
+  reorderThresholdVolume?: number;
+}
+export interface Medication {
+  _id: string;
+  name?: string;
+  description?: string;
+  oneTablet?: number;
+  tabletsInPack?: number;
+  unitMeasure?: string;
+  volumePerDose?: number;
+  totalVolume?: number;
+  liquidUnitMeasure?: string;
+  type?: string;
+}
 export interface Contact {
-  email: string;
+  email?: string;
   phone?: string;
 }
 
 export interface Address {
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
 }
 
 export interface Allergy {
@@ -99,6 +118,10 @@ export interface MedicationObject {
   oneTablet?: number;
   tabletsInPack?: number;
   unitMeasure?: string;
+  volumePerDose?: number;
+  totalVolume?: number;
+  liquidUnitMeasure?: string;
+  type?: string;
 }
 
 export interface Schedule {
@@ -107,16 +130,12 @@ export interface Schedule {
   instruction?: string;
   scheduledTime?: string;
   doseTablets?: number;
-}
-
-export interface RefillQuantity {
-  refillId: string;
-  requestStatus?: boolean;
-  tabletsRefilled?: number;
+  doseQuantity?: string;
 }
 
 export interface MedicationPrescribed {
   medicationPrescribedId: string;
+  medicationId?: string;
   medication?: MedicationObject;
   totalTabletToTake?: number;
   totalTabletsTook?: number;
@@ -127,7 +146,6 @@ export interface MedicationPrescribed {
   schedule?: Schedule[];
   refillsAllowed?: boolean;
   refillRequired?: boolean;
-  refillQuantity?: RefillQuantity[];
 }
 
 export interface AssociatedPharmacy {
@@ -154,10 +172,21 @@ export interface MedicationTracking {
   tracker?: Tracker[];
 }
 
+export interface AssociatedProvider {
+  providerId: string;
+  firstName?: string;
+  lastName?: string;
+  specialization?: string;
+  contact?: Contact;
+  address?: Address;
+}
+
 export interface Prescription {
   prescriptionId: string;
-  prescribedBy?: PrescribedBy;
+  providerId?: string;
+  prescribedBy?: AssociatedProvider;
   medicationsPrescribed?: MedicationPrescribed[];
+  associatedPharmacyId?: string;
   associatedPharmacy?: AssociatedPharmacy;
   medicationTracking?: MedicationTracking[];
 }
@@ -171,6 +200,19 @@ export interface Provider {
   address?: Address;
 }
 
+export interface Refill {
+  refillId?: string;
+  patientId?: string;
+  pharmacyId?: string;
+  medicationId?: string;
+  medication?: MedicationObject;
+  status?: string;
+  refillQuantityTablets?: number;
+  refillQuantityVolume?: number;
+  requestDate?: string;
+  lastRefillDate?: string;
+}
+
 export interface PatientEO {
   _id: string;
   contact?: Contact;
@@ -180,21 +222,27 @@ export interface PatientEO {
   address?: Address;
   bloodGroup?: string;
   dateOfBirth?: string;
+  allergyIds?: string[];
   allergies?: Allergy[];
   existingConditions?: ExistingCondition[];
   emergencyContact?: EmergencyContact;
   prescriptions?: Prescription[];
-  providers?: Provider[];
+  providerIds?: string[];
+  providers?: AssociatedProvider[];
+  refillMedications?: Refill[];
   password?: string;
   createdAt?: string;
 }
 
 export interface PharmacyInventory {
+  medicationId?: string;
   medication?: MedicationObject;
   lastRestockDate?: string;
   currentStockTablets?: number;
+  currentStockVolume?: number;
+  reorderThresholdVolume?: number;
   reorderThresholdTablets?: number;
-  inventoryId: string;
+  inventoryId?: string;
 }
 
 export interface PharmacyEO {
@@ -204,8 +252,8 @@ export interface PharmacyEO {
   contact?: Contact;
   password?: string;
   pharmacyInventory?: PharmacyInventory[];
+  refillMedications?: Refill[];
   createdAt?: string;
-  updatedAt?: string;
 }
 
 export interface PatientRef {
@@ -226,6 +274,16 @@ export interface ProviderEO {
   contact?: Contact;
   address?: Address;
   password?: string;
+  patientIds?: string[];
   patients?: PatientRef[];
   createdAt?: string;
+}
+
+export interface InventoryItem extends PharmacyInventory {
+  medicationName?: string;
+  medicationType?: string;
+  medicationFor?: string;
+  status?: string;
+  statusColor?: string;
+  medicationForm?: string;
 }

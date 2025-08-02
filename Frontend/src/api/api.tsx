@@ -5,4 +5,6 @@ export const APIEndpoints = {
   Login: `${API_URL}/logon/login`,
   SignUp: `${API_URL}/logon/signup`,
   UserProfile: `${API_URL}/logon`,
+  Pharmacy: `${API_URL}/pharmacy`,
+  Admin: `${API_URL}/admin`,
 };

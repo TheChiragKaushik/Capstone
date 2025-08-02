@@ -39,7 +39,14 @@ public class AdminServicesImpl implements AdminServices {
 		
 		return reactiveMongoTemplateRef.findOne(query, MedicationEO.class);
 	}
+	
+	@Override
+	public Flux<MedicationEO> findMedicationsByType(String type){
+		Query query = new Query(Criteria.where("type").is(type));
+		return reactiveMongoTemplateRef.find(query, MedicationEO.class);
+	}
 
+	@Override
 	public Mono<MedicationEO> deleteMedicationById(String id) {
 	    ObjectId medicationId = new ObjectId(id);
 	    Query query = new Query(Criteria.where("_id").is(medicationId));
