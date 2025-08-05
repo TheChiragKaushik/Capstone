@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.mongodb.client.result.UpdateResult;
 
+import capstone.entities.AlarmRingtonesEO;
 import capstone.entities.AllergyEO;
 import capstone.entities.MedicationEO;
 import capstone.services.AdminServices;
@@ -107,6 +108,37 @@ public class AdminController {
 		return adminServicesRef.deleteAllergyById(allergyId)
 				.onErrorResume(ex -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
 						"Failed to update medication: " + ex.getMessage(), ex)));
+	}
+	
+	
+	@PostMapping("/ringtones")
+	public Mono<AlarmRingtonesEO> addNewMedication(@RequestBody AlarmRingtonesEO alarmRingtonesRef) {
+		return adminServicesRef.addNewRingtone(alarmRingtonesRef).onErrorResume(ex -> {
+			return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Failed to add new AlarmRingtone: " + ex.getMessage(), ex));
+		});
+	}
+	
+	@GetMapping("/ringtones")
+	public Mono<?> getRingtones(@RequestParam(value = "RingtoneId", required = false) String ringtoneId) {
+		if (ringtoneId != null && !ringtoneId.isEmpty()) {
+			return adminServicesRef.findRingtoneById(ringtoneId).switchIfEmpty(
+					Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Ringtone By Id not found")));
+		}
+		return adminServicesRef.findAllRingtones().collectList().flatMap(ringtones -> {
+			if (ringtones.isEmpty()) {
+				return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No Ringtone found"));
+			}
+			return Mono.just(ringtones);
+		});
+	}
+	
+	
+	@DeleteMapping("/ringtones")
+	public Mono<AlarmRingtonesEO> deleteRingtone(@RequestParam(value = "RingtoneId", required = true) String ringtoneId) {
+		return adminServicesRef.deleteRingtoneById(ringtoneId)
+				.onErrorResume(ex -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Failed to update Ringtone: " + ex.getMessage(), ex)));
 	}
 
 }

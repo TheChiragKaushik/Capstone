@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import capstone.entities.Constants.Address;
 import capstone.entities.Constants.Contact;
 import capstone.entities.Constants.Medication;
-import capstone.entities.Constants.Refill;
+import capstone.entities.Constants.RaiseRefillEO;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +25,7 @@ public class PharmacyEO {
     private Contact contact;
     private String password;
     private List<PharmacyInventory> pharmacyInventory;
-    private List<Refill> refillMedication;
+    private List<RaiseRefillEO> refillMedication;
     private String createdAt;
     private String updatedAt;
     

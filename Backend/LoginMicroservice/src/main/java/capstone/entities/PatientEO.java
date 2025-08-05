@@ -14,11 +14,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import capstone.entities.Constants.Address;
 import capstone.entities.Constants.Allergy;
-import capstone.entities.Constants.AssociatedPharmacy;
 import capstone.entities.Constants.AssociatedProvider;
 import capstone.entities.Constants.Contact;
 import capstone.entities.Constants.Medication;
-import capstone.entities.Constants.Refill;
+import capstone.entities.Constants.RaiseRefillEO;
+import capstone.entities.Constants.SoundPreference;
 
 @Data
 @Document(collection = "patients")
@@ -38,7 +38,7 @@ public class PatientEO {
     private List<String> allergyIds;
     private List<Allergy> allergies;
     
-    private List<ExistingCondition> existingConditions;
+    private List<String> existingConditions;
     
     private EmergencyContact emergencyContact;
     
@@ -48,7 +48,9 @@ public class PatientEO {
     private List<String> providerIds;
     private List<AssociatedProvider> providers;
     
-    private List<Refill> refillMedications;
+    private List<RaiseRefillEO> refillMedications;
+    
+    private SoundPreference soundPreference;
     
     private String password;
     private String createdAt;
@@ -57,12 +59,6 @@ public class PatientEO {
     public String get_id_asString() {
 		return _id != null ? _id.toHexString() : null;
 	}
-
-    @Data
-    public static class ExistingCondition {
-        private String name;
-        private String severity;
-    }
 
     @Data
     public static class EmergencyContact {
@@ -76,9 +72,8 @@ public class PatientEO {
         private String prescriptionId;
         private String providerId;
         private AssociatedProvider prescribedBy;
+        private String prescriptionForDescription;
         private List<MedicationPrescribed> medicationsPrescribed;
-        private String associatedPharmacyId;
-        private AssociatedPharmacy associatedPharmacy;
         private List<MedicationTracking> medicationTracking;
 
         public Prescription() {
@@ -118,7 +113,7 @@ public class PatientEO {
                 private String instruction;
                 private String scheduledTime;
                 private Integer doseTablets;
-                private String doseVolume;
+                private Integer doseVolume;
                 
                 
                 public Schedule() {

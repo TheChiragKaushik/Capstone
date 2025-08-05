@@ -7,10 +7,16 @@ import { useLocation, useNavigate } from "react-router";
 import RoleConfig from "../utils/RoleConfig";
 import { useDemoRouter } from "@toolpad/core/internal";
 import AppTitle from "../components/MainApp/AppTitle";
-import { AppTheme } from "../utils/Constants";
+import { AppTheme, colors } from "../utils/Constants";
 import axios from "axios";
 import { APIEndpoints } from "../api/api";
-import type { PatientEO, PharmacyEO, ProviderEO } from "../utils/Interfaces";
+import type {
+  PatientEO,
+  PatientNotificationsRequest,
+  PharmacyEO,
+  ProviderEO,
+  RaiseRefillEO,
+} from "../utils/Interfaces";
 import {
   addListener,
   connectUserQueue,
@@ -23,10 +29,6 @@ const MainApp = () => {
   const location = useLocation();
   const { name, email, role, userId } = location.state;
 
-  if (!RoleConfig[role]) {
-    throw new Error(`Role "${role}" is not defined in RoleConfig.`);
-  }
-
   const dynamicSession = React.useMemo(() => {
     if (name && email) {
       return {
@@ -38,55 +40,13 @@ const MainApp = () => {
     }
     return null;
   }, [name, email]);
-
-  const [user, setUser] = React.useState<
-    PatientEO | PharmacyEO | ProviderEO | undefined
-  >(undefined);
-
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const user = await axios.get(
-          `${APIEndpoints.UserProfile}?${role}Id=${userId}`
-        );
-        const fetchedUser = user.data;
-        if (role === "Patient") {
-          setUser(fetchedUser as PatientEO);
-        } else if (role === "Doctor") {
-          setUser(fetchedUser as ProviderEO);
-        } else if (role === "Pharmacy") {
-          setUser(fetchedUser as PharmacyEO);
-        } else {
-          setUser(undefined);
-          console.warn("Unknown role, cannot assign user type");
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-    getUserData();
-
-    if (role === "Patient" || role === "Pharmacy") {
-      connectUserQueue(role, userId);
-
-      function onUserMessage(message: any, type: any) {
-        console.log(`Received ${type} message:`, message);
-        alert(message.message);
-      }
-      addListener(onUserMessage);
-
-      return () => {
-        removeListener(onUserMessage);
-        disconnectUserQueue();
-      };
-    }
-  }, []);
+  const [session, setSession] = React.useState<Session | null>(dynamicSession);
 
   const navigate = useNavigate();
-  const { navigation, routes, notifications } = RoleConfig[role];
-  const [session, setSession] = React.useState<Session | null>(dynamicSession);
-  const router = useDemoRouter("/dashboard");
-  const pathname = router.pathname.replace("/", "") || "dashboard";
+
+  if (!RoleConfig[role]) {
+    throw new Error(`Role "${role}" is not defined in RoleConfig.`);
+  }
 
   const handleLogout = () => {
     setSession(null);
@@ -101,8 +61,119 @@ const MainApp = () => {
     []
   );
 
+  const { navigation, routes, notifications } = RoleConfig[role];
+  const router = useDemoRouter("/dashboard");
+  const pathname = router.pathname.replace("/", "") || "dashboard";
+
   const NoticiationComponent = notifications?.dialog;
   const ComponentToRender = routes[pathname] || (() => <h1>Not Found</h1>);
+
+  const [user, setUser] = React.useState<
+    PatientEO | PharmacyEO | ProviderEO | undefined
+  >(undefined);
+
+  const getUserData = async () => {
+    try {
+      const user = await axios.get(
+        `${APIEndpoints.UserProfile}?${role}Id=${userId}`
+      );
+      const fetchedUser = user.data;
+      if (role === "Patient") {
+        setUser(fetchedUser as PatientEO);
+      } else if (role === "Doctor") {
+        setUser(fetchedUser as ProviderEO);
+      } else if (role === "Pharmacy") {
+        setUser(fetchedUser as PharmacyEO);
+      } else {
+        setUser(undefined);
+        console.warn("Unknown role, cannot assign user type");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  const [newNotifications, setNewNotifications] = React.useState<
+    PatientNotificationsRequest[] | RaiseRefillEO[]
+  >([]);
+
+  const addNotification = (
+    notification: PatientNotificationsRequest | RaiseRefillEO
+  ) => {
+    setNewNotifications((prevNotifications) => [
+      ...prevNotifications,
+      notification,
+    ]);
+  };
+
+  const removeNotification = (id: string) => {
+    setNewNotifications((prevNotifications) =>
+      prevNotifications.filter(
+        (notification) =>
+          (notification as any)._id !== id &&
+          (notification as any).raiseRefillId !== id
+      )
+    );
+  };
+
+  useEffect(() => {
+    getUserData();
+
+    if (role === "Patient" || role === "Pharmacy") {
+      connectUserQueue(role, userId);
+      function onUserMessage(
+        message: PatientNotificationsRequest | RaiseRefillEO,
+        type: string
+      ) {
+        console.log(`Received ${type} message:`, message);
+        if (role === "Patient" && "raiseRefillId" in message) {
+          setTimeout(() => {
+            addNotification(message);
+          }, 3000);
+        } else {
+          addNotification(message);
+        }
+
+        if (Notification.permission === "granted") {
+          const title = "New Notification";
+          let body = "";
+
+          if ("raiseRefillId" in message) {
+            body = `Refill request received with ID: ${message.raiseRefillId}`;
+          } else {
+            body = message?.message || "You have a new notification";
+          }
+
+          const notification = new Notification(title, {
+            body,
+            icon: "/path/to/icon.png",
+          });
+
+          notification.onclick = () => {
+            window.focus();
+            notification.close();
+          };
+        }
+      }
+
+      addListener(onUserMessage);
+
+      return () => {
+        removeListener(onUserMessage);
+        disconnectUserQueue();
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    if (Notification.permission === "default") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          console.log("Notification permission granted.");
+        }
+      });
+    }
+  }, []);
 
   return (
     <>
@@ -129,6 +200,9 @@ const MainApp = () => {
               },
               justifyContent: "space-between",
             },
+            "& .MuiPaper-root": {
+              background: colors.beige100,
+            },
           }}
         >
           <ComponentToRender
@@ -140,7 +214,13 @@ const MainApp = () => {
         </DashboardLayout>
       </AppProvider>
 
-      {NoticiationComponent && <NoticiationComponent />}
+      {NoticiationComponent && (
+        <NoticiationComponent
+          notifications={newNotifications}
+          onRemove={removeNotification}
+          navigateToRoute={router}
+        />
+      )}
     </>
   );
 };

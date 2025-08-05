@@ -18,6 +18,12 @@ const PharmacyDetails: React.FC<PharmacyDetailsProps> = ({ user }) => {
   const [userDetails, setUserDetails] = useState<PharmacyEO>(
     user ?? ({} as PharmacyEO)
   );
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const getUserData = async () => {
@@ -34,12 +40,6 @@ const PharmacyDetails: React.FC<PharmacyDetailsProps> = ({ user }) => {
     getUserData();
   }, []);
 
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-
   const handleSnackbarClose = (
     _: React.SyntheticEvent | Event,
     reason?: string
@@ -47,8 +47,6 @@ const PharmacyDetails: React.FC<PharmacyDetailsProps> = ({ user }) => {
     if (reason === "clickaway") return;
     setSnackbarOpen(false);
   };
-
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -95,10 +93,22 @@ const PharmacyDetails: React.FC<PharmacyDetailsProps> = ({ user }) => {
       return;
     }
 
+    const updatedUserDetails = {
+      ...userDetails,
+      contact: {
+        ...userDetails.contact,
+        email: userDetails.contact?.email
+          ? userDetails.contact.email.includes(getEmailSuffix("Pharmacy"))
+            ? userDetails.contact.email
+            : userDetails.contact.email + getEmailSuffix("Pharmacy")
+          : undefined,
+      },
+    };
+
     try {
       const res = await axios.put(
         `${APIEndpoints.Pharmacy}/${userDetails._id}`,
-        userDetails
+        updatedUserDetails
       );
 
       if (!res.data) throw new Error("Update failed");

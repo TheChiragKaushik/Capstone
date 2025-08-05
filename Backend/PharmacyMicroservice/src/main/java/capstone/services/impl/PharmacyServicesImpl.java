@@ -22,6 +22,7 @@ import com.mongodb.client.result.UpdateResult;
 import capstone.entities.PharmacyEO;
 import capstone.entities.PharmacyEO.PharmacyInventory;
 import capstone.services.PharmacyServices;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -72,36 +73,36 @@ public class PharmacyServicesImpl implements PharmacyServices {
 	@Override
 	public Mono<UpdateResult> addInventoryToPharmacy(String pharmacyId, PharmacyInventory pharmacyInventory) {
 		ObjectId id = new ObjectId(pharmacyId);
-	    Query query = new Query(Criteria.where("_id").is(id));
+		Query query = new Query(Criteria.where("_id").is(id));
 
-	    @SuppressWarnings("unchecked")
-	    Map<String, Object> map = new ObjectMapper().convertValue(pharmacyInventory, Map.class);
-	    
-	    Map<String, Object> newInventoryItem = new HashMap<>();
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = new ObjectMapper().convertValue(pharmacyInventory, Map.class);
 
-	    map.forEach((key, value) -> {
-	        if (value != null) {
-	            newInventoryItem.put(key, value);
-	        }
-	    });
-	    
-	    Update update = new Update();
+		Map<String, Object> newInventoryItem = new HashMap<>();
 
-	    update.push("pharmacyInventory").value(newInventoryItem);
+		map.forEach((key, value) -> {
+			if (value != null) {
+				newInventoryItem.put(key, value);
+			}
+		});
 
-	    UpdateOptions options = new UpdateOptions().upsert(false);
+		Update update = new Update();
 
-	    return reactiveMongoTemplateRef.getCollection("pharmacies").flatMap(collection -> Mono
-	            .from(collection.updateOne(query.getQueryObject(), update.getUpdateObject(), options)));
+		update.push("pharmacyInventory").value(newInventoryItem);
+
+		UpdateOptions options = new UpdateOptions().upsert(false);
+
+		return reactiveMongoTemplateRef.getCollection("pharmacies").flatMap(collection -> Mono
+				.from(collection.updateOne(query.getQueryObject(), update.getUpdateObject(), options)));
 	}
-	
-	
+
 	@Override
-	public Mono<UpdateResult> updatePharmacyInventory(String pharmacyId, String inventoryId, PharmacyInventory pharmacyInventory){
+	public Mono<UpdateResult> updatePharmacyInventory(String pharmacyId, String inventoryId,
+			PharmacyInventory pharmacyInventory) {
 		ObjectId id = new ObjectId(pharmacyId);
-	    Query query = new Query(Criteria.where("_id").is(id));
-	    
-	    Update update = new Update();
+		Query query = new Query(Criteria.where("_id").is(id));
+
+		Update update = new Update();
 
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = new ObjectMapper().convertValue(pharmacyInventory, Map.class);
@@ -114,10 +115,16 @@ public class PharmacyServicesImpl implements PharmacyServices {
 
 		List<Bson> arrayFilters = Arrays.asList(Filters.eq("pharmInv.inventoryId", inventoryId));
 
-		
 		UpdateOptions options = new UpdateOptions().arrayFilters(arrayFilters).upsert(false);
 		return reactiveMongoTemplateRef.getCollection("pharmacies").flatMap(collection -> Mono
 				.from(collection.updateOne(query.getQueryObject(), update.getUpdateObject(), options)));
+	}
+
+	@Override
+	public Flux<PharmacyEO> getAllPharmacyProvidingCertainMedication(String medicationId) {
+		Query query = new Query(Criteria.where("pharmacyInventory.medicationId").is(medicationId));
+
+		return reactiveMongoTemplateRef.find(query, PharmacyEO.class);
 	}
 
 }

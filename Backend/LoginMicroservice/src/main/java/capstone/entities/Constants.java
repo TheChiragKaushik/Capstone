@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import capstone.entities.PatientEO.Prescription.MedicationPrescribed;
+import capstone.entities.PatientEO.Prescription.MedicationTracking.Tracker.Dose;
 import lombok.Data;
 
 @Data
@@ -97,6 +99,8 @@ public class Constants {
 		private String pharmacyId;
 		private String medicationId;
 		private Medication medication;
+		private String prescriptionId;
+		private String medicationPrescribedId;
 		private String status;
 		private Integer refillQuantityTablets;
 		private Integer refillQuantityVolume;
@@ -107,5 +111,64 @@ public class Constants {
 			this.refillId = UUID.randomUUID().toString();
 		}
 	}
+	
+	
+	@Data
+	public static class DoseStatusSetRequest {
+		private String prescriptionId;
+		private String medicationPrescribedId;
+		private String date;
+		private String scheduleId;
+		private Dose doseStatusUpdate;
+	}
+	
+	@Data
+	public static class RefillMedications{
+		
+		private String refillMedications;
+		private RaiseRefillEO raiseRefillEO;
+		
+		public RefillMedications() {
+	    	this.refillMedications = UUID.randomUUID().toString();
+	    }
+		
+	}
+	
+	@Data
+	public static class RaiseRefillEO {
+		
+		private String raiseRefillId;
+		private String patientId;
+		private String medicationId;
+		private String providerId;
+		private String medicationName;
+		private String prescriptionId;
+		private String prescriptionForDescription;
+		private MedicationPrescribed medicationPrescribed;
+		private String medicationPrescribedId;
+		private Integer doseTabletsRequired;
+		private Integer doseVolumeRequired;
+		private String message;
+	    private String status;
+	    private String requestDate;
+	    private String pharmacyId;
+	    private Integer refillQuantityTablets;
+	    private Integer refillQuantityVolume;
+	    private String lastRefillDate;
+	    private String soundUrl;
+	    
+	    
+	    public RaiseRefillEO() {
+	    	this.raiseRefillId = UUID.randomUUID().toString();
+	    }
 
+	}
+
+	@Data
+	public static class SoundPreference {
+		private String doseReminderNotificationSound;
+
+		private String refillReminderNotificationSound;
+		
+	}
 }

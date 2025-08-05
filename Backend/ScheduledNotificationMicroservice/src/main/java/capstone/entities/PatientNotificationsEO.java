@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 @Document(collection = "patientnotifications")
 public class PatientNotificationsEO {
-	
+
 	
 	@Id
 	private ObjectId _id;
@@ -22,6 +22,13 @@ public class PatientNotificationsEO {
 	private Integer totalDoseReminderNotifications;
 	private Integer totalDoseReminderNotificationsChecked;
     private List<DoseReminderNotificationEO> doseReminderNotifications;
+    private Integer totalRefillApprovedNotifications;
+    private Integer totalRefillApprovedCheckedNotifications;
+    private List<RefillApprovedNotifications> refillApprovedNotifications;
+    
+    private Integer totalRaiseRefillNotifications;
+    private Integer totalRaiseRefillCheckedNotifications;
+    private List<RaiseRefillNotifications> raiseRefillNotifications;
     
     @JsonProperty("_id")
     public String get_id_asString() {

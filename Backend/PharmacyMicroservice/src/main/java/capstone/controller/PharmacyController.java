@@ -17,6 +17,7 @@ import com.mongodb.client.result.UpdateResult;
 import capstone.entities.PharmacyEO;
 import capstone.entities.PharmacyEO.PharmacyInventory;
 import capstone.services.PharmacyServices;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -76,6 +77,27 @@ public class PharmacyController {
 	                            "An error occurred while adding to the pharmacy inventory"));
 	                });
 	    }
+	}
+	
+	
+	@GetMapping("/medication")
+	public Flux<PharmacyEO> getAllPharmacyProvidingCertainMedication(@RequestParam(value = "MedicationId", required = true) String medicationId) {
+	    
+	    return pharmacyServicesRef.getAllPharmacyProvidingCertainMedication(medicationId)
+	            .hasElements()
+	            .flatMapMany(hasElements -> {
+	                if (hasElements) {
+	                    return pharmacyServicesRef.getAllPharmacyProvidingCertainMedication(medicationId);
+	                } else {
+	                    return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Pharmacy not found for medication: " + medicationId));
+	                }
+	            })
+	            .onErrorResume(IllegalArgumentException.class, e -> 
+	                Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid medicationId format: " + medicationId))
+	            )
+	            .onErrorResume(e -> 
+	                Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"))
+	            );
 	}
 
 }

@@ -42,7 +42,9 @@ public interface ProviderServices {
 	
 	public Flux<Prescription> getPatientPrescriptionsByProvider(ObjectId patientId, String providerId);
 
-	Mono<UpdateResult> updatePatientDetailsInProvider(ObjectId providerId, String patientId,
+	public Mono<UpdateResult> updatePatientDetailsInProvider(ObjectId providerId, String patientId,
 			PatientRef updatedPatientRef);
+
+	public Mono<ProviderEO> addPatientIdToProvider(String providerId, String patientId);
 
 }

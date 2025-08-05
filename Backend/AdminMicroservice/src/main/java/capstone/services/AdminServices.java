@@ -2,6 +2,7 @@ package capstone.services;
 
 import com.mongodb.client.result.UpdateResult;
 
+import capstone.entities.AlarmRingtonesEO;
 import capstone.entities.AllergyEO;
 import capstone.entities.MedicationEO;
 import reactor.core.publisher.Flux;
@@ -30,5 +31,15 @@ public interface AdminServices {
 	public Flux<AllergyEO> findAllAllergies();
 
 	public Flux<MedicationEO> findMedicationsByType(String type);
+
+	public Mono<AlarmRingtonesEO> addNewRingtone(AlarmRingtonesEO alarmRingtonesEORef);
+
+	public Flux<AlarmRingtonesEO> findAllRingtones();
+
+	public Mono<AlarmRingtonesEO> deleteRingtoneById(String id);
+
+	public Mono<UpdateResult> updateRingtoneById(String id, AlarmRingtonesEO alarmRingtone);
+
+	public Mono<AlarmRingtonesEO> findRingtoneById(String id);
 
 }

@@ -7,4 +7,7 @@ export const APIEndpoints = {
   UserProfile: `${API_URL}/logon`,
   Pharmacy: `${API_URL}/pharmacy`,
   Admin: `${API_URL}/admin`,
+  Provider: `${API_URL}/providers`,
+  Patient: `${API_URL}/patients`,
+  Notifications: `${API_URL}/scheduled`,
 };

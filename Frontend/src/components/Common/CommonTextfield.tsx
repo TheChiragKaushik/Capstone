@@ -2,7 +2,15 @@ import { TextField, type TextFieldProps } from "@mui/material";
 import { colors } from "../../utils/Constants";
 import type React from "react";
 type CommonTextfieldProps = Omit<TextFieldProps, "type"> & {
-  type?: "text" | "email" | "password" | "date" | "number";
+  type?:
+    | "text"
+    | "email"
+    | "password"
+    | "date"
+    | "number"
+    | "search"
+    | "time"
+    | "range";
   isSelect?: boolean;
   children?: React.ReactNode;
 };

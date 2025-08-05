@@ -18,6 +18,19 @@ export const Role = {
   pharmacy: "Pharmacy",
 };
 
+export const getEmailSuffix = (currentRole: string) => {
+  switch (currentRole) {
+    case Role.patient:
+      return "@capstone.com";
+    case Role.provider:
+      return "@capstone.care";
+    case Role.pharmacy:
+      return "@capstone.med";
+    default:
+      return "";
+  }
+};
+
 export const validateEmail = (value: string, currentRole: string) => {
   if (!value) return "Email is required.";
 
@@ -59,19 +72,6 @@ export const validatePassword = (value: string) => {
   if (!passwordRegex.test(value))
     return "Password must be at least 8 characters, include uppercase, lowercase, number, and special character.";
   return "";
-};
-
-export const getEmailSuffix = (currentRole: string) => {
-  switch (currentRole) {
-    case Role.patient:
-      return "@capstone.com";
-    case Role.provider:
-      return "@capstone.care";
-    case Role.pharmacy:
-      return "@capstone.med";
-    default:
-      return "";
-  }
 };
 
 export const validateSignUpEmail = (value: string, currentRole: string) => {

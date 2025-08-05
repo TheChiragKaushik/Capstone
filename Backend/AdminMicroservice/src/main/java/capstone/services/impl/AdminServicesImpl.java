@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
+import capstone.entities.AlarmRingtonesEO;
 import capstone.entities.AllergyEO;
 import capstone.entities.MedicationEO;
 import capstone.services.AdminServices;
@@ -128,6 +129,53 @@ public class AdminServicesImpl implements AdminServices {
 	public Flux<AllergyEO> findAllAllergies() {
 		// TODO Auto-generated method stub
 		return reactiveMongoTemplateRef.findAll(AllergyEO.class);
+	}
+	
+	@Override
+	public Mono<AlarmRingtonesEO> addNewRingtone(AlarmRingtonesEO alarmRingtonesEORef){
+		return reactiveMongoTemplateRef.save(alarmRingtonesEORef);
+	}
+	
+	@Override
+	public Mono<AlarmRingtonesEO> findRingtoneById(String id) {
+		ObjectId alarmaRingtoneId = new ObjectId(id);
+		Query query = new Query(Criteria.where("_id").is(alarmaRingtoneId));
+		
+		return reactiveMongoTemplateRef.findOne(query, AlarmRingtonesEO.class);
+	}
+	
+	@Override
+	public Flux<AlarmRingtonesEO> findAllRingtones(){
+		return reactiveMongoTemplateRef.findAll(AlarmRingtonesEO.class);
+	}
+	
+	@Override
+	public Mono<AlarmRingtonesEO> deleteRingtoneById(String id) {
+		ObjectId alarmaRingtoneId = new ObjectId(id);
+	    Query query = new Query(Criteria.where("_id").is(alarmaRingtoneId));
+	    return reactiveMongoTemplateRef.findAndRemove(query, AlarmRingtonesEO.class);
+	}
+
+	@Override
+	public Mono<UpdateResult> updateRingtoneById(String id, AlarmRingtonesEO alarmRingtone) {
+		ObjectId alarmaRingtoneId = new ObjectId(id);
+	    Query query = new Query(Criteria.where("_id").is(alarmaRingtoneId));
+	    
+	    Update update = new Update();
+
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = new ObjectMapper().convertValue(alarmRingtone, Map.class);
+		map.forEach((key, value) -> {
+
+			if (value != null && !key.equals("_id")) {
+				update.set(key, value);
+			}
+		});
+
+		UpdateOptions options = new UpdateOptions().upsert(false);
+
+		return reactiveMongoTemplateRef.getCollection("alarmringtones").flatMap(collection -> Mono
+				.from(collection.updateOne(query.getQueryObject(), update.getUpdateObject(), options)));
 	}
 
 }

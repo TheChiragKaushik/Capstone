@@ -1,5 +1,12 @@
-import { createTheme } from "@mui/material/styles";
-import type { PharmacyInventory } from "./Interfaces";
+import { createTheme, styled } from "@mui/material/styles";
+import type {
+  AllergyEO,
+  MedicationPrescribed,
+  PharmacyInventory,
+  Prescription,
+} from "./Interfaces";
+import axios, { type AxiosResponse } from "axios";
+import { APIEndpoints } from "../api/api";
 
 export const AppTheme = createTheme({
   palette: {
@@ -163,3 +170,131 @@ export const getStatus = (item: PharmacyInventory) => {
   }
   return { status: "Unknown", color: "gray" };
 };
+
+export const ProviderSpecializations: string[] = [
+  "General Physician",
+  "Cardiologist",
+  "Dermatologist",
+  "Pediatrician",
+  "Orthopedic Surgeon",
+  "Neurologist",
+  "Ophthalmologist",
+  "Psychiatrist",
+  "Gastroenterologist",
+  "Urologist",
+];
+
+export const fetchAllAllergies = async () => {
+  try {
+    const response: AxiosResponse<AllergyEO[]> = await axios.get(
+      `${APIEndpoints.Admin}/allergies`
+    );
+    if (response?.data) {
+      return response.data;
+    }
+    return null;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+export const ExistingConditions = [
+  "Diabetes",
+  "Hypertension (High Blood Pressure)",
+  "Asthma",
+  "Heart Disease",
+  "Chronic Kidney Disease",
+  "Chronic Obstructive Pulmonary Disease (COPD)",
+  "Arthritis",
+  "Epilepsy",
+  "Cancer",
+];
+
+export const MedicationPeriod = [
+  { id: 1, label: "Daily" },
+  { id: 2, label: "Alternative" },
+  { id: 3, label: "Weekly" },
+  { id: 4, label: "Bi-weekly" },
+  { id: 5, label: "Monthly" },
+];
+
+export const formatDate = (dateString: string): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+export const StyledCollapseHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  cursor: "pointer",
+  padding: theme.spacing(2),
+  backgroundColor: colors.beige100,
+  borderRadius: theme.shape.borderRadius,
+  "&:hover": {
+    backgroundColor: colors.beige200,
+  },
+}));
+
+export const validatePrescriptionSubmitForm = (
+  medicationsPrescribed: MedicationPrescribed[],
+  newPrescription: Prescription
+): string | null => {
+  if (medicationsPrescribed.length === 0)
+    return "Please prescribe at least one medication.";
+
+  for (let i = 0; i < medicationsPrescribed.length; i++) {
+    const med = medicationsPrescribed[i];
+    // Medication fields
+    if (!med.medicationId)
+      return `Medication #${i + 1}: Medication is required.`;
+    if (med.medication?.oneTablet) {
+      if (!med.totalTabletToTake)
+        return `Medication #${i + 1}: Total Tablets to take is required.`;
+      if (!med.currentTabletsInHand)
+        return `Medication #${i + 1}: Tablets Providing is required.`;
+    } else {
+      if (!med.totalVolumeToTake)
+        return `Medication #${i + 1}: Total Volume to take is required.`;
+      if (!med.currentVolumeInhand)
+        return `Medication #${i + 1}: Volume Providing is required.`;
+    }
+    if (
+      med.refillsAllowed &&
+      (med.refillAlertThreshold === undefined ||
+        med.refillAlertThreshold === null)
+    ) {
+      return `Medication #${i + 1}: Refill Alert Threshold is required when refills are allowed.`;
+    }
+    if (!med.startDate) return `Medication #${i + 1}: Start Date is required.`;
+    if (!med.endDate) return `Medication #${i + 1}: End Date is required.`;
+    if (!med.schedule || med.schedule.length === 0)
+      return `Medication #${i + 1}: Add at least one schedule.`;
+    // Validate each schedule
+    for (let j = 0; j < med.schedule.length; j++) {
+      const s = med.schedule[j];
+      if (!s.period)
+        return `Medication #${i + 1}, Schedule #${j + 1}: Period is required.`;
+      if (!s.instruction)
+        return `Medication #${i + 1}, Schedule #${j + 1}: Instruction is required.`;
+      if (!s.scheduledTime)
+        return `Medication #${i + 1}, Schedule #${j + 1}: Time is required.`;
+      if (med.medication?.oneTablet) {
+        if (!s.doseTablets)
+          return `Medication #${i + 1}, Schedule #${j + 1}: Dose Tablets is required.`;
+      } else {
+        if (!s.doseVolume)
+          return `Medication #${i + 1}, Schedule #${j + 1}: Dose Volume is required.`;
+      }
+    }
+  }
+  if (!newPrescription.prescriptionForDescription)
+    return "Prescription For Description is required.";
+  return null;
+};
+

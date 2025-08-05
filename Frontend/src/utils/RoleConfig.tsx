@@ -2,16 +2,11 @@ import type { CommonRouteProps, RoleConfiguration } from "./Interfaces";
 
 // Components
 import PatientDashboard from "../components/Patient/PatientDashboard/PatientDashboard";
-import PatientReminders from "../components/Patient/PatientReminders/PatientReminders";
 import PatientRefillRequests from "../components/Patient/PatientRefillRequests/PatientRefillRequests";
 import PatientCalender from "../components/Patient/PatientCalender/PatientCalender";
 import PatientProfile from "../components/Patient/PatientProfile/PatientProfile";
-// import PatientNotification from "../components/Patient/PatientNotification/PatientNotification";
 import PatientNotificationPanel from "../components/Patient/PatientNotification/PatientNotificationPanel";
-import ProviderDashboard from "../components/Provider/ProviderDashboard/ProviderDashboard";
-import PrescribeMedication from "../components/Provider/PrescribeMedication/PrescribeMedication";
 import PharmacyDashboard from "../components/Pharmacy/PharmacyDashboard/PharmacyDashboard";
-// import PharmacyNotification from "../components/Pharmacy/PharmacyNotification/PharmacyNotification";
 import PharmacyNotificationPanel from "../components/Pharmacy/PharmacyNotification/PharmacyNotificationPanel";
 import ProcessRefill from "../components/Pharmacy/ProcessRefill/ProcessRefill";
 import InventoryUpdate from "../components/Pharmacy/InventoryUpdate/InventoryUpdate";
@@ -19,14 +14,16 @@ import InventoryUpdate from "../components/Pharmacy/InventoryUpdate/InventoryUpd
 // Icons
 import TodayIcon from "@mui/icons-material/Today";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
-import HistoryToggleOffIcon from "@mui/icons-material/HistoryToggleOff";
 import RepeatOneOnIcon from "@mui/icons-material/RepeatOneOn";
 import GridViewIcon from "@mui/icons-material/GridView";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import ProcessRefillForm from "../components/Pharmacy/ProcessRefill/ProcessRefillForm";
-import ProviderProfile from "../components/Provider/PatientProfile/PatientProfile";
+import ProviderProfile from "../components/Provider/ProviderProfile/ProviderProfile";
 import PharmacyProfile from "../components/Pharmacy/PharmacyProfile/PharmacyProfile";
+import NewPrescription from "../components/Provider/NewPrescription/NewPrescription";
+import PatientNotificationStack from "../components/Patient/PatientNotification/PatientNotificationStackProps";
+import PharmacyNotificationStack from "../components/Pharmacy/PharmacyNotification/PharmacyNotificationStack";
 
 const RoleConfig: RoleConfiguration = {
   Patient: {
@@ -35,11 +32,6 @@ const RoleConfig: RoleConfiguration = {
         segment: "dashboard",
         title: "Dashboard",
         icon: <GridViewIcon />,
-      },
-      {
-        segment: "reminders",
-        title: "Reminders",
-        icon: <HistoryToggleOffIcon />,
       },
       {
         segment: "refillRequests",
@@ -59,7 +51,6 @@ const RoleConfig: RoleConfiguration = {
     ],
     routes: {
       dashboard: (props: CommonRouteProps) => <PatientDashboard {...props} />,
-      reminders: (props: CommonRouteProps) => <PatientReminders {...props} />,
       refillRequests: (props: CommonRouteProps) => (
         <PatientRefillRequests {...props} />
       ),
@@ -68,7 +59,7 @@ const RoleConfig: RoleConfiguration = {
     },
     notifications: {
       panel: PatientNotificationPanel,
-      // dialog: PatientNotification,
+      dialog: PatientNotificationStack,
     },
   },
   Provider: {
@@ -85,10 +76,7 @@ const RoleConfig: RoleConfiguration = {
       },
     ],
     routes: {
-      dashboard: (props: CommonRouteProps) => <ProviderDashboard {...props} />,
-      prescribeMedication: (props: CommonRouteProps) => (
-        <PrescribeMedication {...props} />
-      ),
+      dashboard: (props: CommonRouteProps) => <NewPrescription {...props} />,
       profile: (props: CommonRouteProps) => <ProviderProfile {...props} />,
     },
   },
@@ -128,7 +116,7 @@ const RoleConfig: RoleConfiguration = {
     },
     notifications: {
       panel: PharmacyNotificationPanel,
-      // dialog: PharmacyNotification,
+      dialog: PharmacyNotificationStack,
     },
   },
 };

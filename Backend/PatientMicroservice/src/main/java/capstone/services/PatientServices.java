@@ -8,6 +8,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import capstone.entities.Constants.Address;
 import capstone.entities.Constants.Contact;
+import capstone.entities.Constants.SoundPreference;
 import capstone.entities.PatientEO;
 import capstone.entities.PatientEO.Prescription;
 import capstone.entities.PatientEO.Prescription.MedicationPrescribed;
@@ -50,7 +51,10 @@ public interface PatientServices {
 			ObjectId patientId, String prescriptionId, String medicationPrescribedId, String date, String scheduleId,
 			Dose doseStatusEO);
 
-	Mono<UpdateResult> updateMedicationDoseAndRecalculateTotals(ObjectId patientId, String prescriptionId,
-			String medicationPrescribedId, String date, String scheduleId, Dose doseStatusUpdate);
+	
+	public Mono<MedicationPrescribed> getMedicationPrescribedByPatientPrescriptionAndMedicationId(String patientId,
+			String prescriptionId, String medicationPrescribedId);
+
+	public Mono<UpdateResult> updateNotificationSoundsById(ObjectId patientId, SoundPreference soundPreference);
 
 }

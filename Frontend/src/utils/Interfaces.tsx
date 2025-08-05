@@ -26,6 +26,17 @@ export type NavigationItem =
 
 export type Navigation = NavigationItem[];
 
+export interface NotificationPanelProps {
+  visibility: string;
+  onClose: () => void;
+}
+
+export interface NotificationDialogProps {
+  notifications?: (PatientNotificationsRequest | RaiseRefillEO)[];
+  onRemove?: (id: string) => void;
+  navigateToRoute?: Router;
+}
+
 export interface RoleConfiguration {
   [role: string]: {
     navigation: Navigation;
@@ -34,14 +45,9 @@ export interface RoleConfiguration {
     };
     notifications?: {
       panel?: React.FC<NotificationPanelProps>;
-      dialog?: React.FC;
+      dialog?: React.FC<NotificationDialogProps>;
     };
   };
-}
-
-export interface NotificationPanelProps {
-  visibility: string;
-  onClose: () => void;
 }
 
 export interface LoggedInUser {
@@ -83,6 +89,14 @@ export interface Address {
   zipCode?: string;
 }
 
+export interface AllergyEO {
+  _id?: string;
+  name?: string;
+  type?: string;
+  description?: string;
+  sideEffects?: string[];
+}
+
 export interface Allergy {
   allergyId: string;
   name?: string;
@@ -91,15 +105,10 @@ export interface Allergy {
   sideEffects?: string[];
 }
 
-export interface ExistingCondition {
-  name: string;
-  severity?: string;
-}
-
 export interface EmergencyContact {
-  name: string;
-  relationship: string;
-  phone: string;
+  name?: string;
+  relationship?: string;
+  phone?: string;
 }
 
 export interface PrescribedBy {
@@ -125,21 +134,24 @@ export interface MedicationObject {
 }
 
 export interface Schedule {
-  scheduleId: string;
+  scheduleId?: string;
   period?: string;
   instruction?: string;
   scheduledTime?: string;
   doseTablets?: number;
-  doseQuantity?: string;
+  doseVolume?: number;
 }
 
 export interface MedicationPrescribed {
-  medicationPrescribedId: string;
+  medicationPrescribedId?: string;
   medicationId?: string;
-  medication?: MedicationObject;
+  medication?: Medication;
   totalTabletToTake?: number;
   totalTabletsTook?: number;
   currentTabletsInHand?: number;
+  totalVolumeToTake?: number;
+  totalVolumeTook?: number;
+  currentVolumeInhand?: number;
   refillAlertThreshold?: number;
   startDate?: string;
   endDate?: string;
@@ -149,31 +161,31 @@ export interface MedicationPrescribed {
 }
 
 export interface AssociatedPharmacy {
-  pharmacyId: string;
+  pharmacyId?: string;
   name?: string;
   address?: Address;
   contact?: Contact;
 }
 
 export interface Dose {
-  scheduleId: string;
+  scheduleId?: string;
   taken?: boolean;
   tabletsTaken?: number;
   actualTimeTaken?: string;
 }
 
 export interface Tracker {
-  date: string;
+  date?: string;
   doses?: Dose[];
 }
 
 export interface MedicationTracking {
-  medicationPrescribedId: string;
+  medicationPrescribedId?: string;
   tracker?: Tracker[];
 }
 
 export interface AssociatedProvider {
-  providerId: string;
+  providerId?: string;
   firstName?: string;
   lastName?: string;
   specialization?: string;
@@ -182,17 +194,16 @@ export interface AssociatedProvider {
 }
 
 export interface Prescription {
-  prescriptionId: string;
+  prescriptionId?: string;
   providerId?: string;
   prescribedBy?: AssociatedProvider;
+  prescriptionForDescription?: string;
   medicationsPrescribed?: MedicationPrescribed[];
-  associatedPharmacyId?: string;
-  associatedPharmacy?: AssociatedPharmacy;
   medicationTracking?: MedicationTracking[];
 }
 
 export interface Provider {
-  providerId: string;
+  providerId?: string;
   firstName?: string;
   lastName?: string;
   specialization?: string;
@@ -200,21 +211,13 @@ export interface Provider {
   address?: Address;
 }
 
-export interface Refill {
-  refillId?: string;
-  patientId?: string;
-  pharmacyId?: string;
-  medicationId?: string;
-  medication?: MedicationObject;
-  status?: string;
-  refillQuantityTablets?: number;
-  refillQuantityVolume?: number;
-  requestDate?: string;
-  lastRefillDate?: string;
+export interface SoundPreference {
+  doseReminderNotificationSound?: string;
+  refillReminderNotificationSound?: string;
 }
 
 export interface PatientEO {
-  _id: string;
+  _id?: string;
   contact?: Contact;
   firstName?: string;
   lastName?: string;
@@ -224,12 +227,13 @@ export interface PatientEO {
   dateOfBirth?: string;
   allergyIds?: string[];
   allergies?: Allergy[];
-  existingConditions?: ExistingCondition[];
+  existingConditions?: string[];
   emergencyContact?: EmergencyContact;
   prescriptions?: Prescription[];
   providerIds?: string[];
   providers?: AssociatedProvider[];
   refillMedications?: Refill[];
+  soundPreference?: SoundPreference;
   password?: string;
   createdAt?: string;
 }
@@ -246,13 +250,13 @@ export interface PharmacyInventory {
 }
 
 export interface PharmacyEO {
-  _id: string;
+  _id?: string;
   name?: string;
   address?: Address;
   contact?: Contact;
   password?: string;
   pharmacyInventory?: PharmacyInventory[];
-  refillMedications?: Refill[];
+  refillMedications?: RaiseRefillEO[];
   createdAt?: string;
 }
 
@@ -286,4 +290,75 @@ export interface InventoryItem extends PharmacyInventory {
   status?: string;
   statusColor?: string;
   medicationForm?: string;
+}
+
+export interface PatientNotificationsRequest {
+  _id?: string;
+  patientId?: string;
+  medicationName?: string;
+  prescriptionId?: string;
+  medicationPrescribedId?: string;
+  scheduleId?: string;
+  period?: string;
+  instruction?: string;
+  prescriptionDescription?: string;
+  scheduledTime?: string;
+  dateToTakeOn?: string;
+  doseTablets?: number;
+  doseVolume?: number;
+  message?: string;
+  status?: string;
+  medicationPrescribed?: MedicationPrescribed;
+  soundUrl?: string;
+}
+
+export interface Refill {
+  refillId?: string;
+  patientId?: string;
+  pharmacyId?: string;
+  medicationId?: string;
+  medication?: Medication;
+  prescriptionId?: string;
+  medicationPrescribedId?: string;
+  status?: string;
+  refillQuantityTablets?: number;
+  refillQuantityVolume?: number;
+  requestDate?: string;
+  lastRefillDate?: string;
+}
+
+export interface DoseStatusSetRequest {
+  prescriptionId?: string;
+  medicationPrescribedId?: string;
+  date?: string;
+  scheduleId?: string;
+  doseStatusUpdate?: Dose;
+}
+
+export interface RaiseRefillEO {
+  raiseRefillId?: string;
+  patientId?: string;
+  providerId?: string;
+  medicationId?: string;
+  medicationName?: string;
+  prescriptionId?: string;
+  prescriptionForDescription?: string;
+  medicationPrescribedId?: string;
+  doseTabletsRequired?: number;
+  doseVolumeRequired?: number;
+  message?: string;
+  status?: string;
+  medicationPrescribed?: MedicationPrescribed;
+  requestDate?: string;
+  pharmacyId?: string;
+  refillQuantityTablets?: number;
+  refillQuantityVolume?: number;
+  lastRefillDate?: string;
+  soundUrl?: string;
+}
+
+export interface AlarmRingtones {
+  _id?: string;
+  name?: string;
+  url?: string;
 }

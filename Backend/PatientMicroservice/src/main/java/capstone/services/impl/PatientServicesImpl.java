@@ -23,6 +23,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import capstone.entities.Constants.Address;
 import capstone.entities.Constants.Contact;
+import capstone.entities.Constants.SoundPreference;
 import capstone.entities.PatientEO;
 import capstone.entities.PatientEO.Prescription;
 import capstone.entities.PatientEO.Prescription.MedicationPrescribed;
@@ -117,6 +118,27 @@ public class PatientServicesImpl implements PatientServices {
 		return reactiveMongoTemplateRef.getCollection("patients").flatMap(collection -> Mono
 				.from(collection.updateOne(query.getQueryObject(), update.getUpdateObject(), options)));
 	}
+	
+	@Override
+	public Mono<UpdateResult> updateNotificationSoundsById(ObjectId patientId, SoundPreference soundPreference) {
+		Query query = new Query(Criteria.where("_id").is(patientId));
+
+		Update update = new Update();
+
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = new ObjectMapper().convertValue(soundPreference, Map.class);
+		map.forEach((key, value) -> {
+
+			if (value != null && !key.equals("_id")) {
+				update.set("soundPreference." + key, value);
+			}
+		});
+
+		UpdateOptions options = new UpdateOptions().upsert(false);
+
+		return reactiveMongoTemplateRef.getCollection("patients").flatMap(collection -> Mono
+				.from(collection.updateOne(query.getQueryObject(), update.getUpdateObject(), options)));
+	}
 
 	@Override
 	public Mono<UpdateResult> updatePrescriptionDetailsByPrescriptionId(ObjectId patientId, String prescriptionId,
@@ -190,10 +212,12 @@ public class PatientServicesImpl implements PatientServices {
 				}).doOnError(e -> System.err.println("Error getting MedicationTrackingEntryEO: " + e.getMessage()));
 	}
 
-	public Mono<MedicationPrescribed> getMedicationPrescribedByPatientPrescriptionAndMedicationId(ObjectId patientId,
+	@Override
+	public Mono<MedicationPrescribed> getMedicationPrescribedByPatientPrescriptionAndMedicationId(String patientId,
 			String prescriptionId, String medicationPrescribedId) {
+		ObjectId id = new ObjectId(patientId);
 		Aggregation aggregation = Aggregation
-				.newAggregation(Aggregation.match(Criteria.where("_id").is(patientId)),
+				.newAggregation(Aggregation.match(Criteria.where("_id").is(id)),
 						Aggregation.unwind("prescriptions"),
 						Aggregation.match(Criteria.where("prescriptions.prescriptionId").is(prescriptionId)),
 						Aggregation.unwind("prescriptions.medicationsPrescribed"),
@@ -278,134 +302,5 @@ public class PatientServicesImpl implements PatientServices {
 				}).doOnError(e -> System.err.println("Error adding MedicationTrackingEntryEO: " + e.getMessage()));
 
 	}
-	
-	@Override
-	public Mono<UpdateResult> updateMedicationDoseAndRecalculateTotals(
-            ObjectId patientId,
-            String prescriptionId,
-            String medicationPrescribedId,
-            String date,
-            String scheduleId,
-            Dose doseStatusUpdate) {
-
-        
-        Query doseUpdateQuery = new Query(Criteria.where("_id").is(patientId));
-        Update doseFieldUpdate = new Update();
-
-       
-        @SuppressWarnings("unchecked")
-        Map<String, Object> doseUpdatesMap = objectMapper.convertValue(doseStatusUpdate, Map.class);
-        doseUpdatesMap.forEach((key, value) -> {
-            if (value != null && !key.equals("scheduleId")) {
-                doseFieldUpdate.set("prescriptions.$[pres].medicationsPrescribed.$[med].medicationTracking.$[track].tracker.$[dateEntry].doses.$[doseEntry]." + key, value);
-            }
-        });
-
-        
-        List<Bson> doseArrayFilters = Arrays.asList(
-                Filters.eq("pres.prescriptionId", prescriptionId),
-                Filters.eq("med.medicationPrescribedId", medicationPrescribedId),
-                Filters.eq("dateEntry.date", date),
-                Filters.eq("doseEntry.scheduleId", scheduleId)
-        );
-        UpdateOptions doseUpdateOptions = new UpdateOptions().arrayFilters(doseArrayFilters);
-
-        
-        return reactiveMongoTemplateRef.getCollection("patients")
-                .flatMap(collection -> Mono.from(collection.updateOne(doseUpdateQuery.getQueryObject(), doseFieldUpdate.getUpdateObject(), doseUpdateOptions)))
-                .doOnSuccess(updateResult -> {
-                    if (updateResult.getModifiedCount() > 0) {
-                        System.out.println("Successfully updated dose for scheduleId: " + scheduleId
-                                + " on date: " + date + " for medication: " + medicationPrescribedId);
-                    } else {
-                        System.out.println("No matching dose found or value already the same for dose update. Patient: "
-                                + patientId + ", prescription: " + prescriptionId + ", medication: "
-                                + medicationPrescribedId + ", date: " + date + ", scheduleId: " + scheduleId);
-                    }
-                })
-                .doOnError(e -> System.err.println("Error updating dose: " + e.getMessage()))
-                .then(
-                    
-                    reactiveMongoTemplateRef.findOne(
-                        new Query(Criteria.where("_id").is(patientId)
-                            .and("prescriptions.prescriptionId").is(prescriptionId)),
-                        PatientEO.class
-                    )
-                )
-                .flatMap(patient -> {
-                    if (patient == null) {
-                        return Mono.error(new RuntimeException("Patient not found after dose update: " + patientId));
-                    }
-
-                    
-                    Prescription targetPrescription = patient.getPrescriptions().stream()
-                            .filter(p -> p.getPrescriptionId().equals(prescriptionId))
-                            .findFirst()
-                            .orElse(null);
-
-                    if (targetPrescription == null) {
-                        return Mono.error(new RuntimeException("Prescription not found: " + prescriptionId));
-                    }
-
-                    MedicationPrescribed targetMedication = targetPrescription.getMedicationsPrescribed().stream()
-                            .filter(mp -> mp.getMedicationPrescribedId().equals(medicationPrescribedId))
-                            .findFirst()
-                            .orElse(null);
-
-                    if (targetMedication == null) {
-                        return Mono.error(new RuntimeException("MedicationPrescribed not found: " + medicationPrescribedId));
-                    }
-
-                    
-                    int calculatedTotalTabletsTook = targetPrescription.getMedicationTracking().stream()
-                            .filter(mt -> mt.getMedicationPrescribedId().equals(medicationPrescribedId))
-                            .flatMap(mt -> mt.getTracker().stream())
-                            .flatMap(tracker -> tracker.getDoses().stream())
-                            .filter(Dose::getTaken) // Only count doses marked as taken
-                            .mapToInt(Dose::getTabletsTaken)
-                            .sum();
-
-                   
-                    int totalTabletsInPrescription = targetMedication.getTotalTabletToTake() != null ?
-                                                     targetMedication.getTotalTabletToTake() : 0;
-                    
-                    int calculatedCurrentTabletsInHand = totalTabletsInPrescription - calculatedTotalTabletsTook;
-
-                   
-                    boolean calculatedRefillRequired = false;
-                    if (targetMedication.getRefillAlertThreshold() != null && targetMedication.getRefillsAllowed() != null && targetMedication.getRefillsAllowed()) {
-                        if (calculatedCurrentTabletsInHand <= targetMedication.getRefillAlertThreshold()) {
-                            calculatedRefillRequired = true;
-                        }
-                    }
-
-                    
-                    Query medicationUpdateQuery = new Query(Criteria.where("_id").is(patientId));
-                    Update medicationFieldUpdate = new Update();
-
-                    medicationFieldUpdate.set("prescriptions.$[pres].medicationsPrescribed.$[med].totalTabletsTook", calculatedTotalTabletsTook);
-                    medicationFieldUpdate.set("prescriptions.$[pres].medicationsPrescribed.$[med].currentTabletsInHand", calculatedCurrentTabletsInHand);
-                    medicationFieldUpdate.set("prescriptions.$[pres].medicationsPrescribed.$[med].refillRequired", calculatedRefillRequired);
-
-                    List<Bson> medicationArrayFilters = Arrays.asList(
-                            Filters.eq("pres.prescriptionId", prescriptionId),
-                            Filters.eq("med.medicationPrescribedId", medicationPrescribedId)
-                    );
-                    UpdateOptions medicationUpdateOptions = new UpdateOptions().arrayFilters(medicationArrayFilters);
-
-                    
-                    return reactiveMongoTemplateRef.getCollection("patients")
-                            .flatMap(collection -> Mono.from(collection.updateOne(medicationUpdateQuery.getQueryObject(), medicationFieldUpdate.getUpdateObject(), medicationUpdateOptions)))
-                            .doOnSuccess(finalUpdateResult -> {
-                                if (finalUpdateResult.getModifiedCount() > 0) {
-                                    System.out.println("Successfully updated medication prescribed totals for medication: " + medicationPrescribedId);
-                                } else {
-                                    System.out.println("No matching medication prescribed found or values already the same for total updates. Medication: " + medicationPrescribedId);
-                                }
-                            })
-                            .doOnError(e -> System.err.println("Error updating medication prescribed totals: " + e.getMessage()));
-                })
-                .switchIfEmpty(Mono.error(new RuntimeException("Patient or Prescription not found for update operation.")));
-    }
 
 }

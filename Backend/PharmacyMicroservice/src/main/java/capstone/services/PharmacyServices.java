@@ -6,6 +6,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import capstone.entities.PharmacyEO;
 import capstone.entities.PharmacyEO.PharmacyInventory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface PharmacyServices {
@@ -18,9 +19,11 @@ public interface PharmacyServices {
 	
 	public Mono<Object> deletePharmacy(ObjectId pharmacyId);
 
-	Mono<UpdateResult> addInventoryToPharmacy(String pharmacyId, PharmacyInventory pharmacyInventory);
+	public Mono<UpdateResult> addInventoryToPharmacy(String pharmacyId, PharmacyInventory pharmacyInventory);
 
-	Mono<UpdateResult> updatePharmacyInventory(String pharmacyId, String inventoryId,
+	public Mono<UpdateResult> updatePharmacyInventory(String pharmacyId, String inventoryId,
 			PharmacyInventory pharmacyInventory);
+
+	public Flux<PharmacyEO> getAllPharmacyProvidingCertainMedication(String medicationId);
 	
 }

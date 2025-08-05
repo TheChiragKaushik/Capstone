@@ -12,7 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mongodb.client.result.UpdateResult;
+
+import capstone.entities.Constants.SoundPreference;
 import capstone.entities.PatientEO;
+import capstone.entities.PatientEO.Prescription.MedicationPrescribed;
 import capstone.entities.PatientEO.Prescription.MedicationTracking.Tracker.Dose;
 import capstone.services.PatientServices;
 import reactor.core.publisher.Mono;
@@ -60,6 +64,22 @@ public class PatientController {
 		ObjectId id = new ObjectId(patientId);
 		return patientServices.updateSingleMedicationTrackingDetailTrackerDoseByPatientPrescriptionAndMedicationId(
 				id, prescriptionId, medicationPrescribedId, date, scheduleId, doseStatusEO);
+	}
+	
+	@GetMapping("/medication-prescribed/{patientId}")
+	public Mono<MedicationPrescribed> getMedicationPrescribed(
+			@PathVariable String patientId,
+			@RequestParam(value="PrescriptionId", required= true) String prescriptionId,
+			@RequestParam(value="MedicationPrescribedId", required= true) String medicationPrescribedId){		
+		return patientServices.getMedicationPrescribedByPatientPrescriptionAndMedicationId(
+				patientId, prescriptionId, medicationPrescribedId);		
+	}
+	
+	
+	@PutMapping("/notification-sounds/{patientId}")
+	public Mono<UpdateResult> updateSoundPreference(@PathVariable String patientId, @RequestBody SoundPreference soundPreference){
+		ObjectId id = new ObjectId(patientId);
+		return patientServices.updateNotificationSoundsById(id, soundPreference);
 	}
 
 }

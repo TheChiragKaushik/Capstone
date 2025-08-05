@@ -1,6 +1,7 @@
 package capstone.services.impl;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -170,6 +172,15 @@ public class ProviderServicesImpl implements ProviderServices {
 	
 	
 	@Override
+	public Mono<ProviderEO> addPatientIdToProvider(String providerId, String patientId){
+		ObjectId id = new ObjectId(providerId);
+		Query query = new Query(Criteria.where("_id").is(id));
+		
+		Update update = new Update().push("patientIds", patientId);
+
+        return reactiveMongoTemplateRef.findAndModify(query, update, FindAndModifyOptions.options().returnNew(true), ProviderEO.class);	}
+	
+	@Override
 	public Mono<UpdateResult> updatePatientDetailsInProvider(ObjectId providerId, String patientId, PatientRef updatedPatientRef){
 		Query query = new Query(Criteria.where("_id").is(providerId));
 		
@@ -237,61 +248,95 @@ public class ProviderServicesImpl implements ProviderServices {
 
 	@Override
 	public Mono<Prescription> addPrescriptionToPatient(ObjectId patientId, Prescription prescription) {
-		prescription.getMedicationsPrescribed().forEach(medicationPrescribed -> {
-            if (medicationPrescribed.getSchedule() != null) {
-                MedicationTracking medicationTracking = new MedicationTracking();
-                medicationTracking.setMedicationPrescribedId(medicationPrescribed.getMedicationPrescribedId());
-               
-                List<Tracker> trackers = new ArrayList<>();
+    prescription.getMedicationsPrescribed().forEach(medicationPrescribed -> {
+        if (medicationPrescribed.getSchedule() != null && !medicationPrescribed.getSchedule().isEmpty()) {
+            MedicationTracking medicationTracking = new MedicationTracking();
+            medicationTracking.setMedicationPrescribedId(medicationPrescribed.getMedicationPrescribedId());
 
-                LocalDate startDate = LocalDate.parse(medicationPrescribed.getStartDate());
-                LocalDate endDate = LocalDate.parse(medicationPrescribed.getEndDate());
+            List<Tracker> trackers = new ArrayList<>();
 
-                for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            LocalDate startDate = LocalDate.parse(medicationPrescribed.getStartDate());
+            LocalDate endDate = LocalDate.parse(medicationPrescribed.getEndDate());
+
+            String periodId = medicationPrescribed.getSchedule().get(0).getPeriod();
+
+            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+                boolean shouldCreateTracker = false;
+                switch (periodId) {
+                    case "1": // Daily
+                        shouldCreateTracker = true;
+                        break;
+                    case "2": // Alternative
+                        long daysBetween = ChronoUnit.DAYS.between(startDate, date);
+                        if (daysBetween % 2 == 0) {
+                            shouldCreateTracker = true;
+                        }
+                        break;
+                    case "3": // Weekly
+                        if (date.getDayOfWeek().equals(startDate.getDayOfWeek())) {
+                            shouldCreateTracker = true;
+                        }
+                        break;
+                    case "4": // Bi-weekly
+                        long weeksBetween = ChronoUnit.WEEKS.between(startDate, date);
+                        if (weeksBetween % 2 == 0 && date.getDayOfWeek().equals(startDate.getDayOfWeek())) {
+                             shouldCreateTracker = true;
+                        }
+                        break;
+                    case "5": // Monthly
+                        if (date.getDayOfMonth() == startDate.getDayOfMonth()) {
+                            shouldCreateTracker = true;
+                        }
+                        break;
+                    default:
+                        shouldCreateTracker = true;
+                        break;
+                }
+
+                if (shouldCreateTracker) {
                     Tracker tracker = new Tracker();
                     tracker.setDate(date.toString());
 
                     List<Dose> doses = new ArrayList<>();
                     for (Schedule schedule : medicationPrescribed.getSchedule()) {
                         Dose dose = new Dose();
-                        dose.setScheduleId(schedule.getScheduleId()); 
-                        dose.setTaken(false); 
-                       
+                        dose.setScheduleId(schedule.getScheduleId());
+                        dose.setTaken(false);
                         doses.add(dose);
                     }
                     tracker.setDoses(doses);
                     trackers.add(tracker);
                 }
-                medicationTracking.setTracker(trackers);
-                
-                if (prescription.getMedicationTracking() == null) {
-                    prescription.setMedicationTracking(new ArrayList<>());
-                }
-                prescription.getMedicationTracking().add(medicationTracking);
             }
-        });
 
-        Query query = new Query(Criteria.where("_id").is(patientId));
-        Update update = new Update();
-        update.push("prescriptions", prescription);
+            medicationTracking.setTracker(trackers);
 
-        return reactiveMongoTemplateRef.updateFirst(query, update, PatientEO.class)
-                .flatMap(updateResult -> {
-                    if (updateResult.getModifiedCount() > 0) {
-                        System.out.println("Prescription added successfully to patient with ID: " + patientId.toHexString());
-                       
-                        return generateAndSaveNotificationsForPrescription(patientId, prescription)
-                                .thenReturn(prescription);
-                    } else {
-                        System.err.println("Failed to add prescription: Patient with ID " + patientId.toHexString() + " not found.");
-                        return Mono.error(new RuntimeException("Patient not found with ID: " + patientId.toHexString()));
-                    }
-                })
-                .doOnError(error -> {
-                    System.err.println("Error adding prescription to patient " + patientId.toHexString() + ": " + error.getMessage());
-                });
+            if (prescription.getMedicationTracking() == null) {
+                prescription.setMedicationTracking(new ArrayList<>());
+            }
+            prescription.getMedicationTracking().add(medicationTracking);
+        }
+    });
+
+    Query query = new Query(Criteria.where("_id").is(patientId));
+    Update update = new Update();
+    update.push("prescriptions", prescription);
+
+    return reactiveMongoTemplateRef.updateFirst(query, update, PatientEO.class)
+            .flatMap(updateResult -> {
+                if (updateResult.getModifiedCount() > 0) {
+                    System.out.println("Prescription added successfully to patient with ID: " + patientId.toHexString());
+                    return generateAndSaveNotificationsForPrescription(patientId, prescription)
+                            .thenReturn(prescription);
+                } else {
+                    System.err.println("Failed to add prescription: Patient with ID " + patientId.toHexString() + " not found.");
+                    return Mono.error(new RuntimeException("Patient not found with ID: " + patientId.toHexString()));
+                }
+            })
+            .doOnError(error -> {
+                System.err.println("Error adding prescription to patient " + patientId.toHexString() + ": " + error.getMessage());
+            });
 	}
-
 	public Mono<Void> generateAndSaveNotificationsForPrescription(ObjectId patientId, Prescription prescription) {
 	    String patientIdAsString = patientId.toHexString();
 

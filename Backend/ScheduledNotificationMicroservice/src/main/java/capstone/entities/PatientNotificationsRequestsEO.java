@@ -19,15 +19,20 @@ public class PatientNotificationsRequestsEO {
 	private ObjectId _id;
 	private String patientId;
 	private String medicationName;
+	private String prescriptionId;
+	private String medicationPrescribedId;
 	private String scheduleId;
 	private String period;
 	private String instruction;
+	private String prescriptionDescription;
 	private String scheduledTime;
 	private String dateToTakeOn;
 	private Integer doseTablets;
+	private Integer doseVolume;
 	private String message;
     private String status;
     private MedicationPrescribed medicationPrescribed;
+    private String soundUrl;
     	
 	@JsonProperty("_id")
 	public String get_id_asString() {

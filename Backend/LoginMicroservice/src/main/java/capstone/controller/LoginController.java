@@ -36,6 +36,23 @@ public class LoginController {
 			return Mono.error(new IllegalArgumentException("No valid ID provided"));
 		}
 	}
+	
+	@GetMapping("/email")
+	public Mono<?> getUserByEmail(
+			@RequestParam(value="PatientEmail", required = false) String patientEmail,
+			@RequestParam(value="ProviderEmail", required = false) String providerEmail,
+			@RequestParam(value="PharmacyEmail", required = false) String pharmacyEmail
+			){
+		if(patientEmail != null) {
+			return loginServicesRef.findPatientByEmail(patientEmail);
+		} else if (providerEmail != null) {
+			return loginServicesRef.findProviderByEmail(providerEmail);
+		} else if (pharmacyEmail != null) {
+			return loginServicesRef.findPharmacyByEmail(pharmacyEmail);
+		} else {
+			return Mono.error(new IllegalArgumentException("No valid Email provided"));
+		}
+	}
 
 	@PostMapping("/signup")
 	public Mono<?> signUpUser(@RequestBody SignUpRequest signUpRequest) {
