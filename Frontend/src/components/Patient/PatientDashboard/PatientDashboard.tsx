@@ -1,4 +1,4 @@
-import type { CommonRouteProps } from "../../../utils/Interfaces";
+import type { CommonRouteProps, PatientEO } from "../../../utils/Interfaces";
 import CommonHeading from "../../Common/CommonHeading";
 import PatientSelectNotificationSound from "./PatientSelectNotificationSound";
 import UpcomingMedicationTable from "./UpcomingMedicationTable";
@@ -15,9 +15,9 @@ const PatientDashboard = ({ user }: CommonRouteProps) => {
           }`}
           subHeading={`Here's your medication overview for today`}
         />
-        <UpcomingMedicationTable user={user} />
+        <UpcomingMedicationTable user={user as PatientEO} />
 
-        <PatientSelectNotificationSound user={user} />
+        <PatientSelectNotificationSound user={user as PatientEO} />
       </div>
     </>
   );

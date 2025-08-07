@@ -28,9 +28,21 @@ import type {
 } from "../../../utils/Interfaces";
 import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
+import { removePharmacyUpdateInventoryNotificationId } from "../../../redux/features/pharmacyUpdateInventoryNotificationIdSlice";
+
+type Filter = "All" | "In Stock" | "Low Stock" | "Out of Stock";
 
 const InventoryActions = ({ userId }: CommonRouteProps) => {
-  const [filter, setFilter] = useState("all");
+  const pharmacyInventoryUpdateRequestNotificationId = useAppSelector(
+    (state) => state.pharmacyUpdateInventoryNotification.value
+  );
+
+  const [pharmacyInventoryUpdateRequest, setPharmacyInventoryUpdateRequest] =
+    useState<string | null>(null);
+
+  const dispatch = useAppDispatch();
+  const [filter, setFilter] = useState<Filter>("All");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -81,10 +93,6 @@ const InventoryActions = ({ userId }: CommonRouteProps) => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [userId]);
-
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -96,7 +104,27 @@ const InventoryActions = ({ userId }: CommonRouteProps) => {
     setPage(0);
   };
 
+  useEffect(() => {
+    if (pharmacyInventoryUpdateRequestNotificationId !== null) {
+      setPharmacyInventoryUpdateRequest(
+        pharmacyInventoryUpdateRequestNotificationId
+      );
+      dispatch(removePharmacyUpdateInventoryNotificationId());
+    }
+  }, [
+    pharmacyInventoryUpdateRequestNotificationId,
+    dispatch,
+    removePharmacyUpdateInventoryNotificationId,
+  ]);
+
+  useEffect(() => {
+    fetchData();
+  }, [userId]);
+
   const filteredInventory = pharmacyInventory?.filter((item) => {
+    if (pharmacyInventoryUpdateRequest) {
+      return item?.inventoryId === pharmacyInventoryUpdateRequest;
+    }
     const matchesSearch =
       (item.medicationName &&
         item.medicationName.toLowerCase().includes(search.toLowerCase())) ||
@@ -104,8 +132,7 @@ const InventoryActions = ({ userId }: CommonRouteProps) => {
         item.medicationFor.toLowerCase().includes(search.toLowerCase()));
 
     const matchesFilter =
-      filter === "all" ||
-      (item.status && item.status.toLowerCase() === filter.toLowerCase());
+      filter === "All" || (item.status && item.status === filter);
 
     return matchesSearch && matchesFilter;
   });
@@ -113,68 +140,54 @@ const InventoryActions = ({ userId }: CommonRouteProps) => {
   return (
     <>
       <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-8">
-        <div className="flex flex-col md:flex-row justify-between gap-6 items-center">
-          <h3 className="text-lg font-medium text-gray-800">
-            Inventory Actions
-          </h3>
-          <div className="flex space-x-2">
-            <Button
-              onClick={() =>
-                setAddInventory((prev) => (prev === false ? true : false))
-              }
-              className="rounded-lg text-sm font-medium transition-colors duration-300"
+        {pharmacyInventoryUpdateRequest !== null ? null : (
+          <div className="flex flex-col md:flex-row items-center justify-center md:justify-between my-5">
+            <CommonTextfield
+              className="md:col-span-3"
+              variant="outlined"
               sx={{
-                backgroundColor: colors.brown600,
-                color: "white",
-                p: 1,
-                "&:hover": {
-                  backgroundColor: colors.brown700,
+                width: {
+                  md: "50%",
                 },
               }}
+              placeholder="Search medications..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start" sx={{ pl: 1.5 }}>
+                      <SearchIcon sx={{ color: "#9CA3AF", fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                  sx: { pl: "6px" },
+                },
+              }}
+            />
+            <CommonTextfield
+              sx={{
+                width: {
+                  md: "25%",
+                },
+              }}
+              label="Filter Results"
+              isSelect
+              value={filter}
+              onChange={(e) => {
+                const value = e.target.value;
+                setFilter(value as Filter);
+              }}
             >
-              Add Medication to Inventory
-              {addInventory ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-            </Button>
+              {["All", "In Stock", "Low Stock", "Out of Stock"].map(
+                (filter, index) => (
+                  <MenuItem key={filter + index} value={filter}>
+                    {filter}
+                  </MenuItem>
+                )
+              )}
+            </CommonTextfield>
           </div>
-        </div>
-
-        <Collapse in={addInventory}>
-          <AddInventoryForm userId={userId} />
-        </Collapse>
-      </div>
-      <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-          <CommonTextfield
-            className="md:col-span-3"
-            variant="outlined"
-            size="small"
-            placeholder="Search medications..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start" sx={{ pl: 1.5 }}>
-                    <SearchIcon sx={{ color: "#9CA3AF", fontSize: 20 }} />
-                  </InputAdornment>
-                ),
-                sx: { pl: "6px" },
-              },
-            }}
-          />
-          <CommonTextfield
-            label="Status"
-            value={filter}
-            size="small"
-            onChange={(e) => setFilter(e.target.value)}
-            isSelect
-          >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="in stock">In Stock</MenuItem>
-            <MenuItem value="low stock">Low Stock</MenuItem>
-            <MenuItem value="out of stock">Out of Stock</MenuItem>
-          </CommonTextfield>
-        </div>
+        )}
         <Divider
           sx={{
             marginY: 4,
@@ -200,6 +213,8 @@ const InventoryActions = ({ userId }: CommonRouteProps) => {
               <TableBody>
                 {filteredInventory && filteredInventory?.length > 0 ? (
                   filteredInventory
+                    ?.slice()
+                    .reverse()
                     ?.slice(
                       page * rowsPerPage,
                       page * rowsPerPage + rowsPerPage
@@ -312,7 +327,7 @@ const InventoryActions = ({ userId }: CommonRouteProps) => {
                   <TableRow>
                     <TableCell colSpan={8} align="center">
                       <div className="p-4 text-center text-gray-500">
-                        {search || filter !== "all"
+                        {search || filter !== "All"
                           ? "No matching medications found."
                           : "No medications in inventory. Add a medication to get started."}
                       </div>
@@ -322,17 +337,55 @@ const InventoryActions = ({ userId }: CommonRouteProps) => {
               </TableBody>
             </Table>
           </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25, 100]}
-            component="div"
-            count={filteredInventory?.length || 0}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+          {pharmacyInventoryUpdateRequest !== null ? null : (
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25, 100]}
+              component="div"
+              count={filteredInventory?.length || 0}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          )}
         </div>
       </div>
+      {pharmacyInventoryUpdateRequest !== null ? null : (
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-8">
+          <div className="flex flex-col md:flex-row justify-between gap-6 items-center">
+            <h3 className="text-lg font-medium text-gray-800">
+              Inventory Actions
+            </h3>
+            <div className="flex space-x-2">
+              <Button
+                onClick={() =>
+                  setAddInventory((prev) => (prev === false ? true : false))
+                }
+                className="rounded-lg text-sm font-medium transition-colors duration-300"
+                sx={{
+                  backgroundColor: colors.brown600,
+                  color: "white",
+                  p: 1,
+                  "&:hover": {
+                    backgroundColor: colors.brown700,
+                  },
+                }}
+              >
+                Add Medication to Inventory
+                {addInventory ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+              </Button>
+            </div>
+          </div>
+
+          <Collapse in={addInventory}>
+            <AddInventoryForm
+              userId={userId}
+              onUpdate={fetchData}
+              setAddInventoryClose={setAddInventory}
+            />
+          </Collapse>
+        </div>
+      )}
     </>
   );
 };

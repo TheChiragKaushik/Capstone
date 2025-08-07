@@ -4,11 +4,21 @@ import { useEffect, useState } from "react";
 import { APIEndpoints } from "../../../api/api";
 import type {
   MedicationObject,
+  PharmacyEO,
   PharmacyInventory,
 } from "../../../utils/Interfaces";
-import { getStatus } from "../../../utils/Constants";
+import { getStatus, isTodayDate } from "../../../utils/Constants";
+import type { Router } from "@toolpad/core/AppProvider";
 
-const DashboardActions = ({ userId }: { userId: string | undefined }) => {
+const DashboardActions = ({
+  userId,
+  navigateToRoute,
+}: {
+  userId: string | undefined;
+  navigateToRoute?: Router;
+}) => {
+  const [pendingRefills, setPendingRefills] = useState(0);
+  const [todayPendingRefills, setTodayPendingRefills] = useState(0);
   const [lowStockItems, setLowStockItems] = useState(0);
   const [outOfStockItems, setOutOfStockItems] = useState(0);
 
@@ -17,9 +27,18 @@ const DashboardActions = ({ userId }: { userId: string | undefined }) => {
       const pharmacyResponse = await axios.get(
         `${APIEndpoints.Pharmacy}/${userId}`
       );
-      const pharmacyData = pharmacyResponse.data;
+      const pharmacyData: PharmacyEO = pharmacyResponse.data;
 
       if (pharmacyData && pharmacyData.pharmacyInventory) {
+        const refillRequests = pharmacyData.refillMedications?.filter(
+          (req) => req.status === "Request Raised"
+        );
+        setTodayPendingRefills(
+          refillRequests?.filter((req) => isTodayDate(req.requestDate ?? ""))
+            .length ?? 0
+        );
+        setPendingRefills(refillRequests?.length ?? 0);
+
         const inventoryWithMedications = await Promise.all(
           pharmacyData.pharmacyInventory.map(
             async (item: PharmacyInventory) => {
@@ -67,10 +86,11 @@ const DashboardActions = ({ userId }: { userId: string | undefined }) => {
         <ActionCard
           icon="fas fa-prescription"
           heading={`Pending Refills`}
-          totalCount={`24`}
-          specificCount={`+8 today`}
+          totalCount={`${pendingRefills}`}
+          specificCount={`${todayPendingRefills > 0 ? `+${todayPendingRefills}` : `0`} today`}
           specificCountColor={`text-red-600`}
           buttonHeading={`Process refills`}
+          onClickFunction={() => navigateToRoute?.navigate("processRefill")}
         />
         <ActionCard
           icon="fas fa-pills"
@@ -79,6 +99,7 @@ const DashboardActions = ({ userId }: { userId: string | undefined }) => {
           specificCount={`${outOfStockItems} critical`}
           specificCountColor={`text-amber-600`}
           buttonHeading={`Update inventory`}
+          onClickFunction={() => navigateToRoute?.navigate("inventoryUpdate")}
         />
       </div>
     </>

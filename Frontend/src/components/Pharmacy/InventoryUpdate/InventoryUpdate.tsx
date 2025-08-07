@@ -82,7 +82,7 @@ const InventoryUpdate = ({ userId }: CommonRouteProps) => {
         <Stat
           bg="bg-yellow-100"
           icon="fas fa-exclamation-triangle text-yellow-600"
-          heading="Out of Stock"
+          heading="Low Stock"
           subHeading={lowStockItems.toString()}
         />
         <Stat

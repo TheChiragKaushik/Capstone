@@ -20,6 +20,7 @@ import capstone.entities.PatientEO.Prescription.MedicationTracking.Tracker.Dose;
 import capstone.services.PatientNotificationsService;
 import capstone.services.PatientPharmacyRefillService;
 import capstone.services.PatientRefillNotifications;
+import capstone.services.PharmacyPatientRequestRefillService;
 import reactor.core.publisher.Mono;
 
 
@@ -36,6 +37,9 @@ public class ScheduledNotificationController {
 	
 	@Autowired
 	private PatientPharmacyRefillService patientPharmacyRefillServiceRef;
+	
+	@Autowired
+	private PharmacyPatientRequestRefillService pharmacyPatientRequestRefillServiceRef;
 	
 	
 	@PutMapping("/prescriptions/{patientId}")
@@ -77,6 +81,11 @@ public class ScheduledNotificationController {
 	}
 	
 	
+	@PutMapping("/approve-request")
+    public Mono<UpdateResult> approveRefillRequest(@RequestBody RaiseRefillEO raiseRefillEO) {
+        return pharmacyPatientRequestRefillServiceRef.approveRefillRequest(raiseRefillEO)
+                .doOnError(e -> System.err.println("Error approving refill request: " + e.getMessage()));
+    }
 }
 
 

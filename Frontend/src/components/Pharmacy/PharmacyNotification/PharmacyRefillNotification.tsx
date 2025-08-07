@@ -1,48 +1,62 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  type MedicationPrescribed,
-  type RaiseRefillEO,
+import type { Router } from "@toolpad/core/AppProvider";
+import type React from "react";
+import type {
+  MedicationPrescribed,
+  RaiseRefillEO,
 } from "../../../utils/Interfaces";
-import { colors } from "../../../utils/Constants";
 import { Box, Button, Fade } from "@mui/material";
+import { colors } from "../../../utils/Constants";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
-import type { Router } from "@toolpad/core/AppProvider";
-import { useDispatch } from "react-redux";
-import { addPatientRaiseRefillNotificationId } from "../../../redux/features/patientRaiseRefillNotificationId";
-
-type RefillNotificationProps = {
-  notification?: RaiseRefillEO;
-  onClose?: () => void;
-  navigateToRoute?: Router;
-};
+import { useAppDispatch } from "../../../redux/hooks";
+import { addPharmacyProcessRefillNotificationId } from "../../../redux/features/pharmacyProcessRefillNotificationIdSlice";
 
 const DEFAULT_RING_ID = "6890a2df83c52777f2a65306";
 
-const RefillNotification: React.FC<RefillNotificationProps> = ({
+type PharmacyRefillNotificationProps = {
+  notification?: RaiseRefillEO;
+  onClose?: () => void;
+  navigateToRoute?: Router;
+  userId?: string;
+};
+
+const PharmacyRefillNotification: React.FC<PharmacyRefillNotificationProps> = ({
   notification,
   onClose,
   navigateToRoute,
+  userId,
 }) => {
-  const isApprovedNotification =
-    notification?.refillQuantityTablets !== null
-      ? notification?.refillQuantityTablets
-      : notification?.refillQuantityVolume;
-  const dispatch = useDispatch();
-
   const [medicationPrescribed, setMedicationPrescribed] =
     useState<MedicationPrescribed>({});
   const [sounds, setSounds] = useState<
     { _id: string; url: string; name?: string }[]
   >([]);
+  const [userSoundPreference, setUserSoundPrefrence] = useState<string>();
   const [defaultRingUrl, setDefaultRingUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const dispatch = useAppDispatch();
 
   const stopAudio = () => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current = null;
+    }
+  };
+
+  const fetchPharmacySoundPreference = async () => {
+    try {
+      const response = await axios.get(
+        `${APIEndpoints.UserProfile}?PharmacyId=${userId}`
+      );
+      if (response.data) {
+        setUserSoundPrefrence(
+          response.data.soundPreference.refillRequestReminderNotificationSound
+        );
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -64,13 +78,14 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
 
   useEffect(() => {
     fetchAllSounds();
+    fetchPharmacySoundPreference();
   }, []);
 
   useEffect(() => {
     if (!sounds.length) return;
 
     if (notification) {
-      const soundId = notification.soundUrl;
+      const soundId = userSoundPreference;
       let soundToPlay = defaultRingUrl;
 
       if (soundId) {
@@ -120,18 +135,14 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
     return () => clearTimeout(timeout);
   }, [onClose]);
 
-  const handleOrderRefill = () => {
-    dispatch(addPatientRaiseRefillNotificationId(notification?.raiseRefillId));
+  const handleRefillRequest = () => {
+    dispatch(
+      addPharmacyProcessRefillNotificationId(notification?.raiseRefillId)
+    );
     stopAudio();
-    navigateToRoute?.navigate("refillRequests");
+    navigateToRoute?.navigate("processRefill");
     if (onClose) onClose();
   };
-
-  const handleAcknowledge = () => {
-    stopAudio();
-    if (onClose) onClose();
-  };
-
   return (
     <>
       <Fade in={true}>
@@ -163,61 +174,40 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-1">
                     <h3 className="text-lg font-semibold text-brown-600">
-                      {isApprovedNotification
-                        ? `Refill Approved`
-                        : `Refill Reminder`}
+                      Refill Request Reminder
                     </h3>
                     <span className="bg-brown-100 text-brown-600 text-xs text-center px-2 py-1 rounded-full font-medium">
-                      {isApprovedNotification ? `Stock Updated` : `Low Stock`}
+                      Low Stock
                     </span>
                   </div>
                   <p className="text-brown-500 mb-2">
-                    {isApprovedNotification
-                      ? `${`Your ${notification?.medicationName} is back in stock`}`
-                      : `${`Your ${notification?.medicationName} is running low`}`}
+                    Patient's <strong> {notification?.medicationName} </strong>{" "}
+                    medication is running low
                   </p>
-                  {isApprovedNotification ? null : (
-                    <div className="text-sm text-brown-400 space-y-1">
-                      <p>
-                        📦 Only{" "}
-                        {medicationPrescribed?.currentTabletsInHand !== null
-                          ? medicationPrescribed?.currentTabletsInHand
-                          : medicationPrescribed?.currentVolumeInhand}{" "}
-                        doses remaining
-                      </p>
-                      <p>🏪 {notification?.message} </p>
-                    </div>
-                  )}
+                  <div className="text-sm text-brown-400 space-y-1">
+                    <p>
+                      📦 Only{" "}
+                      {medicationPrescribed?.currentTabletsInHand !== null
+                        ? medicationPrescribed?.currentTabletsInHand
+                        : medicationPrescribed?.currentVolumeInhand}{" "}
+                      doses remaining
+                    </p>
+                    <p>🏪 Please provide refill ASAP! </p>
+                  </div>
                   <div className="flex items-center space-x-3 mt-4">
-                    {isApprovedNotification ? (
-                      <Button
-                        onClick={handleAcknowledge}
-                        sx={{
-                          backgroundColor: colors.brown500,
-                          color: "white",
-                          "&:hover": {
-                            backgroundColor: colors.brown600,
-                          },
-                        }}
-                        className="rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brown-400"
-                      >
-                        Acknowledge
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleOrderRefill}
-                        sx={{
-                          backgroundColor: colors.brown500,
-                          color: "white",
-                          "&:hover": {
-                            backgroundColor: colors.brown600,
-                          },
-                        }}
-                        className="rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brown-400"
-                      >
-                        Order Refill
-                      </Button>
-                    )}
+                    <Button
+                      onClick={handleRefillRequest}
+                      sx={{
+                        backgroundColor: colors.brown500,
+                        color: "white",
+                        "&:hover": {
+                          backgroundColor: colors.brown600,
+                        },
+                      }}
+                      className="rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brown-400"
+                    >
+                      Refill Medication
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -229,4 +219,4 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
   );
 };
 
-export default RefillNotification;
+export default PharmacyRefillNotification;

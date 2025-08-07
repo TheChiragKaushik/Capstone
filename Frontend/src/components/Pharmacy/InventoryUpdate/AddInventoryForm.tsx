@@ -4,7 +4,12 @@ import {
   type PharmacyInventory,
   type PharmacyInventoryPayload,
 } from "../../../utils/Interfaces";
-import { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import CommonHeading from "../../Common/CommonHeading";
 import CommonTextfield from "../../Common/CommonTextfield";
 import {
@@ -20,7 +25,16 @@ import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
 import MedicationDetails from "./MedicationDetails";
 
-const AddInventoryForm = ({ userId: pharmacyId }: CommonRouteProps) => {
+interface AddInventoryFormProps extends CommonRouteProps {
+  onUpdate?: () => void;
+  setAddInventoryClose?: Dispatch<SetStateAction<boolean>>;
+}
+
+const AddInventoryForm: React.FC<AddInventoryFormProps> = ({
+  userId: pharmacyId,
+  onUpdate,
+  setAddInventoryClose,
+}) => {
   const [existingInventoryIds, setExistingInventoryIds] = useState<string[]>(
     []
   );
@@ -138,6 +152,10 @@ const AddInventoryForm = ({ userId: pharmacyId }: CommonRouteProps) => {
       setMedications([]);
       setInventoryItem({ medicationId: "", lastRestockDate: "" });
       setExistingInventoryIds((prev) => [...prev, payload.medicationId]);
+      if (onUpdate && setAddInventoryClose) {
+        setAddInventoryClose(false);
+        onUpdate();
+      }
     } catch (err: any) {
       console.error(err);
       if (axios.isAxiosError(err) && err.response) {
@@ -186,7 +204,7 @@ const AddInventoryForm = ({ userId: pharmacyId }: CommonRouteProps) => {
 
         <CommonTextfield
           variant="outlined"
-          isSelect
+          isSelect={medications.length > 0}
           size="small"
           label={
             medications.length > 0
@@ -300,7 +318,7 @@ const AddInventoryForm = ({ userId: pharmacyId }: CommonRouteProps) => {
           ) : (
             <>
               <i className="fas fa-plus mr-2"></i>
-              Update Medication
+              Add Medication
             </>
           )}
         </Button>

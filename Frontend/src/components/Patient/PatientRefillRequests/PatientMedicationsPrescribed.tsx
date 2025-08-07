@@ -1,6 +1,5 @@
 import type React from "react";
 import type { MedicationPrescribed } from "../../../utils/Interfaces";
-import RefillRequestCard from "./RefillRequestCard";
 
 type MedicationsPrescribedProps = {
   medicationPrescribed?: MedicationPrescribed[];
@@ -61,7 +60,7 @@ const PatientMedicationsPrescribed: React.FC<MedicationsPrescribedProps> = ({
           const remainingQuantity = (inHand || 0) - (took || 0);
           const needsRefill =
             remainingQuantity <= (medication?.refillAlertThreshold ?? 0);
-          const outOfStock = needsRefill;
+          // const outOfStock = needsRefill;
           const refillAllowed = medication.refillsAllowed;
 
           return (
@@ -123,12 +122,13 @@ const PatientMedicationsPrescribed: React.FC<MedicationsPrescribedProps> = ({
               </div>
               {refillAllowed ? (
                 needsRefill && (
-                  <RefillRequestCard
-                    outOfStock={outOfStock}
-                    medicationName={name}
-                    remaining={remainingQuantity > 0 ? remainingQuantity : 0}
-                    unit={unit}
-                  />
+                  // <RefillRequestCard
+                  //   outOfStock={outOfStock}
+                  //   medicationName={name}
+                  //   remaining={remainingQuantity > 0 ? remainingQuantity : 0}
+                  //   unit={unit}
+                  // />
+                  <p>Hello</p>
                 )
               ) : (
                 <p className="flex justify-center items-center my-4 bg-beige-200 p-4 rounded-full">

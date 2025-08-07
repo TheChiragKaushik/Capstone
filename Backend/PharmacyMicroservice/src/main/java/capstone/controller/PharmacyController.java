@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.mongodb.client.result.UpdateResult;
 
 import capstone.entities.PharmacyEO;
+import capstone.entities.Constants.PharmacySoundPreference;
 import capstone.entities.PharmacyEO.PharmacyInventory;
 import capstone.services.PharmacyServices;
 import reactor.core.publisher.Flux;
@@ -99,5 +100,13 @@ public class PharmacyController {
 	                Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"))
 	            );
 	}
+	
+	
+	@PutMapping("/notification-sounds/{pharmacyId}")
+	public Mono<UpdateResult> updateSoundPreference(@PathVariable String pharmacyId, @RequestBody PharmacySoundPreference soundPreference){
+		ObjectId id = new ObjectId(pharmacyId);
+		return pharmacyServicesRef.updateNotificationSoundsById(id, soundPreference);
+	}
+
 
 }

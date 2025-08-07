@@ -4,6 +4,7 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.client.result.UpdateResult;
 
+import capstone.entities.Constants.PharmacySoundPreference;
 import capstone.entities.PharmacyEO;
 import capstone.entities.PharmacyEO.PharmacyInventory;
 import reactor.core.publisher.Flux;
@@ -25,5 +26,7 @@ public interface PharmacyServices {
 			PharmacyInventory pharmacyInventory);
 
 	public Flux<PharmacyEO> getAllPharmacyProvidingCertainMedication(String medicationId);
+
+	public Mono<UpdateResult> updateNotificationSoundsById(ObjectId pharmacyId, PharmacySoundPreference soundPreference);
 	
 }

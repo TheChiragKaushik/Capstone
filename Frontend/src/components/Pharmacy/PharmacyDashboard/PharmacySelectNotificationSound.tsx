@@ -4,24 +4,27 @@ import CommonTextfield from "../../Common/CommonTextfield";
 import React, { useEffect, useRef, useState, type ChangeEvent } from "react";
 import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
-import type { AlarmRingtones, PatientEO } from "../../../utils/Interfaces";
+import type { AlarmRingtones, PharmacyEO } from "../../../utils/Interfaces";
 import CommonHeading from "../../Common/CommonHeading";
 
-type PatientSelectNotificationSoundProps = {
-  user?: PatientEO;
+type PharmacySelectNotificationSoundProps = {
+  user?: PharmacyEO;
 };
 
-const PatientSelectNotificationSound: React.FC<
-  PatientSelectNotificationSoundProps
+const PharmacySelectNotificationSound: React.FC<
+  PharmacySelectNotificationSoundProps
 > = ({ user }) => {
   const [activeField, setActiveField] = useState<
-    "doseReminder" | "refillReminder"
-  >("doseReminder");
+    "refillRequestReminderNotification" | "inventoryUpdateNotification"
+  >("refillRequestReminderNotification");
 
   const [allSounds, setAllSounds] = useState<AlarmRingtones[]>([]);
 
-  const [doseReminderSoundId, setDoseReminderSoundId] = useState<string>("");
-  const [refillReminderSoundId, setRefillReminderSoundId] =
+  const [
+    refillRequestReminderNotificationId,
+    setRefillRequestReminderNotificationId,
+  ] = useState<string>("");
+  const [inventoryUpdateNotificationId, setInventoryUpdateNotificationId] =
     useState<string>("");
 
   const [selectedSound, setSelectedSound] = useState<AlarmRingtones | null>(
@@ -57,20 +60,25 @@ const PatientSelectNotificationSound: React.FC<
 
   useEffect(() => {
     if (user?.soundPreference && allSounds.length) {
-      const doseSoundId =
+      const refillRequestSoundId =
         allSounds.find(
-          (s) => s._id === user.soundPreference?.doseReminderNotificationSound
+          (s) =>
+            s._id ===
+            user.soundPreference?.refillRequestReminderNotificationSound
         )?._id || "";
-      const refillSoundId =
+      const inventorySoundId =
         allSounds.find(
-          (s) => s._id === user.soundPreference?.refillReminderNotificationSound
+          (s) =>
+            s._id === user.soundPreference?.inventoryUpdateNotificationSound
         )?._id || "";
 
-      setDoseReminderSoundId(doseSoundId);
-      setRefillReminderSoundId(refillSoundId);
+      setRefillRequestReminderNotificationId(refillRequestSoundId);
+      setInventoryUpdateNotificationId(inventorySoundId);
 
       const initialId =
-        activeField === "doseReminder" ? doseSoundId : refillSoundId;
+        activeField === "refillRequestReminderNotification"
+          ? refillRequestSoundId
+          : inventorySoundId;
       const foundSound = allSounds.find((s) => s._id === initialId) || null;
       setSelectedSound(foundSound);
     }
@@ -78,12 +86,17 @@ const PatientSelectNotificationSound: React.FC<
 
   useEffect(() => {
     const selectedId =
-      activeField === "doseReminder"
-        ? doseReminderSoundId
-        : refillReminderSoundId;
+      activeField === "refillRequestReminderNotification"
+        ? refillRequestReminderNotificationId
+        : inventoryUpdateNotificationId;
     const sound = allSounds.find((s) => s._id === selectedId) || null;
     setSelectedSound(sound);
-  }, [activeField, doseReminderSoundId, refillReminderSoundId, allSounds]);
+  }, [
+    activeField,
+    refillRequestReminderNotificationId,
+    inventoryUpdateNotificationId,
+    allSounds,
+  ]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -106,10 +119,10 @@ const PatientSelectNotificationSound: React.FC<
   const handleSoundSelect = (e: ChangeEvent<{ value: unknown }>) => {
     const selectedId = e.target.value as string;
 
-    if (activeField === "doseReminder") {
-      setDoseReminderSoundId(selectedId);
+    if (activeField === "refillRequestReminderNotification") {
+      setRefillRequestReminderNotificationId(selectedId);
     } else {
-      setRefillReminderSoundId(selectedId);
+      setInventoryUpdateNotificationId(selectedId);
     }
 
     const sound = allSounds.find((sound) => sound._id === selectedId) || null;
@@ -126,8 +139,10 @@ const PatientSelectNotificationSound: React.FC<
 
   const handleSubmit = async () => {
     if (
-      (activeField === "doseReminder" && !doseReminderSoundId) ||
-      (activeField === "refillReminder" && !refillReminderSoundId)
+      (activeField === "refillRequestReminderNotification" &&
+        !refillRequestReminderNotificationId) ||
+      (activeField === "inventoryUpdateNotification" &&
+        !inventoryUpdateNotificationId)
     ) {
       setSnackbarSeverity("error");
       setSnackbarMessage("Please select a sound first!");
@@ -136,13 +151,14 @@ const PatientSelectNotificationSound: React.FC<
     }
 
     const payload = {
-      doseReminderNotificationSound: doseReminderSoundId,
-      refillReminderNotificationSound: refillReminderSoundId,
+      refillRequestReminderNotificationSound:
+        refillRequestReminderNotificationId,
+      inventoryUpdateNotificationSound: inventoryUpdateNotificationId,
     };
 
     try {
       const response = await axios.put(
-        `${APIEndpoints.Patient}/notification-sounds/${user?._id}`,
+        `${APIEndpoints.Pharmacy}/notification-sounds/${user?._id}`,
         payload
       );
       if (response.data) {
@@ -173,24 +189,24 @@ const PatientSelectNotificationSound: React.FC<
       <CommonHeading subHeading="Select Custom Sounds for notifications" />
       <div className="flex gap-6 items-center justify-center my-6">
         <Typography
-          onClick={() => setActiveField("doseReminder")}
+          onClick={() => setActiveField("refillRequestReminderNotification")}
           className={`cursor-pointer text-xs rounded-lg p-2 border border-brown-500 text-white ${
-            activeField === "doseReminder"
+            activeField === "refillRequestReminderNotification"
               ? "bg-brown-500 border-beige-400"
               : "bg-brown-300 border-brown-500 text-brown-500"
           }`}
         >
-          Dose Reminder Notification
+          Refill Request Notification
         </Typography>
         <Typography
-          onClick={() => setActiveField("refillReminder")}
+          onClick={() => setActiveField("inventoryUpdateNotification")}
           className={`cursor-pointer rounded-lg p-2 border border-brown-500 text-white ${
-            activeField === "refillReminder"
+            activeField === "inventoryUpdateNotification"
               ? "bg-brown-500 border-beige-400"
               : "bg-brown-300 border-brown-500 text-brown-500"
           }`}
         >
-          Refill Reminder Notification
+          Inventory Reminder Notification
         </Typography>
       </div>
 
@@ -198,15 +214,17 @@ const PatientSelectNotificationSound: React.FC<
         <CommonTextfield
           autoFocus={false}
           label={`Select ${
-            activeField === "doseReminder" ? "Dose" : "Refill"
+            activeField === "refillRequestReminderNotification"
+              ? "Dose"
+              : "Refill"
           } Notification`}
           isSelect
           onChange={handleSoundSelect}
           name={activeField}
           value={
-            activeField === "doseReminder"
-              ? doseReminderSoundId
-              : refillReminderSoundId
+            activeField === "refillRequestReminderNotification"
+              ? refillRequestReminderNotificationId
+              : inventoryUpdateNotificationId
           }
           sx={{
             width: {
@@ -333,4 +351,4 @@ const PatientSelectNotificationSound: React.FC<
   );
 };
 
-export default PatientSelectNotificationSound;
+export default PharmacySelectNotificationSound;

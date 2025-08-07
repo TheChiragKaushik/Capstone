@@ -174,13 +174,21 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
     index: number
   ) => {
     const { name, value } = e.target;
-
+    const parsedValue = [
+      "totalTabletToTake",
+      "currentTabletsInHand",
+      "totalVolumeToTake",
+      "currentVolumeInhand",
+      "refillAlertThreshold",
+    ].includes(name)
+      ? Math.max(0, Number(value))
+      : value;
     setMedicationsPrescribed((prev) =>
       prev.map((item, i) =>
         i === index
           ? {
               ...item,
-              [name]: value,
+              [name]: parsedValue,
             }
           : item
       )
@@ -193,8 +201,10 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
     scheduleIndex: number
   ) => {
     const { name, value } = e.target;
-    console.log(name === "doseTablets" ? value : null);
-
+    const parsedValue =
+      name === "doseTablets" || name === "doseVolume"
+        ? Math.max(0, Number(value))
+        : value;
     setMedicationsPrescribed((prev) =>
       prev.map((medication, i) =>
         i === medicationIndex
@@ -202,7 +212,7 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
               ...medication,
               schedule: medication.schedule?.map((scheduleItem, j) =>
                 j === scheduleIndex
-                  ? { ...scheduleItem, [name]: value }
+                  ? { ...scheduleItem, [name]: parsedValue }
                   : scheduleItem
               ),
             }
@@ -279,6 +289,7 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2">
           <CommonTextfield
             variant="outlined"
+            required
             isSelect
             size="small"
             label="Medication Type"
@@ -300,6 +311,7 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-beige-100 p-4 rounded-lg my-6">
                     <CommonTextfield
                       variant="outlined"
+                      required
                       isSelect
                       size="small"
                       label={
@@ -352,22 +364,34 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <CommonTextfield
                             label="Total Tablets to take"
+                            required
                             size="small"
                             name="totalTabletToTake"
                             value={medication.totalTabletToTake || ""}
                             onChange={(e) =>
                               handleMedicationDetailChange(e, index)
                             }
+                            slotProps={{
+                              htmlInput: {
+                                min: 0,
+                              },
+                            }}
                             type="number"
                           />
                           <CommonTextfield
                             label="Tablets Providing"
+                            required
                             name="currentTabletsInHand"
                             size="small"
                             value={medication.currentTabletsInHand || ""}
                             onChange={(e) =>
                               handleMedicationDetailChange(e, index)
                             }
+                            slotProps={{
+                              htmlInput: {
+                                min: 0,
+                              },
+                            }}
                             type="number"
                           />
                         </div>
@@ -375,22 +399,34 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <CommonTextfield
                             label="Total Volume to take"
+                            required
                             name="totalVolumeToTake"
                             size="small"
                             value={medication.totalVolumeToTake || ""}
                             onChange={(e) =>
                               handleMedicationDetailChange(e, index)
                             }
+                            slotProps={{
+                              htmlInput: {
+                                min: 0,
+                              },
+                            }}
                             type="number"
                           />
                           <CommonTextfield
                             label="Volume Providing"
+                            required
                             name="currentVolumeInhand"
                             size="small"
                             value={medication.currentVolumeInhand || ""}
                             onChange={(e) =>
                               handleMedicationDetailChange(e, index)
                             }
+                            slotProps={{
+                              htmlInput: {
+                                min: 0,
+                              },
+                            }}
                             type="number"
                           />
                         </div>
@@ -433,11 +469,17 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                           onChange={(e) =>
                             handleMedicationDetailChange(e, index)
                           }
+                          slotProps={{
+                            htmlInput: {
+                              min: 0,
+                            },
+                          }}
                           type="number"
                           disabled={!medication.refillsAllowed}
                         />
                         <CommonTextfield
                           label="Start Date"
+                          required
                           name="startDate"
                           type="date"
                           size="small"
@@ -450,6 +492,7 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                         <CommonTextfield
                           label="End Date"
                           name="endDate"
+                          required
                           size="small"
                           type="date"
                           value={medication.endDate || ""}
@@ -471,6 +514,7 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                                 >
                                   <CommonTextfield
                                     variant="outlined"
+                                    required
                                     isSelect
                                     size="small"
                                     label="Period"
@@ -516,6 +560,7 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
 
                                   <CommonTextfield
                                     label="Instructions"
+                                    required
                                     name="instruction"
                                     size="small"
                                     value={scheduleItem.instruction || ""}
@@ -529,6 +574,7 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                                   />
                                   <CommonTextfield
                                     label="Time"
+                                    required
                                     name="scheduledTime"
                                     size="small"
                                     value={scheduleItem.scheduledTime || ""}
@@ -556,6 +602,11 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                                             scheduleIndex
                                           )
                                         }
+                                        slotProps={{
+                                          htmlInput: {
+                                            min: 0,
+                                          },
+                                        }}
                                         type="number"
                                       />
                                     </>
@@ -563,6 +614,7 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                                     <>
                                       <CommonTextfield
                                         label="Dose Volume"
+                                        required
                                         name="doseVolume"
                                         size="small"
                                         value={scheduleItem.doseVolume || ""}
@@ -573,6 +625,11 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                                             scheduleIndex
                                           )
                                         }
+                                        slotProps={{
+                                          htmlInput: {
+                                            min: 0,
+                                          },
+                                        }}
                                         type="number"
                                       />
                                     </>
@@ -628,6 +685,7 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
 
           <CommonTextfield
             label="Prescription For Description"
+            required
             name="prescriptionForDescription"
             type="text"
             disabled={medicationsPrescribed.length === 0}
@@ -658,13 +716,14 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
             type="submit"
             onClick={handleSubmit}
             sx={{
-              backgroundColor: "green",
-              color: "white",
+              backgroundColor: "#D8F5DF",
+              color: "green",
               "&:hover": {
-                backgroundColor: "darkgreen",
+                border: 1,
+                borderColor: "green",
               },
             }}
-            className="ml-2 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-300"
+            className="ml-2 rounded-lg text-sm font-medium transition-colors duration-300"
           >
             Submit Prescription
           </Button>

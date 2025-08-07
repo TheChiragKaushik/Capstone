@@ -18,7 +18,6 @@ import RepeatOneOnIcon from "@mui/icons-material/RepeatOneOn";
 import GridViewIcon from "@mui/icons-material/GridView";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
-import ProcessRefillForm from "../components/Pharmacy/ProcessRefill/ProcessRefillForm";
 import ProviderProfile from "../components/Provider/ProviderProfile/ProviderProfile";
 import PharmacyProfile from "../components/Pharmacy/PharmacyProfile/PharmacyProfile";
 import NewPrescription from "../components/Provider/NewPrescription/NewPrescription";
@@ -108,9 +107,6 @@ const RoleConfig: RoleConfiguration = {
       processRefill: (props: CommonRouteProps) => <ProcessRefill {...props} />,
       inventoryUpdate: (props: CommonRouteProps) => (
         <InventoryUpdate {...props} />
-      ),
-      processRefillForm: (props: CommonRouteProps) => (
-        <ProcessRefillForm {...props} />
       ),
       profile: (props: CommonRouteProps) => <PharmacyProfile {...props} />,
     },

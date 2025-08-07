@@ -1,15 +1,29 @@
 import { Box, Slide } from "@mui/material";
-import type { RaiseRefillEO } from "../../../utils/Interfaces";
-import PatientNotification from "../../Patient/PatientNotification/PatientNotification";
+import type {
+  InventoryRestockReminderNotification,
+  NotificationDialogProps,
+  RaiseRefillEO,
+} from "../../../utils/Interfaces";
+import PharmacyRefillNotification from "./PharmacyRefillNotification";
+import PharmacyInventoryNotification from "./PharmacyInventoryNotification";
 
-type PharmacyNotificationStackProps = {
-  notifications?: RaiseRefillEO[];
-  onRemove?: (id: string) => void;
-};
+function isRefill(x: any): x is RaiseRefillEO {
+  return x && typeof x.raiseRefillId === "string" && "message" in x;
+}
 
-const PharmacyNotificationStack: React.FC<PharmacyNotificationStackProps> = ({
+function isInventory(x: any): x is InventoryRestockReminderNotification {
+  return (
+    x &&
+    typeof x.inventoryRestockReminderNotificationId === "string" &&
+    "message" in x
+  );
+}
+
+const PharmacyNotificationStack: React.FC<NotificationDialogProps> = ({
   notifications = [],
   onRemove = () => {},
+  navigateToRoute,
+  userId
 }) => (
   <Box
     sx={{
@@ -23,22 +37,48 @@ const PharmacyNotificationStack: React.FC<PharmacyNotificationStackProps> = ({
       alignItems: "flex-end",
     }}
   >
-    {notifications.map((notification) => (
-      <Slide
-        key={notification.raiseRefillId}
-        direction="up"
-        in={true}
-        mountOnEnter
-        unmountOnExit
-      >
-        <Box>
-          <PatientNotification
-            notification={notification}
-            onClose={() => onRemove(notification?.raiseRefillId ?? "")}
-          />
-        </Box>
-      </Slide>
-    ))}
+    {notifications.map((notification) => {
+      if (isRefill(notification)) {
+        return (
+          <Slide
+            key={notification.raiseRefillId}
+            direction="up"
+            in={true}
+            mountOnEnter
+            unmountOnExit
+          >
+            <Box>
+              <PharmacyRefillNotification
+                notification={notification}
+                onClose={() => onRemove(notification.raiseRefillId ?? "")}
+                navigateToRoute={navigateToRoute}
+                userId={userId}
+              />
+            </Box>
+          </Slide>
+        );
+      }
+      if (isInventory(notification)) {
+        return (
+          <Slide
+            key={notification.inventoryRestockReminderNotificationId}
+            direction="up"
+            in={true}
+            mountOnEnter
+            unmountOnExit
+          >
+            <Box>
+              <PharmacyInventoryNotification
+                notification={notification}
+                onClose={() => onRemove(notification.inventoryRestockReminderNotificationId ?? "")}
+                navigateToRoute={navigateToRoute}
+                userId={userId}
+              />
+            </Box>
+          </Slide>
+        );
+      }
+    })}
   </Box>
 );
 

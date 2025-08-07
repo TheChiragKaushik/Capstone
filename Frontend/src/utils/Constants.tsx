@@ -1,12 +1,47 @@
 import { createTheme, styled } from "@mui/material/styles";
 import type {
   AllergyEO,
+  InventoryRestockReminderNotification,
   MedicationPrescribed,
+  PatientNotificationsRequest,
   PharmacyInventory,
   Prescription,
+  RaiseRefillEO,
 } from "./Interfaces";
 import axios, { type AxiosResponse } from "axios";
 import { APIEndpoints } from "../api/api";
+
+export const showOsNotification = (
+  message:
+    | PatientNotificationsRequest
+    | RaiseRefillEO
+    | InventoryRestockReminderNotification
+) => {
+  if (Notification.permission === "granted") {
+    const title = "New Notification";
+    let body = "";
+
+    if ("inventoryRestockReminderNotificationId" in message) {
+      body = message.medicationName
+        ? `Inventory restock reminder for: ${message.medicationName}`
+        : message.message || "Inventory restock reminder";
+    } else if ("raiseRefillId" in message) {
+      body = `Refill request received with ID: ${message.raiseRefillId}`;
+    } else {
+      body = message?.message || "You have a new notification";
+    }
+
+    const notification = new Notification(title, {
+      body,
+      icon: "/path/to/icon.png",
+    });
+
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+    };
+  }
+};
 
 export const AppTheme = createTheme({
   palette: {
@@ -83,6 +118,7 @@ export const stringAvatar = (name: string) => {
   const parts = name.trim().split(" ");
   const first = parts[0]?.[0] ?? "";
   const second = parts[1]?.[0] ?? "";
+
   return {
     sx: {
       bgcolor: colors.brown500,
@@ -298,3 +334,33 @@ export const validatePrescriptionSubmitForm = (
   return null;
 };
 
+export const formattedDateTime = (isoDateString: string): string => {
+  return new Date(isoDateString).toLocaleString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+};
+
+export const getRandomLightColor = () => {
+  const r = Math.floor(Math.random() * 76) + 180;
+  const g = Math.floor(Math.random() * 76) + 180;
+  const b = Math.floor(Math.random() * 76) + 180;
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`.toUpperCase();
+};
+
+export const isTodayDate = (dateString: string) => {
+  const date = new Date(dateString);
+
+  const today = new Date();
+
+  return (
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate()
+  );
+};

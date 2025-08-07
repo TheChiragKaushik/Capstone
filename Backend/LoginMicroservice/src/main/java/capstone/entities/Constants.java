@@ -171,4 +171,11 @@ public class Constants {
 		private String refillReminderNotificationSound;
 		
 	}
+	
+	@Data 
+	public static class PharmacySoundPreference {
+		private String refillRequestReminderNotificationSound;
+
+		private String inventoryUpdateNotificationSound;
+	}
 }

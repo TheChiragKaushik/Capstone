@@ -12,6 +12,7 @@ public class InventoryRestockReminderNotificationsEO {
 	private String medicationName;
 	private String medicationId;
 	private String inventoryId;
+	private String message;
 	
 	public InventoryRestockReminderNotificationsEO() {
 		this.inventoryRestockReminderNotificationId = UUID.randomUUID().toString();

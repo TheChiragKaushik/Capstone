@@ -12,75 +12,106 @@ import {
   InputAdornment,
   TablePagination,
   Collapse,
+  MenuItem,
 } from "@mui/material";
-import { colors } from "../../../utils/Constants";
-import { useState } from "react";
+import {
+  colors,
+  formattedDateTime,
+  stringAvatar,
+} from "../../../utils/Constants";
+import React, { useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import ProcessRefillForm from "./ProcessRefillForm";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import CommonTextfield from "../../Common/CommonTextfield";
+import type { RaiseRefillEO } from "../../../utils/Interfaces";
+import axios from "axios";
+import { APIEndpoints } from "../../../api/api";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
+import { removePharmacyProcessRefillNotificationId } from "../../../redux/features/pharmacyProcessRefillNotificationIdSlice";
 
-const rows = [
-  {
-    initials: "RJ",
-    name: "Robert Johnson",
-    dob: "11/04/1962",
-    medication: "Metoprolol",
-    medDetail: "Beta Blocker",
-    dosage: "50mg",
-    quantity: "30 tablets",
-    requested: "Today, 9:58 AM",
-    status: "Pending",
-    statusColor: "yellow",
-    id: 1,
-  },
-  {
-    initials: "SW",
-    name: "Sarah Williams",
-    dob: "09/28/1990",
-    medication: "Levothyroxine",
-    medDetail: "Thyroid Hormone",
-    dosage: "75mcg",
-    quantity: "90 tablets",
-    requested: "Yesterday, 4:32 PM",
-    status: "Urgent",
-    statusColor: "red",
-    id: 2,
-  },
-  {
-    initials: "JD",
-    name: "John Doe",
-    dob: "06/15/1985",
-    medication: "Lisinopril",
-    medDetail: "ACE Inhibitor",
-    dosage: "10mg",
-    quantity: "30 tablets",
-    requested: "Yesterday, 2:15 PM",
-    status: "Pending",
-    statusColor: "yellow",
-    id: 3,
-  },
-  {
-    initials: "MG",
-    name: "Maria Garcia",
-    dob: "03/22/1978",
-    medication: "Atorvastatin",
-    medDetail: "Statin",
-    dosage: "20mg",
-    quantity: "30 tablets",
-    requested: "Yesterday, 11:45 AM",
-    status: "Pending",
-    statusColor: "yellow",
-    id: 4,
-  },
-];
+const statusColor = {
+  Wanted: "bg-red-100 text-red-800",
+  "Request Raised": "bg-blue-100 text-blue-800",
+  Approved: "bg-green-100 text-green-800",
+};
 
-const RefillQueue = () => {
+interface RefillMedications extends RaiseRefillEO {
+  patientName: string;
+  patientDOB: string;
+}
+type Filter = "All" | "Request Raised" | "Approved";
+
+type RefillQueueProps = {
+  pharmacyId?: string;
+};
+
+const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
+  const dispatch = useAppDispatch();
+  const pharmacyRequestRefillNotification = useAppSelector(
+    (state) => state.pharmacyProcessRefillNotification.value
+  );
+  const [
+    pharmacyProcessRefillNotification,
+    setPharmacyProcessRefillNotification,
+  ] = useState<string | null>(null);
+
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [filter, setFilter] = useState<Filter>("Request Raised");
+  const [expandedId, setExpandedId] = useState<string | number | null>(null);
+
+  const [refillMedications, setRefillMedications] = useState<
+    RefillMedications[]
+  >([]);
+
+  const fetchAllPatientDetails = async () => {
+    if (!refillMedications.length) return;
+
+    const ids = refillMedications.map((r) => r.patientId).filter(Boolean);
+    const uniqueIds = Array.from(new Set(ids));
+
+    const newPatientDetailsMap: Record<string, { name: string; dob: string }> =
+      {};
+
+    await Promise.all(
+      uniqueIds.map(async (patientId) => {
+        try {
+          const response = await axios.get(
+            `${APIEndpoints.UserProfile}?PatientId=${patientId}`
+          );
+          if (response.data) {
+            newPatientDetailsMap[patientId ?? " "] = {
+              name: response.data.firstName + " " + response.data.lastName,
+              dob: response.data.dateOfBirth,
+            };
+          }
+        } catch (error) {
+          console.error(
+            "Failed to fetch patient details for:",
+            patientId,
+            error
+          );
+        }
+      })
+    );
+
+    setRefillMedications((prevRefills) => {
+      return prevRefills.map((refill) => {
+        const patientInfo = newPatientDetailsMap[refill.patientId ?? " "];
+        if (patientInfo) {
+          return {
+            ...refill,
+            patientName: patientInfo.name,
+            patientDOB: patientInfo.dob,
+          };
+        }
+        return refill;
+      });
+    });
+  };
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -93,10 +124,57 @@ const RefillQueue = () => {
     setPage(0);
   };
 
-  const [expandedId, setExpandedId] = useState<string | number | null>(null);
-  const handleAccordionToggle = (id: string | number) => {
+  const handleAccordionToggle = (id: string | null) => {
     setExpandedId(expandedId === id ? null : id);
   };
+
+  const fetchPharmacyRefillMedications = async () => {
+    try {
+      const refillMedications = await axios.get(
+        `${APIEndpoints.UserProfile}?PharmacyId=${pharmacyId}`
+      );
+      if (refillMedications.data) {
+        setRefillMedications(refillMedications.data.refillMedications);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (pharmacyRequestRefillNotification !== null) {
+      setPharmacyProcessRefillNotification(pharmacyRequestRefillNotification);
+      dispatch(removePharmacyProcessRefillNotificationId());
+    }
+  }, [
+    pharmacyRequestRefillNotification,
+    dispatch,
+    removePharmacyProcessRefillNotificationId,
+  ]);
+
+  useEffect(() => {
+    fetchPharmacyRefillMedications();
+  }, []);
+
+  useEffect(() => {
+    fetchAllPatientDetails();
+  }, [refillMedications]);
+
+  const filteredInventory = refillMedications?.filter((item) => {
+    if (pharmacyProcessRefillNotification !== null) {
+      return item.raiseRefillId === pharmacyProcessRefillNotification;
+    }
+    const matchesSearch =
+      (item.patientName &&
+        item.patientName.toLowerCase().includes(search.toLowerCase())) ||
+      (item.medicationName &&
+        item.medicationName.toLowerCase().includes(search.toLowerCase()));
+
+    const matchesFilter =
+      filter === "All" || (item.status && item.status === filter);
+
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <>
@@ -105,171 +183,218 @@ const RefillQueue = () => {
           <Typography variant="h6" fontWeight={500} color="#1F2937">
             Refill Queue
           </Typography>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-            <CommonTextfield
-              variant="outlined"
-              size="small"
-              placeholder="Search refills requests"
-              className="md:col-span-2"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ pl: 1.5 }}>
-                      <SearchIcon sx={{ color: "#9CA3AF", fontSize: 20 }} />
-                    </InputAdornment>
-                  ),
-                  sx: { pl: "6px" },
-                },
-              }}
-            />
-          </div>
+          {pharmacyProcessRefillNotification !== null ? null : (
+            <div className="flex flex-col md:flex-row items-center justify-center md:justify-between my-5">
+              <CommonTextfield
+                variant="outlined"
+                sx={{
+                  width: {
+                    md: "50%",
+                  },
+                }}
+                placeholder="Search refills requests"
+                className="md:col-span-2"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ pl: 1.5 }}>
+                        <SearchIcon sx={{ color: "#9CA3AF", fontSize: 20 }} />
+                      </InputAdornment>
+                    ),
+                    sx: { pl: "6px" },
+                  },
+                }}
+              />
+              <CommonTextfield
+                sx={{
+                  width: {
+                    md: "25%",
+                  },
+                }}
+                label="Filter Results"
+                isSelect
+                value={filter}
+                onChange={(e) => {
+                  const value = e.target.value as Filter;
+                  setFilter(value);
+                }}
+                className="col-start-4"
+              >
+                {["All", "Request Raised", "Approved"].map((filter, index) => (
+                  <MenuItem key={filter + index} value={filter}>
+                    {filter}
+                  </MenuItem>
+                ))}
+              </CommonTextfield>
+            </div>
+          )}
         </div>
 
         <div className="overflow-x-auto">
           <TableContainer>
             <Table>
-              <TableHead sx={{ backgroundColor: "#F9FAFB" }}>
+              <TableHead sx={{ backgroundColor: colors.beige50 }}>
                 <TableRow>
-                  <TableCell>Patient</TableCell>
-                  <TableCell>Medication</TableCell>
-                  <TableCell>Dosage</TableCell>
-                  <TableCell>Quantity</TableCell>
-                  <TableCell>Requested</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell align="center">Patient</TableCell>
+                  <TableCell align="center">Medication Name</TableCell>
+                  <TableCell align="center">Quantity Required</TableCell>
+                  <TableCell align="center">Requested Date</TableCell>
+                  <TableCell align="center">Status</TableCell>
+                  <TableCell align="center">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
-                    <>
-                      <TableRow
-                        key={row.id}
-                        sx={{
-                          "&:hover": { backgroundColor: "#F9FAFB" },
-                        }}
-                      >
-                        <TableCell>
-                          <Box display="flex" alignItems="center">
-                            <Avatar
-                              sx={{
-                                bgcolor: "#FFF6E5",
-                                color: "#8B5E3C",
-                                width: 32,
-                                height: 32,
-                                fontWeight: "bold",
-                                fontSize: 16,
-                              }}
-                            >
-                              {row.initials}
-                            </Avatar>
-                            <Box ml={2}>
-                              <Typography variant="body2" fontWeight={500}>
-                                {row.name}
+                {filteredInventory.length > 0 ? (
+                  filteredInventory
+                    ?.slice()
+                    .reverse()
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((refillMedication) => {
+                      return (
+                        <>
+                          <TableRow
+                            key={refillMedication?.raiseRefillId}
+                            sx={{
+                              "&:hover": { backgroundColor: "#F9FAFB" },
+                            }}
+                          >
+                            <TableCell align="center">
+                              <Box display="flex" alignItems="center">
+                                <Avatar
+                                  {...stringAvatar(
+                                    refillMedication?.patientName ?? ""
+                                  )}
+                                />
+                                <Box ml={2}>
+                                  <Typography variant="body2" fontWeight={500}>
+                                    {refillMedication?.patientName}
+                                  </Typography>
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                  >
+                                    {refillMedication?.patientDOB}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Typography variant="body2">
+                                {refillMedication?.medicationName ?? " "}
                               </Typography>
                               <Typography
                                 variant="caption"
                                 color="text.secondary"
-                              >
-                                DOB: {row.dob}
+                              ></Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Typography variant="body2">
+                                {refillMedication.doseTabletsRequired !== null
+                                  ? refillMedication.doseTabletsRequired
+                                  : refillMedication.doseVolumeRequired}
                               </Typography>
-                            </Box>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {row.medication}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {row.medDetail}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">{row.dosage}</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {row.quantity}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {row.requested}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              padding: "2px 8px",
-                              borderRadius: "999px",
-                              fontWeight: 600,
-                              fontSize: 12,
-                              backgroundColor:
-                                row.statusColor === "yellow"
-                                  ? "#FEF3C7"
-                                  : row.statusColor === "red"
-                                    ? "#FEE2E2"
-                                    : "#E0E7FF",
-                              color:
-                                row.statusColor === "yellow"
-                                  ? "#B45309"
-                                  : row.statusColor === "red"
-                                    ? "#B91C1C"
-                                    : "#3730A3",
-                            }}
-                          >
-                            {row.status}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            onClick={() => handleAccordionToggle(row.id)}
-                            sx={{
-                              color: colors.brown600,
-                              backgroundColor: colors.beige200,
-                              fontWeight: 500,
-                              textTransform: "none",
-                              "&:hover": { color: colors.brown700 },
-                            }}
-                            size="small"
-                          >
-                            Process
-                            {expandedId === row.id ? (
-                              <ArrowDropUpIcon />
-                            ) : (
-                              <ArrowDropDownIcon />
-                            )}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell
-                          colSpan={7}
-                          style={{ paddingBottom: 0, paddingTop: 0 }}
-                        >
-                          <Collapse in={expandedId === row.id}>
-                            <ProcessRefillForm />
-                          </Collapse>
-                        </TableCell>
-                      </TableRow>
-                    </>
-                  ))}
+                            </TableCell>
+                            <TableCell align="center">
+                              <Typography variant="body2">
+                                {formattedDateTime(
+                                  refillMedication?.requestDate ?? ""
+                                )}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  padding: "2px 8px",
+                                  borderRadius: "999px",
+                                  fontWeight: 600,
+                                  fontSize: 12,
+                                }}
+                              >
+                                <p
+                                  className={`${statusColor[refillMedication?.status as keyof typeof statusColor]} p-2 rounded-2xl font-semibold`}
+                                >
+                                  {refillMedication?.status}
+                                </p>
+                              </span>
+                            </TableCell>
+                            <TableCell align="center">
+                              {refillMedication.status === "Request Raised" ? (
+                                <>
+                                  <Button
+                                    onClick={() =>
+                                      handleAccordionToggle(
+                                        refillMedication.raiseRefillId ?? ""
+                                      )
+                                    }
+                                    sx={{
+                                      color: colors.brown600,
+                                      backgroundColor: colors.beige200,
+                                      fontWeight: 500,
+                                      textTransform: "none",
+                                      "&:hover": { color: colors.brown700 },
+                                    }}
+                                    size="small"
+                                  >
+                                    Process
+                                    {expandedId ===
+                                    refillMedication.raiseRefillId ? (
+                                      <ArrowDropUpIcon />
+                                    ) : (
+                                      <ArrowDropDownIcon />
+                                    )}
+                                  </Button>
+                                </>
+                              ) : null}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              align="center"
+                              colSpan={7}
+                              style={{ paddingBottom: 0, paddingTop: 0 }}
+                            >
+                              <Collapse
+                                in={
+                                  expandedId === refillMedication.raiseRefillId
+                                }
+                              >
+                                <ProcessRefillForm
+                                  refillMedication={refillMedication}
+                                  onUpdate={fetchPharmacyRefillMedications}
+                                  handleAccordionToggle={handleAccordionToggle}
+                                />
+                              </Collapse>
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      );
+                    })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6}>
+                      <p className="flex items-center justify-center my-6">
+                        No records available!
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25, 100]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+          {pharmacyProcessRefillNotification !== null ? null : (
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25, 100]}
+              component="div"
+              count={filteredInventory.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          )}
         </div>
       </div>
     </>

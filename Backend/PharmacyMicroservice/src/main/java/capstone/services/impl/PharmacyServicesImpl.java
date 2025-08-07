@@ -20,6 +20,7 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
 import capstone.entities.PharmacyEO;
+import capstone.entities.Constants.PharmacySoundPreference;
 import capstone.entities.PharmacyEO.PharmacyInventory;
 import capstone.services.PharmacyServices;
 import reactor.core.publisher.Flux;
@@ -126,5 +127,28 @@ public class PharmacyServicesImpl implements PharmacyServices {
 
 		return reactiveMongoTemplateRef.find(query, PharmacyEO.class);
 	}
+	
+	
+	@Override
+	public Mono<UpdateResult> updateNotificationSoundsById(ObjectId pharmacyId, PharmacySoundPreference soundPreference) {
+		Query query = new Query(Criteria.where("_id").is(pharmacyId));
+
+		Update update = new Update();
+
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = new ObjectMapper().convertValue(soundPreference, Map.class);
+		map.forEach((key, value) -> {
+
+			if (value != null && !key.equals("_id")) {
+				update.set("soundPreference." + key, value);
+			}
+		});
+
+		UpdateOptions options = new UpdateOptions().upsert(false);
+
+		return reactiveMongoTemplateRef.getCollection("pharmacies").flatMap(collection -> Mono
+				.from(collection.updateOne(query.getQueryObject(), update.getUpdateObject(), options)));
+	}
+
 
 }

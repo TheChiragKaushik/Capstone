@@ -1,5 +1,5 @@
 import CommonHeading from "../../Common/CommonHeading";
-import type { CommonRouteProps } from "../../../utils/Interfaces";
+import type { CommonRouteProps, PharmacyEO } from "../../../utils/Interfaces";
 import PharmacyDetails from "./PharmacyDetails";
 
 const PharmacyProfile = ({ userId, user }: CommonRouteProps) => {
@@ -10,7 +10,7 @@ const PharmacyProfile = ({ userId, user }: CommonRouteProps) => {
         heading={`Your Profile`}
         subHeading={`Manage your personal information and preferences`}
       />
-      <PharmacyDetails user={user} />
+      <PharmacyDetails user={user as PharmacyEO} />
     </div>
   );
 };

@@ -158,7 +158,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ providerId }) => {
             }}
             sx={{
               width: {
-                sm: "75%",
+                sm: "100%",
                 md: "100%",
               },
             }}

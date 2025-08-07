@@ -7,10 +7,11 @@ import { useLocation, useNavigate } from "react-router";
 import RoleConfig from "../utils/RoleConfig";
 import { useDemoRouter } from "@toolpad/core/internal";
 import AppTitle from "../components/MainApp/AppTitle";
-import { AppTheme, colors } from "../utils/Constants";
+import { AppTheme, colors, showOsNotification } from "../utils/Constants";
 import axios from "axios";
 import { APIEndpoints } from "../api/api";
 import type {
+  InventoryRestockReminderNotification,
   PatientEO,
   PatientNotificationsRequest,
   PharmacyEO,
@@ -94,11 +95,16 @@ const MainApp = () => {
   };
 
   const [newNotifications, setNewNotifications] = React.useState<
-    PatientNotificationsRequest[] | RaiseRefillEO[]
+    | PatientNotificationsRequest[]
+    | RaiseRefillEO[]
+    | InventoryRestockReminderNotification[]
   >([]);
 
   const addNotification = (
-    notification: PatientNotificationsRequest | RaiseRefillEO
+    notification:
+      | PatientNotificationsRequest
+      | RaiseRefillEO
+      | InventoryRestockReminderNotification
   ) => {
     setNewNotifications((prevNotifications) => [
       ...prevNotifications,
@@ -108,11 +114,18 @@ const MainApp = () => {
 
   const removeNotification = (id: string) => {
     setNewNotifications((prevNotifications) =>
-      prevNotifications.filter(
-        (notification) =>
-          (notification as any)._id !== id &&
-          (notification as any).raiseRefillId !== id
-      )
+      prevNotifications.filter((notification) => {
+        if ("_id" in notification) {
+          return notification._id !== id;
+        }
+        if ("raiseRefillId" in notification) {
+          return notification.raiseRefillId !== id;
+        }
+        if ("inventoryRestockReminderNotificationId" in notification) {
+          return notification.inventoryRestockReminderNotificationId !== id;
+        }
+        return true;
+      })
     );
   };
 
@@ -121,40 +134,34 @@ const MainApp = () => {
 
     if (role === "Patient" || role === "Pharmacy") {
       connectUserQueue(role, userId);
-      function onUserMessage(
-        message: PatientNotificationsRequest | RaiseRefillEO,
+
+      const onUserMessage = (
+        message:
+          | PatientNotificationsRequest
+          | RaiseRefillEO
+          | InventoryRestockReminderNotification,
         type: string
-      ) {
+      ) => {
         console.log(`Received ${type} message:`, message);
+
         if (role === "Patient" && "raiseRefillId" in message) {
           setTimeout(() => {
             addNotification(message);
-          }, 3000);
+            showOsNotification(message);
+          }, 2000);
+        } else if (
+          role === "Pharmacy" &&
+          "  inventoryRestockReminderNotificationId" in message
+        ) {
+          setTimeout(() => {
+            addNotification(message);
+            showOsNotification(message);
+          }, 2000);
         } else {
           addNotification(message);
+          showOsNotification(message);
         }
-
-        if (Notification.permission === "granted") {
-          const title = "New Notification";
-          let body = "";
-
-          if ("raiseRefillId" in message) {
-            body = `Refill request received with ID: ${message.raiseRefillId}`;
-          } else {
-            body = message?.message || "You have a new notification";
-          }
-
-          const notification = new Notification(title, {
-            body,
-            icon: "/path/to/icon.png",
-          });
-
-          notification.onclick = () => {
-            window.focus();
-            notification.close();
-          };
-        }
-      }
+      };
 
       addListener(onUserMessage);
 
@@ -219,6 +226,7 @@ const MainApp = () => {
           notifications={newNotifications}
           onRemove={removeNotification}
           navigateToRoute={router}
+          userId={user?._id}
         />
       )}
     </>

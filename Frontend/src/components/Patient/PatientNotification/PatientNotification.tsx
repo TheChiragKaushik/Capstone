@@ -55,7 +55,6 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
     }
   };
 
-  // Fetch all sounds once and extract default ringtone URL
   const fetchAllSounds = async () => {
     try {
       const res = await axios.get(`${APIEndpoints.Admin}/ringtones`);
@@ -76,9 +75,8 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
     fetchAllSounds();
   }, []);
 
-  // Play sound based on notification.soundUrl (which is sound _id) or fallback to defaultRingUrl
   useEffect(() => {
-    if (!sounds.length) return; // wait for sounds to load
+    if (!sounds.length) return; 
 
     const soundId = notification?.soundUrl;
     let soundToPlayUrl = defaultRingUrl;

@@ -3,9 +3,12 @@ import LoginPage from "../components/Logon/LoginPage";
 import SignupPage from "../components/Logon/SignupPage";
 import { Box, Paper } from "@mui/material";
 import Intro from "../components/Logon/Intro";
+import { useLocation } from "react-router";
 
 const LogonPage = () => {
-  const [logonType, setLogonType] = useState("login");
+  const location = useLocation();
+  const { page } = location.state;
+  const [logonType, setLogonType] = useState(page);
 
   return (
     <>

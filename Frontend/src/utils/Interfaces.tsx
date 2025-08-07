@@ -32,9 +32,23 @@ export interface NotificationPanelProps {
 }
 
 export interface NotificationDialogProps {
-  notifications?: (PatientNotificationsRequest | RaiseRefillEO)[];
+  notifications?: (
+    | PatientNotificationsRequest
+    | RaiseRefillEO
+    | InventoryRestockReminderNotification
+  )[];
   onRemove?: (id: string) => void;
   navigateToRoute?: Router;
+  userId?: string;
+}
+
+export interface InventoryRestockReminderNotification {
+  inventoryRestockReminderNotificationId?: string;
+  checked?: boolean;
+  medicationName?: string;
+  medicationId?: string;
+  inventoryId?: string;
+  message?: string;
 }
 
 export interface RoleConfiguration {
@@ -256,6 +270,10 @@ export interface PharmacyEO {
   contact?: Contact;
   password?: string;
   pharmacyInventory?: PharmacyInventory[];
+  soundPreference?: {
+    refillRequestReminderNotificationSound?: string;
+    inventoryUpdateNotificationSound?: string;
+  };
   refillMedications?: RaiseRefillEO[];
   createdAt?: string;
 }
@@ -347,10 +365,10 @@ export interface RaiseRefillEO {
   doseTabletsRequired?: number;
   doseVolumeRequired?: number;
   message?: string;
-  status?: string;
   medicationPrescribed?: MedicationPrescribed;
   requestDate?: string;
   pharmacyId?: string;
+  status?: string;
   refillQuantityTablets?: number;
   refillQuantityVolume?: number;
   lastRefillDate?: string;

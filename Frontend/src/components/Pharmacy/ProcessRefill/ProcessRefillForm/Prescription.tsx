@@ -1,4 +1,11 @@
 import type React from "react";
+import {
+  type ProviderEO,
+  type RaiseRefillEO,
+} from "../../../../utils/Interfaces";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { APIEndpoints } from "../../../../api/api";
 
 type PrescriptionProps = {
   medicationName?: string;
@@ -9,56 +16,81 @@ type PrescriptionProps = {
   quantityNeeded?: string;
   directions?: string;
   lastRefillDate?: string;
+  refillMedication?: RaiseRefillEO;
 };
 
-const Prescription: React.FC<PrescriptionProps> = ({
-  medicationName = "Something",
-  medicationUnit = "50mg",
-  prescriberName = "Dr. Sarah Cena",
-  prescribedDate = "2025-11-12",
-  inHandQuantity = "50",
-  quantityNeeded = "20",
-  directions = "Take 1 tablet by mouth once daily",
-  lastRefillDate = "May 16, 2023",
-}) => {
+const Prescription: React.FC<PrescriptionProps> = ({ refillMedication }) => {
+  const [providerDetails, setProviderDetails] = useState<ProviderEO>(
+    {} as ProviderEO
+  );
+
+  const fetchProviderDetails = async () => {
+    try {
+      const provider = await axios.get(
+        `${APIEndpoints.UserProfile}?ProviderId=${refillMedication?.providerId}`
+      );
+
+      if (provider.data) {
+        setProviderDetails(provider.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProviderDetails();
+  }, []);
   return (
     <div>
       <h4 className="text-md font-medium text-gray-700 mb-4">
         Prescription Details
       </h4>
       <div className="bg-gray-50 p-4 rounded-lg">
-        <div className="mb-4">
-          <div className="flex p-4 justify-between font-semibold rounded-full bg-brown-200 text-yellow-800">
-            <p className="text-md font-medium text-gray-900">
-              {medicationName}
-            </p>
-            <p className="text-sm text-gray-500">{medicationUnit}</p>
-          </div>
-        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
+            <p className="text-xs text-gray-500">Medication</p>
+            <p className="text-md font-medium text-gray-900">
+              {refillMedication?.medicationName}
+            </p>
+          </div>
+          <div>
             <p className="text-xs text-gray-500">Prescriber</p>
-            <p className="text-sm text-gray-900">{prescriberName}</p>
+            <p className="text-sm text-gray-900">
+              Dr. {providerDetails?.firstName}&nbsp;{providerDetails?.lastName}
+            </p>
           </div>
           <div>
             <p className="text-xs text-gray-500">Prescribed Date</p>
-            <p className="text-sm text-gray-900">{prescribedDate}</p>
+            <p className="text-sm text-gray-900">
+              {refillMedication?.medicationPrescribed?.startDate}
+            </p>
           </div>
           <div>
             <p className="text-xs text-gray-500">In hand Quantity</p>
-            <p className="text-sm text-gray-900">{inHandQuantity} tablets</p>
+            <p className="text-sm text-gray-900">
+              {refillMedication?.medicationPrescribed?.currentTabletsInHand !==
+              null
+                ? refillMedication?.medicationPrescribed?.currentTabletsInHand +
+                  ` Tablets`
+                : refillMedication?.medicationPrescribed?.currentVolumeInhand +
+                  ` ${refillMedication?.medicationPrescribed?.medication?.liquidUnitMeasure}`}
+            </p>
           </div>
           <div>
             <p className="text-xs text-gray-500">Quantity Needed</p>
-            <p className="text-sm text-gray-900">{quantityNeeded} tablets</p>
+            <p className="text-sm text-gray-900">
+              {refillMedication?.doseTabletsRequired !== null
+                ? refillMedication?.doseTabletsRequired + " Tablets"
+                : refillMedication?.doseVolumeRequired + " by Volume"}
+            </p>
           </div>
           <div>
             <p className="text-xs text-gray-500">Directions</p>
-            <p className="text-sm text-gray-900">{directions}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Last Filled</p>
-            <p className="text-sm text-gray-900">{lastRefillDate} </p>
+            <p className="text-sm text-gray-900">
+              {refillMedication?.medicationPrescribed?.schedule?.[0]
+                ?.instruction ?? "No instruction available."}
+            </p>
           </div>
         </div>
       </div>
