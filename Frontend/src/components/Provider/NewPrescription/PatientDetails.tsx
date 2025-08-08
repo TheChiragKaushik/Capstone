@@ -250,10 +250,25 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ providerId }) => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <PatientMedicalDetailCard
-              className="md:col-start-2"
-              heading="Allergies"
-            >
+            <PatientMedicalDetailCard heading="Address">
+              <MedicalDetail
+                className="bg-green-400"
+                name={`Street: ` + userDetails.address?.street}
+              />
+              <MedicalDetail
+                className="bg-green-400"
+                name={`City: ` + userDetails.address?.city}
+              />
+              <MedicalDetail
+                className="bg-green-400"
+                name={`State: ` + userDetails.address?.state}
+              />
+              <MedicalDetail
+                className="bg-green-400"
+                name={`Zipcode: ` + userDetails.address?.zipCode}
+              />
+            </PatientMedicalDetailCard>
+            <PatientMedicalDetailCard heading="Allergies">
               {allergies.map((allergy: Allergy, index: number) => (
                 <MedicalDetail
                   className="bg-yellow-400"
@@ -272,6 +287,22 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ providerId }) => {
                   />
                 )
               )}
+            </PatientMedicalDetailCard>
+            <PatientMedicalDetailCard heading="Emergency Contact">
+              <MedicalDetail
+                className="bg-orange-400"
+                name={`Name: ` + userDetails.emergencyContact?.name}
+              />
+              <MedicalDetail
+                className="bg-orange-400"
+                name={
+                  `Relationship: ` + userDetails.emergencyContact?.relationship
+                }
+              />
+              <MedicalDetail
+                className="bg-orange-400"
+                name={`Phone Number: ` + userDetails.emergencyContact?.phone}
+              />
             </PatientMedicalDetailCard>
           </div>
           <div>

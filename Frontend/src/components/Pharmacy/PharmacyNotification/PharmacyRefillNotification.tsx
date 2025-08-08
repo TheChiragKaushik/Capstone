@@ -135,10 +135,25 @@ const PharmacyRefillNotification: React.FC<PharmacyRefillNotificationProps> = ({
     return () => clearTimeout(timeout);
   }, [onClose]);
 
-  const handleRefillRequest = () => {
+  const handleRefillRequest = async () => {
     dispatch(
       addPharmacyProcessRefillNotificationId(notification?.raiseRefillId)
     );
+    try {
+      const checkNotificationPayload = {
+        pharmacyId: notification?.pharmacyId,
+        fieldToUpdateId: notification?.raiseRefillId,
+      };
+      const checkNotification = await axios.put(
+        `${APIEndpoints.Pharmacy}/check?refillrequest=true`,
+        checkNotificationPayload
+      );
+      if (!checkNotification.data) {
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+    }
     stopAudio();
     navigateToRoute?.navigate("processRefill");
     if (onClose) onClose();

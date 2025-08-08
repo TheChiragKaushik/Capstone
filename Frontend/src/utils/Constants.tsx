@@ -364,3 +364,11 @@ export const isTodayDate = (dateString: string) => {
     date.getDate() === today.getDate()
   );
 };
+
+export const getMinEndDate = (startDateString: string) => {
+  if (!startDateString) return "";
+
+  const startDate = new Date(startDateString);
+  startDate.setDate(startDate.getDate() + 1);
+  return startDate.toISOString().split("T")[0];
+};

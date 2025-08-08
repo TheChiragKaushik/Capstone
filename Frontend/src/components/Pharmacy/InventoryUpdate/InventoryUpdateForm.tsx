@@ -13,6 +13,7 @@ interface InventoryUpdateProps {
   currentStock: number;
   medicationForm: string;
   onUpdateSuccess: () => void;
+  medicationThreshold?: number;
 }
 
 const InventoryUpdateForm = ({
@@ -21,15 +22,26 @@ const InventoryUpdateForm = ({
   currentStock,
   medicationForm,
   onUpdateSuccess,
+  medicationThreshold,
 }: InventoryUpdateProps) => {
-  const [newQuantity, setNewQuantity] = useState<number | null>(currentStock);
+  const defaulRefillValue: number =
+    currentStock > (medicationThreshold ?? 0)
+      ? currentStock
+      : (medicationThreshold ?? 0) + 1;
+  const [newQuantity, setNewQuantity] = useState<number | null>(
+    defaulRefillValue
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const handleUpdate = async () => {
-    if (newQuantity === null || newQuantity < 0) {
+    if ((newQuantity ?? 0) < (medicationThreshold ?? 0)) {
+      setError("Please enter a quantity greater or equal to threshold.");
+      return;
+    }
+    if (newQuantity === null || newQuantity < 0 || newQuantity === 0) {
       setError("Please enter a valid positive quantity.");
       return;
     }
@@ -38,9 +50,9 @@ const InventoryUpdateForm = ({
 
     const updatePayload: Partial<PharmacyInventory> = {};
     if (medicationForm === "Tablet") {
-      updatePayload.currentStockTablets = newQuantity;
+      updatePayload.currentStockTablets = newQuantity + currentStock;
     } else if (medicationForm === "Liquid") {
-      updatePayload.currentStockVolume = newQuantity;
+      updatePayload.currentStockVolume = newQuantity + currentStock;
     }
 
     try {
@@ -81,7 +93,7 @@ const InventoryUpdateForm = ({
           <CommonTextfield
             variant="outlined"
             size="small"
-            label="New Quantity"
+            label="Add to Current Quantity"
             type="number"
             value={newQuantity}
             onChange={(e) => {
@@ -90,6 +102,11 @@ const InventoryUpdateForm = ({
             }}
             error={!!error}
             helperText={error}
+            slotProps={{
+              htmlInput: {
+                min: medicationThreshold,
+              },
+            }}
           />
         </div>
         <div className="flex justify-end space-x-2">

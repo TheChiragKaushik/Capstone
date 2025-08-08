@@ -92,7 +92,7 @@ const InventoryUpdate = ({ userId }: CommonRouteProps) => {
           subHeading={outOfStockItems.toString()}
         />
       </div>
-      <InventoryActions userId={userId} />
+      <InventoryActions userId={userId} onInventoryUpdate={fetchData} />
     </div>
   );
 };

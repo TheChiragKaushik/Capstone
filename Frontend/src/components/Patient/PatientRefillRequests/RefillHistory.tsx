@@ -308,7 +308,10 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
                               refillMedication={refillMedication}
                               medicationId={refillMedication?.medicationId}
                               setExpandedId={setExpandedId}
-                              onUpdate={fetchPatientRefillMedications}
+                              onUpdate={() => {
+                                fetchPatientRefillMedications();
+                                setCustomRaiseRefillNotificationId(null);
+                              }}
                             />
                           </Collapse>
                         </TableCell>

@@ -10,12 +10,13 @@ import {
 } from "@mui/material";
 import {
   colors,
+  getMinEndDate,
   MedicationForTypes,
   MedicationPeriod,
   validatePrescriptionSubmitForm,
 } from "../../../utils/Constants";
 import CommonTextfield from "../../Common/CommonTextfield";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   type Prescription,
   type Medication,
@@ -24,6 +25,8 @@ import {
 import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
 import { TransitionGroup } from "react-transition-group";
+
+const todayDate = new Date().toISOString().split("T")[0];
 
 type NewPrescriptionFormProps = {
   setAddNewPrescription?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -37,7 +40,10 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
   providerId,
   onSubmitRefresh,
 }) => {
-  const [medicationType, setMedicationType] = useState<string>("");
+  const [medicationTypesForRows, setMedicationTypesForRows] = useState<
+    string[]
+  >([]);
+
   const [medications, setMedications] = useState<Medication[]>([]);
   const [newPrescription, setNewPrescription] = useState<Prescription>(
     {} as Prescription
@@ -61,17 +67,9 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const handleTypeSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const type = e.target.value;
-    setMedicationType(type);
-    setMedications([]);
-    setMedicationsPrescribed([]);
-    setError(null);
-
+  const fetchMedications = async () => {
     try {
-      const response = await axios.get(
-        `${APIEndpoints.Admin}/medications?type=${type}`
-      );
+      const response = await axios.get(`${APIEndpoints.Admin}/medications`);
       if (response.data) {
         setMedications(response.data);
       }
@@ -85,6 +83,10 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
       });
     }
   };
+
+  useEffect(() => {
+    fetchMedications();
+  }, []);
 
   const addMedication = () => {
     if (medicationsPrescribed.length < medications.length) {
@@ -103,11 +105,13 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
           schedule: [],
         },
       ]);
+      setMedicationTypesForRows((prev) => [...prev, ""]);
     }
   };
 
   const removeMedication = (index: number) => {
     setMedicationsPrescribed((prev) => prev.filter((_, i) => i !== index));
+    setMedicationTypesForRows((prev) => prev.filter((_, i) => i !== index));
   };
 
   const addSchedule = (medicationIndex: number) => {
@@ -144,6 +148,16 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
             }
           : medication
       )
+    );
+  };
+
+  const handleMedicationTypeChangeForRow = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    index: number
+  ) => {
+    const type = e.target.value;
+    setMedicationTypesForRows((prev) =>
+      prev.map((v, i) => (i === index ? type : v))
     );
   };
 
@@ -256,9 +270,8 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
       );
       if (response.data) {
         console.log("Prescription saved successfully!");
-        setMedicationType("");
-        setMedications([]);
         setMedicationsPrescribed([]);
+        setMedicationTypesForRows([]);
         setNewPrescription({} as Prescription);
         setError(null);
         onSubmitRefresh && onSubmitRefresh();
@@ -285,60 +298,12 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
         <h3 className="text-lg font-medium text-brown-700 mb-6">
           New Prescription
         </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          <CommonTextfield
-            variant="outlined"
-            required
-            isSelect
-            size="small"
-            label="Medication Type"
-            onChange={handleTypeSelect}
-            value={medicationType}
-          >
-            {MedicationForTypes.map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </CommonTextfield>
-        </div>
         <div>
           <div className="space-y-6">
             <TransitionGroup>
               {medicationsPrescribed.map((medication, index) => (
                 <Collapse key={index}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-beige-100 p-4 rounded-lg my-6">
-                    <CommonTextfield
-                      variant="outlined"
-                      required
-                      isSelect
-                      size="small"
-                      label={
-                        medications.length > 0
-                          ? "Medication"
-                          : "No new Medication available"
-                      }
-                      onChange={(e) => handleMedicationChange(e, index)}
-                      value={medication.medicationId || ""}
-                      disabled={medications.length === 0}
-                    >
-                      {medications.length > 0
-                        ? medications
-                            .filter((newMedication) => {
-                              return !medicationsPrescribed.some(
-                                (existingMedication, existingIndex) =>
-                                  existingMedication.medicationId ===
-                                    newMedication._id && existingIndex !== index
-                              );
-                            })
-                            .map((med) => (
-                              <MenuItem key={med._id} value={med._id}>
-                                {med.name}
-                              </MenuItem>
-                            ))
-                        : null}
-                    </CommonTextfield>
+                  <div className="bg-beige-100 p-4 rounded-lg my-10 flex flex-col">
                     <div className="flex justify-end items-center">
                       <Button
                         size="small"
@@ -356,268 +321,259 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                         Remove
                       </Button>
                     </div>
-                    <Collapse
-                      in={Boolean(medication?.medicationId)}
-                      className="col-span-2"
-                    >
-                      {medication.medication?.oneTablet ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <CommonTextfield
-                            label="Total Tablets to take"
-                            required
-                            size="small"
-                            name="totalTabletToTake"
-                            value={medication.totalTabletToTake || ""}
-                            onChange={(e) =>
-                              handleMedicationDetailChange(e, index)
-                            }
-                            slotProps={{
-                              htmlInput: {
-                                min: 0,
-                              },
-                            }}
-                            type="number"
-                          />
-                          <CommonTextfield
-                            label="Tablets Providing"
-                            required
-                            name="currentTabletsInHand"
-                            size="small"
-                            value={medication.currentTabletsInHand || ""}
-                            onChange={(e) =>
-                              handleMedicationDetailChange(e, index)
-                            }
-                            slotProps={{
-                              htmlInput: {
-                                min: 0,
-                              },
-                            }}
-                            type="number"
-                          />
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <CommonTextfield
-                            label="Total Volume to take"
-                            required
-                            name="totalVolumeToTake"
-                            size="small"
-                            value={medication.totalVolumeToTake || ""}
-                            onChange={(e) =>
-                              handleMedicationDetailChange(e, index)
-                            }
-                            slotProps={{
-                              htmlInput: {
-                                min: 0,
-                              },
-                            }}
-                            type="number"
-                          />
-                          <CommonTextfield
-                            label="Volume Providing"
-                            required
-                            name="currentVolumeInhand"
-                            size="small"
-                            value={medication.currentVolumeInhand || ""}
-                            onChange={(e) =>
-                              handleMedicationDetailChange(e, index)
-                            }
-                            slotProps={{
-                              htmlInput: {
-                                min: 0,
-                              },
-                            }}
-                            type="number"
-                          />
-                        </div>
-                      )}
-                      <div className="grid grid-cols-1 md:grid-cols-2 place-items-center mt-6 gap-6">
-                        <Typography
-                          sx={{
-                            marginTop: 1,
-                          }}
-                          className="w-full bg-beige-50 flex items-center rounded-lg border border-brown-300 h-3/4 md:h-[60%]"
-                        >
-                          <Checkbox
-                            checked={!!medication.refillsAllowed}
-                            onChange={(e) => {
-                              setMedicationsPrescribed((prev) =>
-                                prev.map((item, i) =>
-                                  i === index
-                                    ? {
-                                        ...item,
-                                        refillsAllowed: e.target.checked,
-                                        ...(e.target.checked
-                                          ? {}
-                                          : {
-                                              refillAlertThreshold: undefined,
-                                            }),
-                                      }
-                                    : item
-                                )
-                              );
-                            }}
-                            name="refillsAllowed"
-                          />
-                          Refill Allowed
-                        </Typography>
-                        <CommonTextfield
-                          label="Refill Alert Threshold"
-                          name="refillAlertThreshold"
-                          size="small"
-                          value={medication.refillAlertThreshold || ""}
-                          onChange={(e) =>
-                            handleMedicationDetailChange(e, index)
-                          }
-                          slotProps={{
-                            htmlInput: {
-                              min: 0,
-                            },
-                          }}
-                          type="number"
-                          disabled={!medication.refillsAllowed}
-                        />
-                        <CommonTextfield
-                          label="Start Date"
-                          required
-                          name="startDate"
-                          type="date"
-                          size="small"
-                          value={medication.startDate || ""}
-                          onChange={(e) =>
-                            handleMedicationDetailChange(e, index)
-                          }
-                          InputLabelProps={{ shrink: true }}
-                        />
-                        <CommonTextfield
-                          label="End Date"
-                          name="endDate"
-                          required
-                          size="small"
-                          type="date"
-                          value={medication.endDate || ""}
-                          onChange={(e) =>
-                            handleMedicationDetailChange(e, index)
-                          }
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-beige-100 p-4 rounded-lg">
+                      <CommonTextfield
+                        variant="outlined"
+                        className="col-span-2 md:col-span-1"
+                        required
+                        isSelect
+                        size="small"
+                        label="Medication Type"
+                        value={medicationTypesForRows[index] || ""}
+                        onChange={(e) =>
+                          handleMedicationTypeChangeForRow(e, index)
+                        }
+                      >
+                        {MedicationForTypes.map((type) => (
+                          <MenuItem key={type} value={type}>
+                            {type}
+                          </MenuItem>
+                        ))}
+                      </CommonTextfield>
+                      <CommonTextfield
+                        variant="outlined"
+                        className="col-span-2 md:col-span-1"
+                        required
+                        isSelect
+                        size="small"
+                        label={
+                          medications.length > 0
+                            ? "Medication"
+                            : "No new Medication available"
+                        }
+                        disabled={!medicationTypesForRows[index]}
+                        value={medication.medicationId || ""}
+                        onChange={(e) => handleMedicationChange(e, index)}
+                      >
+                        {medications
+                          .filter(
+                            (med) => med.type === medicationTypesForRows[index]
+                          )
+                          .filter(
+                            (med) =>
+                              !medicationsPrescribed.some(
+                                (m, idx) =>
+                                  m.medicationId === med._id && idx !== index
+                              )
+                          )
+                          .map((med) => (
+                            <MenuItem key={med._id} value={med._id}>
+                              {med.name}
+                            </MenuItem>
+                          ))}
+                      </CommonTextfield>
 
-                      <TransitionGroup>
-                        {(medication?.schedule ?? []).length > 0 &&
-                          medication.schedule?.map(
-                            (scheduleItem, scheduleIndex) => (
-                              <Collapse key={scheduleIndex}>
-                                <div
-                                  key={scheduleIndex}
-                                  className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 bg-beige-50 p-4 rounded-lg gap-6 my-6"
-                                >
-                                  <CommonTextfield
-                                    variant="outlined"
-                                    required
-                                    isSelect
-                                    size="small"
-                                    label="Period"
-                                    name="period"
-                                    value={scheduleItem.period}
-                                    onChange={(e) =>
-                                      handleScheduleChange(
-                                        e,
-                                        index,
-                                        scheduleIndex
-                                      )
-                                    }
-                                  >
-                                    {MedicationPeriod.map((period) => (
-                                      <MenuItem
-                                        key={period.id}
-                                        value={period.id}
+                      <Collapse
+                        in={Boolean(medication?.medicationId)}
+                        className="col-span-2"
+                      >
+                        {medication.medication?.oneTablet ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <CommonTextfield
+                              label="Total Tablets to take"
+                              required
+                              size="small"
+                              name="totalTabletToTake"
+                              value={medication.totalTabletToTake || ""}
+                              onChange={(e) =>
+                                handleMedicationDetailChange(e, index)
+                              }
+                              slotProps={{
+                                htmlInput: {
+                                  min: 0,
+                                },
+                              }}
+                              type="number"
+                            />
+                            <CommonTextfield
+                              label="Tablets Providing"
+                              required
+                              name="currentTabletsInHand"
+                              size="small"
+                              value={medication.currentTabletsInHand || ""}
+                              onChange={(e) =>
+                                handleMedicationDetailChange(e, index)
+                              }
+                              slotProps={{
+                                htmlInput: {
+                                  min: 0,
+                                },
+                              }}
+                              type="number"
+                            />
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <CommonTextfield
+                              label="Total Volume to take"
+                              required
+                              name="totalVolumeToTake"
+                              size="small"
+                              value={medication.totalVolumeToTake || ""}
+                              onChange={(e) =>
+                                handleMedicationDetailChange(e, index)
+                              }
+                              slotProps={{
+                                htmlInput: {
+                                  min: 0,
+                                },
+                              }}
+                              type="number"
+                            />
+                            <CommonTextfield
+                              label="Volume Providing"
+                              required
+                              name="currentVolumeInhand"
+                              size="small"
+                              value={medication.currentVolumeInhand || ""}
+                              onChange={(e) =>
+                                handleMedicationDetailChange(e, index)
+                              }
+                              slotProps={{
+                                htmlInput: {
+                                  min: 0,
+                                },
+                              }}
+                              type="number"
+                            />
+                          </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 place-items-center mt-6 gap-6">
+                          <Typography
+                            sx={{
+                              marginTop: 1,
+                            }}
+                            className="w-full bg-beige-50 flex items-center rounded-lg border border-brown-300 h-3/4 md:h-[60%]"
+                          >
+                            <Checkbox
+                              checked={!!medication.refillsAllowed}
+                              onChange={(e) => {
+                                setMedicationsPrescribed((prev) =>
+                                  prev.map((item, i) =>
+                                    i === index
+                                      ? {
+                                          ...item,
+                                          refillsAllowed: e.target.checked,
+                                          ...(e.target.checked
+                                            ? {}
+                                            : {
+                                                refillAlertThreshold: undefined,
+                                              }),
+                                        }
+                                      : item
+                                  )
+                                );
+                              }}
+                              name="refillsAllowed"
+                            />
+                            Refill Allowed
+                          </Typography>
+                          <CommonTextfield
+                            label="Refill Alert Threshold"
+                            name="refillAlertThreshold"
+                            size="small"
+                            value={medication.refillAlertThreshold || ""}
+                            onChange={(e) =>
+                              handleMedicationDetailChange(e, index)
+                            }
+                            slotProps={{
+                              htmlInput: {
+                                min: 0,
+                              },
+                            }}
+                            type="number"
+                            disabled={!medication.refillsAllowed}
+                          />
+                          <CommonTextfield
+                            label="Start Date"
+                            required
+                            name="startDate"
+                            type="date"
+                            size="small"
+                            value={medication.startDate || ""}
+                            onChange={(e) =>
+                              handleMedicationDetailChange(e, index)
+                            }
+                            slotProps={{
+                              inputLabel: {
+                                shrink: true,
+                              },
+                              htmlInput: {
+                                min: todayDate,
+                              },
+                            }}
+                          />
+
+                          <CommonTextfield
+                            label="End Date"
+                            name="endDate"
+                            required
+                            size="small"
+                            type="date"
+                            value={medication.endDate || ""}
+                            onChange={(e) =>
+                              handleMedicationDetailChange(e, index)
+                            }
+                            slotProps={{
+                              inputLabel: {
+                                shrink: true,
+                              },
+                              htmlInput: {
+                                min:
+                                  getMinEndDate(medication?.startDate ?? "") ||
+                                  todayDate,
+                              },
+                            }}
+                          />
+                        </div>
+
+                        <TransitionGroup>
+                          {(medication?.schedule ?? []).length > 0 &&
+                            medication.schedule?.map(
+                              (scheduleItem, scheduleIndex) => (
+                                <Collapse key={scheduleIndex}>
+                                  <div className="bg-beige-50 p-4 rounded-lg gap-6 my-6">
+                                    <div className="flex justify-end items-center">
+                                      <Button
+                                        size="small"
+                                        color="error"
+                                        sx={{
+                                          backgroundColor: "#FDDCDC",
+                                          color: "red",
+                                          "&:hover": {
+                                            border: 1,
+                                            borderColor: "#red",
+                                          },
+                                        }}
+                                        onClick={() =>
+                                          removeSchedule(index, scheduleIndex)
+                                        }
                                       >
-                                        {period.label}
-                                      </MenuItem>
-                                    ))}
-                                  </CommonTextfield>
-
-                                  <div className="flex justify-end items-center">
-                                    <Button
-                                      size="small"
-                                      color="error"
-                                      sx={{
-                                        backgroundColor: "#FDDCDC",
-                                        color: "red",
-                                        "&:hover": {
-                                          border: 1,
-                                          borderColor: "#red",
-                                        },
-                                      }}
-                                      onClick={() =>
-                                        removeSchedule(index, scheduleIndex)
-                                      }
+                                        Remove
+                                      </Button>
+                                    </div>
+                                    <div
+                                      key={scheduleIndex}
+                                      className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6"
                                     >
-                                      Remove
-                                    </Button>
-                                  </div>
-
-                                  <CommonTextfield
-                                    label="Instructions"
-                                    required
-                                    name="instruction"
-                                    size="small"
-                                    value={scheduleItem.instruction || ""}
-                                    onChange={(e) =>
-                                      handleScheduleChange(
-                                        e,
-                                        index,
-                                        scheduleIndex
-                                      )
-                                    }
-                                  />
-                                  <CommonTextfield
-                                    label="Time"
-                                    required
-                                    name="scheduledTime"
-                                    size="small"
-                                    value={scheduleItem.scheduledTime || ""}
-                                    onChange={(e) =>
-                                      handleScheduleChange(
-                                        e,
-                                        index,
-                                        scheduleIndex
-                                      )
-                                    }
-                                    type="time"
-                                    InputLabelProps={{ shrink: true }}
-                                  />
-                                  {medication.medication?.oneTablet ? (
-                                    <>
                                       <CommonTextfield
-                                        label="Dose Tablets"
-                                        name="doseTablets"
-                                        size="small"
-                                        value={scheduleItem.doseTablets || ""}
-                                        onChange={(e) =>
-                                          handleScheduleChange(
-                                            e,
-                                            index,
-                                            scheduleIndex
-                                          )
-                                        }
-                                        slotProps={{
-                                          htmlInput: {
-                                            min: 0,
-                                          },
-                                        }}
-                                        type="number"
-                                      />
-                                    </>
-                                  ) : (
-                                    <>
-                                      <CommonTextfield
-                                        label="Dose Volume"
+                                        variant="outlined"
                                         required
-                                        name="doseVolume"
+                                        isSelect
                                         size="small"
-                                        value={scheduleItem.doseVolume || ""}
+                                        label="Period"
+                                        name="period"
+                                        value={scheduleItem.period}
                                         onChange={(e) =>
                                           handleScheduleChange(
                                             e,
@@ -625,41 +581,125 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
                                             scheduleIndex
                                           )
                                         }
-                                        slotProps={{
-                                          htmlInput: {
-                                            min: 0,
-                                          },
-                                        }}
-                                        type="number"
+                                      >
+                                        {MedicationPeriod.map((period) => (
+                                          <MenuItem
+                                            key={period.id}
+                                            value={period.id}
+                                          >
+                                            {period.label}
+                                          </MenuItem>
+                                        ))}
+                                      </CommonTextfield>
+
+                                      <CommonTextfield
+                                        label="Instructions"
+                                        required
+                                        name="instruction"
+                                        size="small"
+                                        value={scheduleItem.instruction || ""}
+                                        onChange={(e) =>
+                                          handleScheduleChange(
+                                            e,
+                                            index,
+                                            scheduleIndex
+                                          )
+                                        }
                                       />
-                                    </>
-                                  )}
-                                </div>
-                              </Collapse>
-                            )
-                          )}
-                      </TransitionGroup>
-                      <div className="flex justify-start items-center col-span-2 my-4">
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            backgroundColor: colors.brown600,
-                            width: {
-                              sc: "25%",
-                              md: "15%",
-                            },
-                            color: "white",
-                            "&:hover": {
-                              backgroundColor: colors.brown700,
-                            },
-                          }}
-                          onClick={() => addSchedule(index)}
-                        >
-                          Add Schedule
-                        </Button>
-                      </div>
-                    </Collapse>
+                                      <CommonTextfield
+                                        label="Time"
+                                        required
+                                        name="scheduledTime"
+                                        size="small"
+                                        value={scheduleItem.scheduledTime || ""}
+                                        onChange={(e) =>
+                                          handleScheduleChange(
+                                            e,
+                                            index,
+                                            scheduleIndex
+                                          )
+                                        }
+                                        type="time"
+                                        InputLabelProps={{ shrink: true }}
+                                      />
+                                      {medication.medication?.oneTablet ? (
+                                        <>
+                                          <CommonTextfield
+                                            label="Dose Tablets"
+                                            name="doseTablets"
+                                            size="small"
+                                            value={
+                                              scheduleItem.doseTablets || ""
+                                            }
+                                            onChange={(e) =>
+                                              handleScheduleChange(
+                                                e,
+                                                index,
+                                                scheduleIndex
+                                              )
+                                            }
+                                            slotProps={{
+                                              htmlInput: {
+                                                min: 0,
+                                              },
+                                            }}
+                                            type="number"
+                                          />
+                                        </>
+                                      ) : (
+                                        <>
+                                          <CommonTextfield
+                                            label="Dose Volume"
+                                            required
+                                            name="doseVolume"
+                                            size="small"
+                                            value={
+                                              scheduleItem.doseVolume || ""
+                                            }
+                                            onChange={(e) =>
+                                              handleScheduleChange(
+                                                e,
+                                                index,
+                                                scheduleIndex
+                                              )
+                                            }
+                                            slotProps={{
+                                              htmlInput: {
+                                                min: 0,
+                                              },
+                                            }}
+                                            type="number"
+                                          />
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                </Collapse>
+                              )
+                            )}
+                        </TransitionGroup>
+                        <div className="flex justify-start items-center col-span-2 my-4">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            sx={{
+                              backgroundColor: colors.brown600,
+                              width: {
+                                sc: "25%",
+                                md: "15%",
+                              },
+                              color: "white",
+                              "&:hover": {
+                                backgroundColor: colors.brown700,
+                              },
+                            }}
+                            onClick={() => addSchedule(index)}
+                          >
+                            Add Schedule
+                          </Button>
+                        </div>
+                      </Collapse>
+                    </div>
                   </div>
                 </Collapse>
               ))}
@@ -670,7 +710,7 @@ const NewPrescriptionForm: React.FC<NewPrescriptionFormProps> = ({
             <Button
               variant="outlined"
               onClick={addMedication}
-              disabled={!medicationType || medications.length === 0}
+              disabled={medications.length === 0}
               sx={{
                 backgroundColor: colors.brown600,
                 color: "white",

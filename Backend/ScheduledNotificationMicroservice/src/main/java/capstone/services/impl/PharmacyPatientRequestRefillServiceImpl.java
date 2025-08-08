@@ -65,6 +65,9 @@ public class PharmacyPatientRequestRefillServiceImpl implements PharmacyPatientR
 		update.push("refillApprovedNotifications", refillApprovedNotifications);
 
 		update.inc("totalRefillApprovedNotifications", 1);
+		
+		update.pull("raiseRefillNotifications", new Query(Criteria.where("raiseRefillNotificationId").is(raiseRefillEO.getRaiseRefillId())));
+        update.inc("totalRaiseRefillCheckedNotifications", -1);
 
 		return reactiveMongoTemplateRef.upsert(query, update, "patientnotifications");
 	}
@@ -153,50 +156,55 @@ public class PharmacyPatientRequestRefillServiceImpl implements PharmacyPatientR
 	}
 
 	private void checkAndSendInventoryNotification(RaiseRefillEO raiseRefillEO) {
-		ObjectId pharmacyId = new ObjectId(raiseRefillEO.getPharmacyId());
-		String medicationId = raiseRefillEO.getMedicationId();
+    ObjectId pharmacyId = new ObjectId(raiseRefillEO.getPharmacyId());
+    String medicationId = raiseRefillEO.getMedicationId();
 
-		Query query = new Query(Criteria.where("_id").is(pharmacyId)
-				.and("pharmacyInventory.medicationId").is(medicationId));
-		
-		reactiveMongoTemplateRef.findOne(query, PharmacyEO.class, "pharmacies")
-				.subscribe(pharmacy -> {
-					if (pharmacy != null && pharmacy.getPharmacyInventory() != null) {
-						pharmacy.getPharmacyInventory().stream()
-								.filter(inventory -> inventory.getMedicationId().equals(medicationId))
-								.findFirst()
-								.ifPresent(inventory -> {
-									boolean sendNotification = false;
-									String message = "";
-									if (inventory.getCurrentStockTablets() != null && inventory.getReorderThresholdTablets() != null &&
-											inventory.getCurrentStockTablets() < inventory.getReorderThresholdTablets()) {
-										sendNotification = true;
-										message = "Inventory for " + raiseRefillEO.getMedicationName() + " is low. Current stock is " + 
-												inventory.getCurrentStockTablets() + " tablets, which is below the reorder threshold of " + 
-												inventory.getReorderThresholdTablets() + " tablets.";
-									} else if (inventory.getCurrentStockVolume() != null && inventory.getReorderThresholdVolume() != null &&
-											inventory.getCurrentStockVolume() < inventory.getReorderThresholdVolume()) {
-										sendNotification = true;
-										message = "Inventory for " + raiseRefillEO.getMedicationName() + " is low. Current stock is " + 
-												inventory.getCurrentStockVolume() + " volume, which is below the reorder threshold of " + 
-												inventory.getReorderThresholdVolume() + " volume.";
-									}
-									
-									if(sendNotification) {
-										InventoryRestockReminderNotificationsEO notification = new InventoryRestockReminderNotificationsEO();
-										notification.setChecked(false);
-										notification.setMedicationName(raiseRefillEO.getMedicationName());
-										notification.setMedicationId(medicationId);
-										notification.setInventoryId(inventory.getInventoryId());
-										notification.setMessage(message);
-										updatePharmacyInventoryNotification(raiseRefillEO.getPharmacyId(),notification);
-										System.out.println("inventoryRestockReminderNotifications saved!");
-										sendInventoryUpdateNotificationToPharmacy(raiseRefillEO.getPharmacyId(), notification);
-									}
-								});
-					}
-				});
-	}
+    Query query = new Query(Criteria.where("_id").is(pharmacyId)
+            .and("pharmacyInventory.medicationId").is(medicationId));
+    
+    reactiveMongoTemplateRef.findOne(query, PharmacyEO.class, "pharmacies")
+            .subscribe(pharmacy -> {
+                if (pharmacy != null && pharmacy.getPharmacyInventory() != null) {
+                    pharmacy.getPharmacyInventory().stream()
+                            .filter(inventory -> inventory.getMedicationId().equals(medicationId))
+                            .findFirst()
+                            .ifPresent(inventory -> {
+                                boolean sendNotification = false;
+                                String message = "";
+                                if (inventory.getCurrentStockTablets() != null && inventory.getReorderThresholdTablets() != null &&
+                                        inventory.getCurrentStockTablets() < inventory.getReorderThresholdTablets()) {
+                                    sendNotification = true;
+                                    message = "Inventory for " + raiseRefillEO.getMedicationName() + " is low. Current stock is " + 
+                                            inventory.getCurrentStockTablets() + " tablets, which is below the reorder threshold of " + 
+                                            inventory.getReorderThresholdTablets() + " tablets.";
+                                } else if (inventory.getCurrentStockVolume() != null && inventory.getReorderThresholdVolume() != null &&
+                                        inventory.getCurrentStockVolume() < inventory.getReorderThresholdVolume()) {
+                                    sendNotification = true;
+                                    message = "Inventory for " + raiseRefillEO.getMedicationName() + " is low. Current stock is " + 
+                                            inventory.getCurrentStockVolume() + " volume, which is below the reorder threshold of " + 
+                                            inventory.getReorderThresholdVolume() + " volume.";
+                                }
+                                
+                                if(sendNotification) {
+                                    InventoryRestockReminderNotificationsEO notification = new InventoryRestockReminderNotificationsEO();
+                                    notification.setChecked(false);
+                                    notification.setMedicationName(raiseRefillEO.getMedicationName());
+                                    notification.setMedicationId(medicationId);
+                                    notification.setInventoryId(inventory.getInventoryId());
+                                    notification.setMessage(message);
+                                    
+                                    updatePharmacyInventoryNotification(raiseRefillEO.getPharmacyId(), notification)
+                                        .doOnSuccess(updateResult -> {
+                                            System.out.println("inventoryRestockReminderNotifications saved!");
+                                            // Only send the STOMP message after the DB save is confirmed
+                                            sendInventoryUpdateNotificationToPharmacy(raiseRefillEO.getPharmacyId(), notification);
+                                        })
+                                        .subscribe(); 
+                                }
+                            });
+                }
+            });
+}
 	
 	
 	public Mono<UpdateResult> updatePharmacyInventoryNotification(String pharmacyId, InventoryRestockReminderNotificationsEO notification){
@@ -209,7 +217,13 @@ public class PharmacyPatientRequestRefillServiceImpl implements PharmacyPatientR
 
 		update.inc("totalPharmacyInventoryRestockReminderNotifications", 1);
 
-		return reactiveMongoTemplateRef.upsert(query, update, "pharmacynotifications");
+		return reactiveMongoTemplateRef.upsert(query, update, "pharmacynotifications")
+	            .doOnSuccess(updateResult -> {
+	                System.out.println("Saved inventory notification in DB. Matched: " + updateResult.getMatchedCount() + ", Upserted: " + updateResult.getUpsertedId());
+	            })
+	            .doOnError(e -> System.err.println("Failed to update or create inventory refill request reminder notification for pharmacyId: "
+	                    + pharmacyId + ". Error: "
+	                    + e.getMessage()));
 	}
 
 	public void sendInventoryUpdateNotificationToPharmacy(String pharmacyId, InventoryRestockReminderNotificationsEO request) {

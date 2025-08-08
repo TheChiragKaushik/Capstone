@@ -118,7 +118,7 @@ public class PatientServicesImpl implements PatientServices {
 		return reactiveMongoTemplateRef.getCollection("patients").flatMap(collection -> Mono
 				.from(collection.updateOne(query.getQueryObject(), update.getUpdateObject(), options)));
 	}
-	
+
 	@Override
 	public Mono<UpdateResult> updateNotificationSoundsById(ObjectId patientId, SoundPreference soundPreference) {
 		Query query = new Query(Criteria.where("_id").is(patientId));
@@ -217,8 +217,7 @@ public class PatientServicesImpl implements PatientServices {
 			String prescriptionId, String medicationPrescribedId) {
 		ObjectId id = new ObjectId(patientId);
 		Aggregation aggregation = Aggregation
-				.newAggregation(Aggregation.match(Criteria.where("_id").is(id)),
-						Aggregation.unwind("prescriptions"),
+				.newAggregation(Aggregation.match(Criteria.where("_id").is(id)), Aggregation.unwind("prescriptions"),
 						Aggregation.match(Criteria.where("prescriptions.prescriptionId").is(prescriptionId)),
 						Aggregation.unwind("prescriptions.medicationsPrescribed"),
 						Aggregation.match(Criteria.where("prescriptions.medicationsPrescribed.medicationPrescribedId")
@@ -236,8 +235,6 @@ public class PatientServicesImpl implements PatientServices {
 					}
 				}).doOnError(e -> System.err.println("Error getting MedicationPrescribed: " + e.getMessage()));
 	}
-	
-	
 
 	@Override
 	public Mono<UpdateResult> updateSingleMedicationTrackingDetailTrackerDoseByPatientPrescriptionAndMedicationId(
@@ -245,12 +242,14 @@ public class PatientServicesImpl implements PatientServices {
 			Dose doseStatusEO) {
 		Query query = new Query(Criteria.where("_id").is(patientId));
 		Update update = new Update();
-		
+
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = objectMapper.convertValue(doseStatusEO, Map.class);
 		map.forEach((key, value) -> {
 			if (value != null && !key.equals("scheduleId")) {
-				update.set("prescriptions.$[pres].medicationTracking.$[med].tracker.$[track].doses.$[doseStatus]." + key, value);
+				update.set(
+						"prescriptions.$[pres].medicationTracking.$[med].tracker.$[track].doses.$[doseStatus]." + key,
+						value);
 			}
 		});
 		LocalDate dateForQuery = LocalDate.parse(date);
@@ -303,4 +302,47 @@ public class PatientServicesImpl implements PatientServices {
 
 	}
 
+	@Override
+	public Mono<UpdateResult> updateDoseReminderNotificationCheck(String patientId, String notificationRequestId) {
+		Query query = new Query(Criteria.where("patientId").is(patientId)
+				.and("doseReminderNotifications.notificationRequestId").is(notificationRequestId));
+
+		Update update = new Update().inc("totalDoseReminderNotifications", -1)
+				.inc("totalDoseReminderNotificationsChecked", 1).set("doseReminderNotifications.$.checked", true);
+
+		return reactiveMongoTemplateRef.updateFirst(query, update, "patientnotifications")
+				.doOnError(e -> System.err.println("Failed to update dose reminder notification for patientId: "
+						+ patientId + " and notificationRequestId: " + notificationRequestId + ". Error: "
+						+ e.getMessage()));
+	}
+	
+	
+	@Override
+	public Mono<UpdateResult> updateRaiseRefillNotificationCheck(String patientId, String raiseRefillId){
+		Query query = new Query(Criteria.where("patientId").is(patientId)
+				.and("raiseRefillNotifications.raiseRefillNotificationId").is(raiseRefillId));
+
+		Update update = new Update().inc("totalRaiseRefillNotifications", -1)
+				.inc("totalRaiseRefillCheckedNotifications", 1).set("raiseRefillNotifications.$.checked", true);
+
+		return reactiveMongoTemplateRef.updateFirst(query, update, "patientnotifications")
+				.doOnError(e -> System.err.println("Failed to update raise refill reminder notification for patientId: "
+						+ patientId + " and notificationRequestId: " + raiseRefillId + ". Error: "
+						+ e.getMessage()));
+	}
+	
+	@Override
+	public Mono<UpdateResult> updateApproveRefillNotificationCheck(String patientId, String raiseRefillId){
+		Query query = new Query(Criteria.where("patientId").is(patientId)
+				.and("refillApprovedNotifications.refillApproveNotificationId").is(raiseRefillId));
+
+		Update update = new Update().inc("totalRefillApprovedNotifications", -1)
+				.inc("totalRefillApprovedCheckedNotifications", 1).set("refillApprovedNotifications.$.checked", true);
+
+		return reactiveMongoTemplateRef.updateFirst(query, update, "patientnotifications")
+				.doOnSuccess(result -> System.out.println("Matched: " + result.getMatchedCount() + ", Modified: " + result.getModifiedCount()))
+				.doOnError(e -> System.err.println("Failed to update approved refill reminder notification for patientId: "
+						+ patientId + " and notificationRequestId: " + raiseRefillId + ". Error: "
+						+ e.getMessage()));
+	}
 }

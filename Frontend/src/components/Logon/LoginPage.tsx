@@ -74,7 +74,7 @@ const LoginPage: React.FC = () => {
         role = "Patient";
         name = loggedInUser.firstName + " " + loggedInUser.lastName;
       } else if (email.includes("@capstone.care")) {
-        role = "Provider";
+        role = "Doctor";
         name = loggedInUser.firstName + " " + loggedInUser.lastName;
       } else if (email.includes("@capstone.med")) {
         role = "Pharmacy";

@@ -120,16 +120,45 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
     return () => clearTimeout(timeout);
   }, [onClose]);
 
-  const handleOrderRefill = () => {
+  const handleOrderRefill = async () => {
     dispatch(addPatientRaiseRefillNotificationId(notification?.raiseRefillId));
+    const checkNotificationPayload = {
+      patientId: notification?.patientId,
+      fieldToUpdateId: notification?.raiseRefillId,
+    };
+    const checkNotification = await axios.put(
+      `${APIEndpoints.Patient}/check?refillrequest=true`,
+      checkNotificationPayload
+    );
+
+    if (!checkNotification.data) {
+      return;
+    }
     stopAudio();
-    navigateToRoute?.navigate("refillRequests");
     if (onClose) onClose();
+    navigateToRoute?.navigate("refillRequests");
   };
 
-  const handleAcknowledge = () => {
+  const handleAcknowledge = async () => {
+    dispatch(addPatientRaiseRefillNotificationId(notification?.raiseRefillId));
+    try {
+      const checkNotificationPayload = {
+        patientId: notification?.patientId,
+        fieldToUpdateId: notification?.raiseRefillId,
+      };
+      const checkNotification = await axios.put(
+        `${APIEndpoints.Patient}/check?approvedrefill=true`,
+        checkNotificationPayload
+      );
+      if (!checkNotification.data) {
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+    }
     stopAudio();
     if (onClose) onClose();
+    navigateToRoute?.navigate("refillRequests");
   };
 
   return (

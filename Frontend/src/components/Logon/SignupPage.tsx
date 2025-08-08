@@ -397,6 +397,12 @@ const SignupPage: React.FC = () => {
           onChange={handleUserChange}
           error={!!phoneError}
           helperText={phoneError}
+          slotProps={{
+            htmlInput: {
+              minLength: 10,
+              maxLength: 10,
+            },
+          }}
         />
       </div>
       <div>

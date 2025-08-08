@@ -3,7 +3,6 @@ import type { CommonRouteProps, RoleConfiguration } from "./Interfaces";
 // Components
 import PatientDashboard from "../components/Patient/PatientDashboard/PatientDashboard";
 import PatientRefillRequests from "../components/Patient/PatientRefillRequests/PatientRefillRequests";
-import PatientCalender from "../components/Patient/PatientCalender/PatientCalender";
 import PatientProfile from "../components/Patient/PatientProfile/PatientProfile";
 import PatientNotificationPanel from "../components/Patient/PatientNotification/PatientNotificationPanel";
 import PharmacyDashboard from "../components/Pharmacy/PharmacyDashboard/PharmacyDashboard";
@@ -12,7 +11,6 @@ import ProcessRefill from "../components/Pharmacy/ProcessRefill/ProcessRefill";
 import InventoryUpdate from "../components/Pharmacy/InventoryUpdate/InventoryUpdate";
 
 // Icons
-import TodayIcon from "@mui/icons-material/Today";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import RepeatOneOnIcon from "@mui/icons-material/RepeatOneOn";
 import GridViewIcon from "@mui/icons-material/GridView";
@@ -37,11 +35,7 @@ const RoleConfig: RoleConfiguration = {
         title: "Refill Requests",
         icon: <RepeatOneOnIcon />,
       },
-      {
-        segment: "calender",
-        title: "Calender",
-        icon: <TodayIcon />,
-      },
+
       {
         segment: "profile",
         title: "Profile",
@@ -53,7 +47,6 @@ const RoleConfig: RoleConfiguration = {
       refillRequests: (props: CommonRouteProps) => (
         <PatientRefillRequests {...props} />
       ),
-      calender: (props: CommonRouteProps) => <PatientCalender {...props} />,
       profile: (props: CommonRouteProps) => <PatientProfile {...props} />,
     },
     notifications: {
@@ -61,7 +54,7 @@ const RoleConfig: RoleConfiguration = {
       dialog: PatientNotificationStack,
     },
   },
-  Provider: {
+  Doctor: {
     navigation: [
       {
         segment: "dashboard",

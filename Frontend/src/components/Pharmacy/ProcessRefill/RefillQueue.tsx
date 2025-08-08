@@ -60,15 +60,17 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [filter, setFilter] = useState<Filter>("Request Raised");
+  const [filter, setFilter] = useState<Filter>("All");
   const [expandedId, setExpandedId] = useState<string | number | null>(null);
 
   const [refillMedications, setRefillMedications] = useState<
     RefillMedications[]
   >([]);
 
+  const [patientDetailsFetched, setPatientDetailsFetched] = useState(false);
+
   const fetchAllPatientDetails = async () => {
-    if (!refillMedications.length) return;
+    if (!refillMedications) return;
 
     const ids = refillMedications.map((r) => r.patientId).filter(Boolean);
     const uniqueIds = Array.from(new Set(ids));
@@ -111,6 +113,8 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
         return refill;
       });
     });
+
+    setPatientDetailsFetched(true);
   };
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -153,12 +157,14 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
   ]);
 
   useEffect(() => {
-    fetchPharmacyRefillMedications();
-  }, []);
+    if (!refillMedications && !patientDetailsFetched) {
+      fetchAllPatientDetails();
+    }
+  }, [refillMedications, patientDetailsFetched]);
 
   useEffect(() => {
-    fetchAllPatientDetails();
-  }, [refillMedications]);
+    fetchPharmacyRefillMedications();
+  }, [pharmacyId]);
 
   const filteredInventory = refillMedications?.filter((item) => {
     if (pharmacyProcessRefillNotification !== null) {
@@ -246,7 +252,7 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredInventory.length > 0 ? (
+                {filteredInventory !== null ? (
                   filteredInventory
                     ?.slice()
                     .reverse()
@@ -363,7 +369,10 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
                               >
                                 <ProcessRefillForm
                                   refillMedication={refillMedication}
-                                  onUpdate={fetchPharmacyRefillMedications}
+                                  onUpdate={() => {
+                                    fetchPharmacyRefillMedications();
+                                    setPharmacyProcessRefillNotification(null);
+                                  }}
                                   handleAccordionToggle={handleAccordionToggle}
                                 />
                               </Collapse>
@@ -388,7 +397,7 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25, 100]}
               component="div"
-              count={filteredInventory.length}
+              count={filteredInventory?.length ?? 0}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

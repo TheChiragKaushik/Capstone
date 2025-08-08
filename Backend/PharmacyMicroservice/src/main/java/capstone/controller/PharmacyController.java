@@ -18,6 +18,7 @@ import capstone.entities.PharmacyEO;
 import capstone.entities.Constants.PharmacySoundPreference;
 import capstone.entities.PharmacyEO.PharmacyInventory;
 import capstone.services.PharmacyServices;
+import lombok.Data;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -106,6 +107,32 @@ public class PharmacyController {
 	public Mono<UpdateResult> updateSoundPreference(@PathVariable String pharmacyId, @RequestBody PharmacySoundPreference soundPreference){
 		ObjectId id = new ObjectId(pharmacyId);
 		return pharmacyServicesRef.updateNotificationSoundsById(id, soundPreference);
+	}
+	
+	
+	
+	@Data
+	public static class CheckStatusPayload {
+		private String pharmacyId;
+		private String fieldToUpdateId;
+	}
+	
+	@PutMapping("check")
+	public Mono<UpdateResult> updateCheckedStatusOfNotification(
+			@RequestParam(required=false) Boolean inventory,
+			@RequestParam(required=false) Boolean refillrequest,
+			@RequestBody CheckStatusPayload checkStatusPayload
+			){
+		String pharmacyId = checkStatusPayload.getPharmacyId();
+		String fieldToUpdate = checkStatusPayload.getFieldToUpdateId();
+		
+		if(inventory != null && inventory) {
+			return pharmacyServicesRef.updateInventoryRestockReminderNotificationCheck(pharmacyId, fieldToUpdate);
+		}else if(refillrequest != null && refillrequest){
+			return pharmacyServicesRef.updateRefillRequestReminderNotificationCheck(pharmacyId,fieldToUpdate);
+		}
+		
+		return null;
 	}
 
 

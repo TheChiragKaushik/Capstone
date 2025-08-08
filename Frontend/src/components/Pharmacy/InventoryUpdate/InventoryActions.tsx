@@ -12,7 +12,7 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import InventoryUpdateForm from "./InventoryUpdateForm";
 import { colors, getStatus } from "../../../utils/Constants";
@@ -21,7 +21,6 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import CommonTextfield from "../../Common/CommonTextfield";
 import AddInventoryForm from "./AddInventoryForm";
 import type {
-  CommonRouteProps,
   PharmacyInventory,
   MedicationObject,
   InventoryItem,
@@ -33,7 +32,14 @@ import { removePharmacyUpdateInventoryNotificationId } from "../../../redux/feat
 
 type Filter = "All" | "In Stock" | "Low Stock" | "Out of Stock";
 
-const InventoryActions = ({ userId }: CommonRouteProps) => {
+type InventoryActionsProps = {
+  userId?: string;
+  onInventoryUpdate?: () => void;
+};
+const InventoryActions: React.FC<InventoryActionsProps> = ({
+  userId,
+  onInventoryUpdate,
+}) => {
   const pharmacyInventoryUpdateRequestNotificationId = useAppSelector(
     (state) => state.pharmacyUpdateInventoryNotification.value
   );
@@ -310,12 +316,21 @@ const InventoryActions = ({ userId }: CommonRouteProps) => {
                                     ? item.currentStockTablets
                                     : (item.currentStockVolume as number)
                                 }
+                                medicationThreshold={
+                                  item.reorderThresholdTablets !== null
+                                    ? item.reorderThresholdTablets
+                                    : (item.reorderThresholdVolume as number)
+                                }
                                 medicationForm={item.medicationForm as string}
                                 onUpdateSuccess={() => {
                                   fetchData();
+                                  setPharmacyInventoryUpdateRequest(null);
                                   setTimeout(() => {
                                     handleAccordionToggle("");
                                   }, 500);
+                                  if (onInventoryUpdate) {
+                                    onInventoryUpdate();
+                                  }
                                 }}
                               />
                             </Collapse>
@@ -380,7 +395,12 @@ const InventoryActions = ({ userId }: CommonRouteProps) => {
           <Collapse in={addInventory}>
             <AddInventoryForm
               userId={userId}
-              onUpdate={fetchData}
+              onUpdate={() => {
+                fetchData();
+                if (onInventoryUpdate) {
+                  onInventoryUpdate();
+                }
+              }}
               setAddInventoryClose={setAddInventory}
             />
           </Collapse>

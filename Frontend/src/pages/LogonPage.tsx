@@ -7,8 +7,8 @@ import { useLocation } from "react-router";
 
 const LogonPage = () => {
   const location = useLocation();
-  const { page } = location.state;
-  const [logonType, setLogonType] = useState(page);
+  const { page } = location.state || {};
+  const [logonType, setLogonType] = useState(page || "login");
 
   return (
     <>

@@ -91,7 +91,13 @@ public class PatientPharmacyRefillServiceImpl implements PatientPharmacyRefillSe
 
 		update.inc("totalRefillRequests", 1);
 
-		return reactiveMongoTemplateRef.upsert(query, update, "pharmacynotifications");
+		return reactiveMongoTemplateRef.upsert(query, update, "pharmacynotifications")
+	            .doOnSuccess(updateResult -> {
+	                System.out.println("Saved inventory notification in DB. Matched: " + updateResult.getMatchedCount() + ", Upserted: " + updateResult.getUpsertedId());
+	            })
+	            .doOnError(e -> System.err.println("Failed to update or create inventory refill request reminder notification for pharmacyId: "
+	                    + pharmacyId + ". Error: "
+	                    + e.getMessage()));
 	}
 
 	public void raiseRefillRequestNotificationToPharmacy(RaiseRefillEO request) {

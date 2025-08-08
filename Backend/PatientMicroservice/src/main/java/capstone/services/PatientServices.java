@@ -57,4 +57,10 @@ public interface PatientServices {
 
 	public Mono<UpdateResult> updateNotificationSoundsById(ObjectId patientId, SoundPreference soundPreference);
 
+	public Mono<UpdateResult> updateDoseReminderNotificationCheck(String patientId, String notificationRequestId);
+
+	public Mono<UpdateResult> updateRaiseRefillNotificationCheck(String patientId, String raiseRefillId);
+
+	public Mono<UpdateResult> updateApproveRefillNotificationCheck(String patientId, String raiseRefillId);
+
 }

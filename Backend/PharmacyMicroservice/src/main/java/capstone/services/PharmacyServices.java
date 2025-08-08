@@ -28,5 +28,9 @@ public interface PharmacyServices {
 	public Flux<PharmacyEO> getAllPharmacyProvidingCertainMedication(String medicationId);
 
 	public Mono<UpdateResult> updateNotificationSoundsById(ObjectId pharmacyId, PharmacySoundPreference soundPreference);
+
+	public Mono<UpdateResult> updateRefillRequestReminderNotificationCheck(String pharmacyId, String raiseRefillId);
+
+	public Mono<UpdateResult> updateInventoryRestockReminderNotificationCheck(String pharmacyId, String inventoryId);
 	
 }

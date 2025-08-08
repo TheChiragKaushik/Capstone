@@ -110,10 +110,25 @@ const PharmacyInventoryNotification: React.FC<
     return () => clearTimeout(timeout);
   }, [onClose]);
 
-  const handleInventory = () => {
+  const handleInventory = async () => {
     dispatch(
       addPharmacyUpdateInventoryNotificationId(notification?.inventoryId)
     );
+    try {
+      const checkNotificationPayload = {
+        pharmacyId: userId,
+        fieldToUpdateId: notification?.inventoryId,
+      };
+      const checkNotification = await axios.put(
+        `${APIEndpoints.Pharmacy}/check?inventory=true`,
+        checkNotificationPayload
+      );
+      if (!checkNotification.data) {
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+    }
     stopAudio();
     navigateToRoute?.navigate("inventoryUpdate");
     if (onClose) {

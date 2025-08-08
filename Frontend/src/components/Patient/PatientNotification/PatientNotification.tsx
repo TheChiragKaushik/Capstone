@@ -1,5 +1,4 @@
-import { Box, IconButton, Fade, Button, Snackbar, Alert } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { Box, Fade, Button, Snackbar, Alert } from "@mui/material";
 import type React from "react";
 import type {
   DoseStatusSetRequest,
@@ -76,7 +75,7 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!sounds.length) return; 
+    if (!sounds.length) return;
 
     const soundId = notification?.soundUrl;
     let soundToPlayUrl = defaultRingUrl;
@@ -105,7 +104,16 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
         `${APIEndpoints.Notifications}/status/${notification.patientId}`,
         payload
       );
-      return Boolean(response.data);
+
+      const checkNotificationPayload = {
+        patientId: notification?.patientId,
+        fieldToUpdateId: notification?._id,
+      };
+      const checkNotification = await axios.put(
+        `${APIEndpoints.Patient}/check?dosereminder=true`,
+        checkNotificationPayload
+      );
+      return Boolean(response.data && checkNotification.data);
     } catch (error) {
       return false;
     }
@@ -187,11 +195,6 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
     if (onClose) onClose();
   };
 
-  const handleClose = () => {
-    stopAudio();
-    if (onClose) onClose();
-  };
-
   const handleSnackbarClose = (
     _: React.SyntheticEvent | Event,
     reason?: string
@@ -268,11 +271,6 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
                   </div>
                 </div>
               </div>
-              {onClose && (
-                <IconButton onClick={handleClose} size="small" sx={{ ml: 1 }}>
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              )}
             </div>
           </div>
         </Box>
