@@ -9,7 +9,7 @@ import {
   Collapse,
   TablePagination,
 } from "@mui/material";
-import type React from "react";
+import React from "react";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import { useState } from "react";
@@ -74,8 +74,8 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ user }) => {
               .reverse()
               ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((prescription: Prescription, idx: number) => (
-                <>
-                  <TableRow key={prescription.prescriptionId ?? idx}>
+                <React.Fragment key={prescription.prescriptionId || idx}>
+                  <TableRow>
                     <TableCell align="center">{idx + 1}</TableCell>
                     <TableCell align="center">
                       {prescription.prescribedBy?.firstName}{" "}
@@ -159,7 +159,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ user }) => {
                       </Collapse>
                     </TableCell>
                   </TableRow>
-                </>
+                </React.Fragment>
               ))}
           </TableBody>
         </Table>

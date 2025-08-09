@@ -29,6 +29,7 @@ import capstone.entities.PatientEO.Prescription;
 import capstone.entities.PatientEO.Prescription.MedicationPrescribed;
 import capstone.entities.PatientEO.Prescription.MedicationTracking;
 import capstone.entities.PatientEO.Prescription.MedicationTracking.Tracker.Dose;
+import capstone.entities.PatientNotificationsEO;
 import capstone.services.PatientServices;
 import reactor.core.publisher.Mono;
 
@@ -303,12 +304,13 @@ public class PatientServicesImpl implements PatientServices {
 	}
 
 	@Override
-	public Mono<UpdateResult> updateDoseReminderNotificationCheck(String patientId, String notificationRequestId) {
+	public Mono<UpdateResult> updateDoseReminderNotificationCheck(String patientId, String notificationRequestId, Boolean taken) {
 		Query query = new Query(Criteria.where("patientId").is(patientId)
 				.and("doseReminderNotifications.notificationRequestId").is(notificationRequestId));
 
 		Update update = new Update().inc("totalDoseReminderNotifications", -1)
-				.inc("totalDoseReminderNotificationsChecked", 1).set("doseReminderNotifications.$.checked", true);
+				.inc("totalDoseReminderNotificationsChecked", 1).set("doseReminderNotifications.$.checked", true)
+				.set("doseReminderNotifications.$.taken", taken);
 
 		return reactiveMongoTemplateRef.updateFirst(query, update, "patientnotifications")
 				.doOnError(e -> System.err.println("Failed to update dose reminder notification for patientId: "
@@ -344,5 +346,13 @@ public class PatientServicesImpl implements PatientServices {
 				.doOnError(e -> System.err.println("Failed to update approved refill reminder notification for patientId: "
 						+ patientId + " and notificationRequestId: " + raiseRefillId + ". Error: "
 						+ e.getMessage()));
+	}
+	
+	@Override
+	public Mono<PatientNotificationsEO> getAllPatientNotifications(String patientId){
+	 Query query = new Query(Criteria.where("patientId").is(patientId));
+	 return reactiveMongoTemplateRef.findOne(query, PatientNotificationsEO.class)
+			 .doOnSuccess(e -> System.out.println("Patient notifications fetched! "))
+			 .doOnError(e -> System.err.println("Failed to fetch patients notification with ID: " + patientId + " : " + e.getMessage()));
 	}
 }

@@ -2,9 +2,11 @@ import { configureStore } from "@reduxjs/toolkit";
 import { patientRaiseRefillNotificationIdSlice } from "./features/patientRaiseRefillNotificationId";
 import { pharmacyProcessRefillNotificationIdSlice } from "./features/pharmacyProcessRefillNotificationIdSlice";
 import { pharmacyUpdateInventoryNotificationIdSlice } from "./features/pharmacyUpdateInventoryNotificationIdSlice";
+import patientNotificationsSlice from "./features/patientNotificationsSlice";
 
 export const capstoneStore = configureStore({
   reducer: {
+    patientNotifications: patientNotificationsSlice,
     patientRaiseRefillNotification:
       patientRaiseRefillNotificationIdSlice.reducer,
     pharmacyProcessRefillNotification:

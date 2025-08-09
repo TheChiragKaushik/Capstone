@@ -19,7 +19,7 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import ProviderProfile from "../components/Provider/ProviderProfile/ProviderProfile";
 import PharmacyProfile from "../components/Pharmacy/PharmacyProfile/PharmacyProfile";
 import NewPrescription from "../components/Provider/NewPrescription/NewPrescription";
-import PatientNotificationStack from "../components/Patient/PatientNotification/PatientNotificationStackProps";
+import PatientNotificationStack from "../components/Patient/PatientNotification/PatientNotificationStack";
 import PharmacyNotificationStack from "../components/Pharmacy/PharmacyNotification/PharmacyNotificationStack";
 
 const RoleConfig: RoleConfiguration = {

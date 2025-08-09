@@ -1,5 +1,9 @@
 import type React from "react";
-import type { MedicationPrescribed } from "../../../../utils/Interfaces";
+import type {
+  MedicationPrescribed,
+  Schedule,
+} from "../../../../utils/Interfaces";
+import { MedicationPeriod } from "../../../../utils/Constants";
 
 type MedicationsPrescribedProps = {
   medicationPrescribed?: MedicationPrescribed[];
@@ -13,7 +17,7 @@ const MedicationsPrescribed: React.FC<MedicationsPrescribedProps> = ({
       <h4 className="text-md font-medium text-gray-700 mb-4">
         Medications Details
       </h4>
-      <div className="grid grid-cols-1 md:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {medicationPrescribed?.map((medication) => {
           const name = medication.medication?.name || "-";
           const unit =
@@ -66,14 +70,12 @@ const MedicationsPrescribed: React.FC<MedicationsPrescribedProps> = ({
             status = "In Progress";
           }
 
-          let directions = "-";
+          let schedule: Schedule[] = [];
           if (
             Array.isArray(medication.schedule) &&
             medication.schedule.length > 0
           ) {
-            directions = medication.schedule
-              .map((s) => `${s.instruction || ""} (${s.scheduledTime || ""})`)
-              .join(", ");
+            schedule = medication.schedule;
           }
 
           return (
@@ -115,10 +117,6 @@ const MedicationsPrescribed: React.FC<MedicationsPrescribedProps> = ({
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Directions</p>
-                  <p className="text-sm text-gray-900">{directions}</p>
-                </div>
-                <div>
                   <p className="text-xs text-gray-500">Status</p>
                   <span
                     className={`inline-block px-2 py-1 rounded text-xs font-medium ${
@@ -131,6 +129,29 @@ const MedicationsPrescribed: React.FC<MedicationsPrescribedProps> = ({
                   >
                     {status}
                   </span>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs text-gray-500">Schedule</p>
+                  <div className="text-sm grid grid-cols-1 md:grid-cols-2 text-gray-900">
+                    {schedule.map((schedule, index) => (
+                      <div
+                        key={schedule.scheduleId ?? "schedule" + index}
+                        className=" flex flex-col"
+                      >
+                        <p>Schedule: {index + 1}</p>
+                        <p>
+                          Period:{" "}
+                          {
+                            MedicationPeriod.find(
+                              (period) => period.id === Number(schedule.period)
+                            )?.label
+                          }
+                        </p>
+                        <p>Instruction: {schedule.instruction || ""}</p>
+                        <p>Time: {schedule.scheduledTime || ""}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

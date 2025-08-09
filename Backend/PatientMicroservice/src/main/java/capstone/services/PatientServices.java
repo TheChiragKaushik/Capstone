@@ -14,6 +14,7 @@ import capstone.entities.PatientEO.Prescription;
 import capstone.entities.PatientEO.Prescription.MedicationPrescribed;
 import capstone.entities.PatientEO.Prescription.MedicationTracking;
 import capstone.entities.PatientEO.Prescription.MedicationTracking.Tracker.Dose;
+import capstone.entities.PatientNotificationsEO;
 import reactor.core.publisher.Mono;
 
 public interface PatientServices {
@@ -57,10 +58,12 @@ public interface PatientServices {
 
 	public Mono<UpdateResult> updateNotificationSoundsById(ObjectId patientId, SoundPreference soundPreference);
 
-	public Mono<UpdateResult> updateDoseReminderNotificationCheck(String patientId, String notificationRequestId);
+	public Mono<UpdateResult> updateDoseReminderNotificationCheck(String patientId, String notificationRequestId, Boolean taken);
 
 	public Mono<UpdateResult> updateRaiseRefillNotificationCheck(String patientId, String raiseRefillId);
 
 	public Mono<UpdateResult> updateApproveRefillNotificationCheck(String patientId, String raiseRefillId);
+
+	public Mono<PatientNotificationsEO> getAllPatientNotifications(String patientId);
 
 }

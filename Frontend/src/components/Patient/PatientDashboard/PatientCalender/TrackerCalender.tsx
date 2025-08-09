@@ -10,6 +10,7 @@ import {
   isSameMonth,
   isSameDay,
   addDays,
+  startOfDay,
 } from "date-fns";
 import { IndicatorLegend } from "../../../../utils/Constants";
 import CommonTextfield from "../../../Common/CommonTextfield";
@@ -27,6 +28,12 @@ const colorLegend: Record<string, string> = {
   delayed: "bg-yellow-400",
   missed: "bg-red-600",
   scheduled: "bg-beige-400",
+};
+
+type DoseStatus = {
+  status: string;
+  time: string;
+  delay?: number;
 };
 
 type TrackerCalenderProps = {
@@ -81,10 +88,10 @@ const TrackerCalender: React.FC<TrackerCalenderProps> = ({ prescription }) => {
   const dateFormat = "d";
 
   const startDate = selectedmedicationData.startDate
-    ? new Date(selectedmedicationData.startDate)
+    ? startOfDay(new Date(selectedmedicationData.startDate))
     : null;
   const endDate = selectedmedicationData.endDate
-    ? new Date(selectedmedicationData.endDate)
+    ? startOfDay(new Date(selectedmedicationData.endDate))
     : null;
 
   const canGoPrev = startDate
@@ -105,16 +112,15 @@ const TrackerCalender: React.FC<TrackerCalenderProps> = ({ prescription }) => {
     const next = addMonths(currentDate, 1);
     if (next <= endOfMonth(endDate)) setCurrentDate(next);
   };
-  
 
   function getDoseStatus(
     dateStr: string,
     schedule: Schedule[],
     trackerEntry: Tracker | undefined
-  ): string[] {
+  ): DoseStatus[] {
     if (!schedule) return [];
 
-    const statuses: string[] = [];
+    const statuses: DoseStatus[] = [];
     const now = new Date();
 
     const trackerDoses = trackerEntry?.doses ?? [];
@@ -136,25 +142,32 @@ const TrackerCalender: React.FC<TrackerCalenderProps> = ({ prescription }) => {
               (actualTime.getTime() - scheduledDateTime.getTime()) /
               (1000 * 60);
             if (diffMin > 5) {
-              statuses.push("delayed");
+              statuses.push({
+                status: "delayed",
+                time: sch.scheduledTime ?? "",
+                delay: diffMin,
+              });
             } else {
-              statuses.push("taken");
+              statuses.push({ status: "taken", time: sch.scheduledTime ?? "" });
             }
           } else {
-            statuses.push("taken");
+            statuses.push({ status: "taken", time: sch.scheduledTime ?? "" });
           }
         } else {
           if (scheduledDateTime < now) {
-            statuses.push("missed");
+            statuses.push({ status: "missed", time: sch.scheduledTime ?? "" });
           } else {
-            statuses.push("scheduled");
+            statuses.push({
+              status: "scheduled",
+              time: sch.scheduledTime ?? "",
+            });
           }
         }
       } else {
         if (scheduledDateTime > now) {
-          statuses.push("scheduled");
+          statuses.push({ status: "scheduled", time: sch.scheduledTime ?? "" });
         } else {
-          statuses.push("missed");
+          statuses.push({ status: "missed", time: sch.scheduledTime ?? "" });
         }
       }
     });
@@ -189,19 +202,15 @@ const TrackerCalender: React.FC<TrackerCalenderProps> = ({ prescription }) => {
         <div
           key={day.toISOString()}
           className={`calendar-day h-24 border border-beige-100 rounded-lg p-1
-          ${
-            isWithinPrescription
-              ? isSameMonth(day, monthStart)
-                ? "bg-white hover:shadow-md"
-                : "bg-beige-50 opacity-50"
-              : "bg-gray-100 opacity-30 pointer-events-none"
-          }
-          ${
-            isSameDay(day, new Date())
-              ? "bg-brown-50 font-medium text-brown-600"
-              : ""
-          }
-          `}
+    ${
+      isWithinPrescription
+        ? isSameMonth(day, monthStart)
+          ? "bg-white hover:shadow-md"
+          : "bg-beige-50 opacity-50"
+        : "bg-gray-100 opacity-30 pointer-events-none"
+    }
+    ${isSameDay(day, new Date()) ? "bg-brown-50 font-medium text-brown-600" : ""}
+    `}
         >
           <div
             className={`text-right text-sm ${
@@ -213,12 +222,21 @@ const TrackerCalender: React.FC<TrackerCalenderProps> = ({ prescription }) => {
             {format(day, dateFormat)}
           </div>
           <div className="mt-1 flex flex-wrap space-x-1">
-            {statuses.map((status, idx) => (
-              <div
-                key={idx}
-                className={`${colorLegend[status]} rounded-full w-3 h-3 mb-1`}
-                title={status}
-              />
+            {statuses.map((dose, idx) => (
+              <div key={idx} className="flex items-center space-x-1">
+                <div
+                  className={`${colorLegend[dose.status]} rounded-full w-3 h-3 mb-1`}
+                  title={dose.status}
+                />
+                <div className="text-xs text-brown-600">
+                  {dose.time}
+                  {dose.status === "delayed" && (
+                    <span className="text-red-500 ml-1">
+                      ({dose.delay} min delay)
+                    </span>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         </div>

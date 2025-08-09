@@ -1,5 +1,6 @@
 import type React from "react";
-import type { MedicationPrescribed } from "../../../utils/Interfaces";
+import type { MedicationPrescribed, Schedule } from "../../../utils/Interfaces";
+import { MedicationPeriod } from "../../../utils/Constants";
 
 type MedicationsPrescribedProps = {
   medicationPrescribed?: MedicationPrescribed[];
@@ -35,24 +36,35 @@ const MedicationsPrescribed: React.FC<MedicationsPrescribedProps> = ({
           const took = medication.totalTabletsTook ?? 0;
 
           let status = "-";
-          if (
+
+          const hasTabletData =
             medication.totalTabletToTake !== null &&
+            medication.totalTabletToTake !== undefined;
+          const hasTabletTookData =
             medication.totalTabletsTook !== null &&
-            medication.totalTabletsTook !== undefined
-          ) {
-            status = took >= (needed ?? 0) ? "Complete" : "In Progress";
-          } else if (medication.totalTabletToTake !== null) {
+            medication.totalTabletsTook !== undefined;
+
+          const hasVolumeData =
+            medication.totalVolumeToTake !== null &&
+            medication.totalVolumeToTake !== undefined;
+          const hasVolumeTookData =
+            medication.totalVolumeTook !== null &&
+            medication.totalVolumeTook !== undefined;
+
+          if (hasTabletData && hasTabletTookData) {
+            status = (took ?? 0) >= (needed ?? 0) ? "Complete" : "In Progress";
+          } else if (hasVolumeData && hasVolumeTookData) {
+            status = (took ?? 0) >= (needed ?? 0) ? "Complete" : "In Progress";
+          } else if (hasTabletData || hasVolumeData) {
             status = "In Progress";
           }
 
-          let directions = "-";
+          let schedule: Schedule[] = [];
           if (
             Array.isArray(medication.schedule) &&
             medication.schedule.length > 0
           ) {
-            directions = medication.schedule
-              .map((s) => `${s.instruction || ""} (${s.scheduledTime || ""})`)
-              .join(", ");
+            schedule = medication.schedule;
           }
 
           return (
@@ -88,10 +100,6 @@ const MedicationsPrescribed: React.FC<MedicationsPrescribedProps> = ({
                   <p className="text-sm text-gray-900">{took} tablets</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Directions</p>
-                  <p className="text-sm text-gray-900">{directions}</p>
-                </div>
-                <div>
                   <p className="text-xs text-gray-500">Status</p>
                   <span
                     className={`inline-block px-2 py-1 rounded text-xs font-medium ${
@@ -104,6 +112,26 @@ const MedicationsPrescribed: React.FC<MedicationsPrescribedProps> = ({
                   >
                     {status}
                   </span>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs text-gray-500">Schedule</p>
+                  <div className="text-sm grid grid-cols-1 md:grid-cols-2 text-gray-900">
+                    {schedule.map((schedule, index) => (
+                      <div className=" flex flex-col">
+                        <p>Schedule: {index + 1}</p>
+                        <p>
+                          Period:{" "}
+                          {
+                            MedicationPeriod.find(
+                              (period) => period.id === Number(schedule.period)
+                            )?.label
+                          }
+                        </p>
+                        <p>Instruction: {schedule.instruction || ""}</p>
+                        <p>Time: {schedule.scheduledTime || ""}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

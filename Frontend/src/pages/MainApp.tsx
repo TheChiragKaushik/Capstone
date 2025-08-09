@@ -196,7 +196,11 @@ const MainApp = () => {
           slots={{
             appTitle: AppTitle,
             toolbarActions: () => (
-              <ToolbarActionsSearch role={role} user={user} />
+              <ToolbarActionsSearch
+                role={role}
+                user={user}
+                navigateToRoute={router}
+              />
             ),
           }}
           sx={{

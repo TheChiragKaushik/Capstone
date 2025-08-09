@@ -90,12 +90,6 @@ const TestCalender = ({ prescriptionData }: { prescriptionData: any }) => {
   let days = [];
   let day = weekStart;
 
-  const medicationOptions =
-    prescriptionData?.medicationsPrescribed?.map((med: any) => ({
-      value: med.medicationPrescribedId,
-      label: med.medication.name,
-    })) || [];
-
   const getEventStatus = (date: any) => {
     if (!selectedMedication) return [];
 
@@ -125,7 +119,6 @@ const TestCalender = ({ prescriptionData }: { prescriptionData: any }) => {
 
   while (day <= weekEnd) {
     for (let i = 0; i < 7; i++) {
-      //   const dayKey = format(day, "yyyy-MM-dd");
       const dayEvents = getEventStatus(day);
       const isWithinRange =
         selectedMedication &&

@@ -29,6 +29,8 @@ export type Navigation = NavigationItem[];
 export interface NotificationPanelProps {
   visibility: string;
   onClose: () => void;
+  userId?: string;
+  navigateToRoute?: Router;
 }
 
 export interface NotificationDialogProps {
@@ -379,4 +381,50 @@ export interface AlarmRingtones {
   _id?: string;
   name?: string;
   url?: string;
+}
+
+export interface PatientNotifications {
+  _id?: string;
+  patientId?: string;
+  totalDoseReminderNotifications?: number;
+  totalDoseReminderNotificationsChecked?: number;
+  doseReminderNotifications?: DoseReminderNotification[];
+  totalRefillApprovedNotifications?: number;
+  totalRefillApprovedCheckedNotifications?: number;
+  refillApprovedNotifications?: RefillApprovedNotifications[];
+  totalRaiseRefillNotifications?: number;
+  totalRaiseRefillCheckedNotifications?: number;
+  raiseRefillNotifications?: RaiseRefillNotifications[];
+}
+
+export interface DoseReminderNotification {
+  doseReminderNotificationId?: string;
+  notificationRequestId?: string;
+  checked?: boolean;
+  taken?: boolean;
+  notification?: PatientNotificationsRequest;
+}
+
+export interface RefillApprovedNotifications {
+  refillApproveNotificationId?: string;
+  checked?: boolean;
+  approvedRefill?: RaiseRefillEO;
+}
+
+export interface RaiseRefillNotifications {
+  raiseRefillNotificationId?: string;
+  checked?: boolean;
+  raiseRefill?: RaiseRefillEO;
+}
+
+export interface SinglePatientNotification {
+  id?: string;
+  type?: "Dose Reminder" | "Refill Request" | "Refill Approved";
+  checked?: boolean;
+  message?: string;
+  date?: string;
+  notification?:
+    | DoseReminderNotification
+    | RefillApprovedNotifications
+    | RaiseRefillNotifications;
 }

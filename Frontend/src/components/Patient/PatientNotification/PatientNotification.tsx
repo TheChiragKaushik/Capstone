@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
 import { colors } from "../../../utils/Constants";
+import { useAppDispatch } from "../../../redux/hooks";
+import { fetchAllNotifications } from "../../../redux/features/patientNotificationsSlice";
 
 type PatientNotificationProps = {
   notification?: PatientNotificationsRequest;
@@ -24,7 +26,7 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
     { _id: string; url: string; name?: string }[]
   >([]);
   const [defaultRingUrl, setDefaultRingUrl] = useState<string | null>(null);
-
+  const dispatch = useAppDispatch();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const [snackbar, setSnackbar] = useState<{
@@ -105,15 +107,7 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
         payload
       );
 
-      const checkNotificationPayload = {
-        patientId: notification?.patientId,
-        fieldToUpdateId: notification?._id,
-      };
-      const checkNotification = await axios.put(
-        `${APIEndpoints.Patient}/check?dosereminder=true`,
-        checkNotificationPayload
-      );
-      return Boolean(response.data && checkNotification.data);
+      return Boolean(response.data);
     } catch (error) {
       return false;
     }
@@ -134,6 +128,7 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
       };
 
       const sent = await setDoseStatus(updatedStatus);
+      dispatch(fetchAllNotifications(notification?.patientId ?? ""));
 
       if (!sent) {
         setSnackbar({
@@ -177,7 +172,18 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
       },
     });
 
-    if (success) {
+    const checkNotificationPayload = {
+      patientId: notification?.patientId,
+      fieldToUpdateId: notification?._id,
+      taken: true,
+    };
+    const checkNotification = await axios.put(
+      `${APIEndpoints.Patient}/check?dosereminder=true`,
+      checkNotificationPayload
+    );
+    dispatch(fetchAllNotifications(notification?.patientId ?? ""));
+
+    if (success && checkNotification) {
       setSnackbar({
         open: true,
         severity: "success",

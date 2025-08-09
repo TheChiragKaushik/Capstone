@@ -377,6 +377,7 @@ public class PatientNotificationsServiceImpl implements PatientNotificationsServ
 		DoseReminderNotificationEO newDoseReminder = new DoseReminderNotificationEO();
 		newDoseReminder.setNotificationRequestId(notificationRequestId);
 		newDoseReminder.setChecked(false);
+		newDoseReminder.setTaken(false);
 		newDoseReminder.setNotification(notificationRequest);
 
 		Query query = new Query(Criteria.where("patientId").is(patientId));

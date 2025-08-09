@@ -18,6 +18,7 @@ import capstone.entities.Constants.SoundPreference;
 import capstone.entities.PatientEO;
 import capstone.entities.PatientEO.Prescription.MedicationPrescribed;
 import capstone.entities.PatientEO.Prescription.MedicationTracking.Tracker.Dose;
+import capstone.entities.PatientNotificationsEO;
 import capstone.services.PatientServices;
 import lombok.Data;
 import reactor.core.publisher.Mono;
@@ -88,6 +89,7 @@ public class PatientController {
 	public static class CheckStatusPayload {
 		private String patientId;
 		private String fieldToUpdateId;
+		private Boolean taken;
 	}
 
 	@PutMapping("check")
@@ -99,9 +101,10 @@ public class PatientController {
 			){
 		String patientId = checkStatusPayload.getPatientId();
 		String fieldToUpdate = checkStatusPayload.getFieldToUpdateId();
+		Boolean taken = checkStatusPayload.getTaken();
 		
 		if(dosereminder != null && dosereminder) {
-			return patientServices.updateDoseReminderNotificationCheck(patientId, fieldToUpdate);
+			return patientServices.updateDoseReminderNotificationCheck(patientId, fieldToUpdate, taken);
 		}else if(refillrequest != null && refillrequest){
 			return patientServices.updateRaiseRefillNotificationCheck(patientId,fieldToUpdate);
 		}else if(approvedrefill != null && approvedrefill) {
@@ -109,6 +112,12 @@ public class PatientController {
 		}
 		
 		return null;
+	}
+	
+	
+	@GetMapping("/notifications/{patientId}")
+	public Mono<PatientNotificationsEO> getAllPatientNotifications(@PathVariable String patientId){
+		return patientServices.getAllPatientNotifications(patientId);
 	}
 }
  
