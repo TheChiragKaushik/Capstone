@@ -67,8 +67,6 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
     RefillMedications[]
   >([]);
 
-  const [patientDetailsFetched, setPatientDetailsFetched] = useState(false);
-
   const fetchAllPatientDetails = async () => {
     if (!refillMedications) return;
 
@@ -113,8 +111,6 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
         return refill;
       });
     });
-
-    setPatientDetailsFetched(true);
   };
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -157,14 +153,16 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
   ]);
 
   useEffect(() => {
-    if (!refillMedications && !patientDetailsFetched) {
-      fetchAllPatientDetails();
-    }
-  }, [refillMedications, patientDetailsFetched]);
-
-  useEffect(() => {
     fetchPharmacyRefillMedications();
   }, [pharmacyId]);
+
+  useEffect(() => {
+    if (refillMedications && refillMedications.length > 0) {
+      if (!refillMedications[0]?.patientName) {
+        fetchAllPatientDetails();
+      }
+    }
+  }, [refillMedications]);
 
   const filteredInventory = refillMedications?.filter((item) => {
     if (pharmacyProcessRefillNotification !== null) {
@@ -261,9 +259,8 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((refillMedication) => {
                       return (
-                        <>
+                        <React.Fragment key={refillMedication?.raiseRefillId}>
                           <TableRow
-                            key={refillMedication?.raiseRefillId}
                             sx={{
                               "&:hover": { backgroundColor: "#F9FAFB" },
                             }}
@@ -380,7 +377,7 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
                               </Collapse>
                             </TableCell>
                           </TableRow>
-                        </>
+                        </React.Fragment>
                       );
                     })
                 ) : (

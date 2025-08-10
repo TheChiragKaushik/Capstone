@@ -8,6 +8,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import {
+  checkProfileComplete,
   colors,
   ProviderSpecializations,
   stringAvatar,
@@ -18,12 +19,15 @@ import type { ProviderEO } from "../../../utils/Interfaces";
 import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
 import { getEmailSuffix, validateField } from "../../../utils/Validations";
+import { useAppDispatch } from "../../../redux/hooks";
+import { setProfileStatus } from "../../../redux/features/setProfileCompleteSlice";
 
 type ProviderDetailsProps = {
   userId?: string;
 };
 
 const ProviderDetails: React.FC<ProviderDetailsProps> = ({ userId }) => {
+  const dispatch = useAppDispatch();
   const [edit, setEdit] = useState(false);
   const [userDetails, setUserDetails] = useState<ProviderEO>({} as ProviderEO);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -121,6 +125,9 @@ const ProviderDetails: React.FC<ProviderDetailsProps> = ({ userId }) => {
       );
 
       if (!res.data) throw new Error("Update failed");
+      const isComplete = checkProfileComplete(updatedUserDetails, "Provider");
+      dispatch(setProfileStatus(isComplete));
+
 
       setSnackbarSeverity("success");
       setSnackbarMessage("Pharmacy details updated successfully!");

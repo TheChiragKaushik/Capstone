@@ -3,9 +3,12 @@ import type {
   AllergyEO,
   InventoryRestockReminderNotification,
   MedicationPrescribed,
+  PatientEO,
   PatientNotificationsRequest,
+  PharmacyEO,
   PharmacyInventory,
   Prescription,
+  ProviderEO,
   RaiseRefillEO,
 } from "./Interfaces";
 import axios, { type AxiosResponse } from "axios";
@@ -381,3 +384,59 @@ export const RelationShipWithUser = [
   "Son",
   "Daughter",
 ];
+
+
+export function checkProfileComplete(
+  userDetail: PatientEO | ProviderEO | PharmacyEO | undefined,
+  type: "Patient" | "Provider" | "Pharmacy"
+): boolean {
+  if (!userDetail) return false;
+
+  const checkAddress = (address: any) =>
+    !!address?.city &&
+    !!address?.state &&
+    !!address?.street &&
+    !!address?.zipCode;
+
+  switch (type) {
+    case "Patient": {
+      const patient = userDetail as PatientEO;
+
+      const addressComplete = checkAddress(patient.address);
+
+      const emergencyContactComplete =
+        !!patient.emergencyContact?.name &&
+        !!patient.emergencyContact?.phone &&
+        !!patient.emergencyContact?.relationship;
+
+      const medicalInfoComplete =
+        !!patient.allergyIds?.length &&
+        !!patient.existingConditions?.length;
+
+      const basicInfoComplete =
+        !!patient.bloodGroup && !!patient.dateOfBirth;
+
+      return (
+        addressComplete &&
+        emergencyContactComplete &&
+        medicalInfoComplete &&
+        basicInfoComplete
+      );
+    }
+
+    case "Provider": {
+      const provider = userDetail as ProviderEO;
+      const addressComplete = checkAddress(provider.address);
+      return !!provider.specialization && addressComplete;
+    }
+
+    case "Pharmacy": {
+      const pharmacy = userDetail as PharmacyEO;
+      return checkAddress(pharmacy.address);
+    }
+
+    default:
+      console.warn(`Unknown type "${type}"`);
+      return false;
+  }
+}

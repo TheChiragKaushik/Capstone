@@ -9,6 +9,8 @@ import { Button, IconButton, InputAdornment } from "@mui/material";
 import { colors } from "../../utils/Constants";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -16,6 +18,8 @@ const LoginPage: React.FC = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -92,9 +96,29 @@ const LoginPage: React.FC = () => {
       });
     } catch (error) {
       console.error("Login error:", error);
-      alert("Login failed. Please check your credentials and try again.");
+      let message = "Login failed. Please check your credentials and try again.";
+
+      if (axios.isAxiosError(error) && error.response) {
+        if (error.response.status === 401) {
+          message = "Invalid email or password. Please try again.";
+        } else if (error.response.data && error.response.data.message) {
+          message = error.response.data.message;
+        }
+      }
+
+      setSnackbarMessage(message);
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleSnackbarClose = (
+    _?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
       return;
     }
+    setSnackbarOpen(false);
   };
 
   return (
@@ -207,27 +231,6 @@ const LoginPage: React.FC = () => {
           }}
         />
       </div>
-      {/* <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <Checkbox
-            sx={{
-              color: colors.brown400,
-              "&.Mui-checked": {
-                color: colors.brown500,
-              },
-            }}
-          />
-          <Typography variant="body2" sx={{ color: colors.brown500 }}>
-            Remember me
-          </Typography>
-        </div>
-        <Link
-          to="#"
-          className="text-sm font-medium text-brown-500 hover:text-brown-700"
-        >
-          Forgot password?
-        </Link>
-      </div> */}
       <Button
         onClick={handleLogin}
         sx={{
@@ -249,6 +252,20 @@ const LoginPage: React.FC = () => {
       >
         Login
       </Button>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

@@ -38,19 +38,68 @@ public class PharmacyPatientRequestRefillServiceImpl implements PharmacyPatientR
 
 	@Override
 	public Mono<UpdateResult> approveRefillRequest(RaiseRefillEO raiseRefillEO) {
-		return updateMedicationPrescribedDetailsByPrescriptionAndMedicationId(raiseRefillEO)
-				.doOnError(throwable -> System.err.println("Error updating medication prescribed details: " + throwable.getMessage()))
-				.flatMap(updateResult -> updateRaisedRefillStatus(raiseRefillEO, "patients"))
-				.doOnError(throwable -> System.err.println("Error updating raised refill status for patients: " + throwable.getMessage()))
-				.flatMap(updateResult -> updateRaisedRefillStatus(raiseRefillEO, "pharmacies"))
-				.doOnError(throwable -> System.err.println("Error updating raised refill status for pharmacies: " + throwable.getMessage()))
-				.flatMap(updateResult -> updatePatientNotification(raiseRefillEO))
-				.doOnError(throwable -> System.err.println("Error updating patient notification: " + throwable.getMessage()))
-				.doOnSuccess(updateResult -> sendRefillApproveNotificationToPatient(raiseRefillEO))
-				.flatMap(updateResult -> updatePharmacyInventory(raiseRefillEO))
-		        .doOnError(throwable -> System.err.println("Error updating pharmacy inventory: " + throwable.getMessage()));
+	    return checkPharmacyInventoryForEnoughMedication(raiseRefillEO)
+	            .doOnError(throwable -> System.err.println("Error updating pharmacy inventory: " + throwable.getMessage()))
+	            .flatMap(updateResult -> {
+	                if (updateResult.getModifiedCount() > 0) {
+	                    return updateMedicationPrescribedDetailsByPrescriptionAndMedicationId(raiseRefillEO)
+	                            .doOnError(throwable -> System.err.println("Error updating medication prescribed details: " + throwable.getMessage()))
+	                            .flatMap(result -> updateRaisedRefillStatus(raiseRefillEO, "patients"))
+	                            .doOnError(throwable -> System.err.println("Error updating raised refill status for patients: " + throwable.getMessage()))
+	                            .flatMap(result -> updateRaisedRefillStatus(raiseRefillEO, "pharmacies"))
+	                            .doOnError(throwable -> System.err.println("Error updating raised refill status for pharmacies: " + throwable.getMessage()))
+	                            .flatMap(result -> updatePatientNotification(raiseRefillEO))
+	                            .doOnError(throwable -> System.err.println("Error updating patient notification: " + throwable.getMessage()))
+	                            .doOnSuccess(result -> sendRefillApproveNotificationToPatient(raiseRefillEO));
+	                } else {
+	                    System.out.println("Inventory not updated. Not enough stock for medication " + raiseRefillEO.getMedicationId());
+	                    return Mono.error(new IllegalStateException("Not enough stock in pharmacy inventory."));
+	                }
+	            })
+	            .doOnSuccess(updateResult -> checkAndSendInventoryNotification(raiseRefillEO));
 	}
 	
+//	@Override
+//	public Mono<UpdateResult> approveRefillRequest(RaiseRefillEO raiseRefillEO) {
+//		return updateMedicationPrescribedDetailsByPrescriptionAndMedicationId(raiseRefillEO)
+//				.doOnError(throwable -> System.err.println("Error updating medication prescribed details: " + throwable.getMessage()))
+//				.flatMap(updateResult -> updateRaisedRefillStatus(raiseRefillEO, "patients"))
+//				.doOnError(throwable -> System.err.println("Error updating raised refill status for patients: " + throwable.getMessage()))
+//				.flatMap(updateResult -> updateRaisedRefillStatus(raiseRefillEO, "pharmacies"))
+//				.doOnError(throwable -> System.err.println("Error updating raised refill status for pharmacies: " + throwable.getMessage()))
+//				.flatMap(updateResult -> updatePatientNotification(raiseRefillEO))
+//				.doOnError(throwable -> System.err.println("Error updating patient notification: " + throwable.getMessage()))
+//				.doOnSuccess(updateResult -> sendRefillApproveNotificationToPatient(raiseRefillEO))
+//				.flatMap(updateResult -> updatePharmacyInventory(raiseRefillEO))
+//		        .doOnError(throwable -> System.err.println("Error updating pharmacy inventory: " + throwable.getMessage()));
+//	}
+	
+	public Mono<UpdateResult> checkPharmacyInventoryForEnoughMedication(RaiseRefillEO raiseRefillEO) {
+	    Integer doseRequired = raiseRefillEO.getDoseTabletsRequired() != null ? raiseRefillEO.getDoseTabletsRequired() : raiseRefillEO.getDoseVolumeRequired();
+	    String pharmacyId = raiseRefillEO.getPharmacyId();
+	    String medicationId = raiseRefillEO.getMedicationId();
+
+	    Query finalQuery;
+	    Update finalUpdate = new Update();
+
+	    if (raiseRefillEO.getDoseTabletsRequired() != null) {
+	        finalQuery = new Query(Criteria.where("_id").is(pharmacyId)
+	                .and("pharmacyInventory").elemMatch(
+	                    Criteria.where("medicationId").is(medicationId)
+	                            .and("currentStockTablets").gte(doseRequired)
+	                ));
+	        finalUpdate.inc("pharmacyInventory.$.currentStockTablets", -doseRequired);
+	    } else {
+	        finalQuery = new Query(Criteria.where("_id").is(pharmacyId)
+	                .and("pharmacyInventory").elemMatch(
+	                    Criteria.where("medicationId").is(medicationId)
+	                            .and("currentStockVolume").gte(doseRequired)
+	                ));
+	        finalUpdate.inc("pharmacyInventory.$.currentStockVolume", -doseRequired);
+	    }
+
+	    return reactiveMongoTemplateRef.updateFirst(finalQuery, finalUpdate, PharmacyEO.class);
+	}
 	public Mono<UpdateResult> updatePatientNotification(RaiseRefillEO raiseRefillEO){
 		String patientId = raiseRefillEO.getPatientId();
 		Query query = new Query(Criteria.where("patientId").is(patientId));

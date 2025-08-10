@@ -7,19 +7,22 @@ import type {
   RaiseRefillEO,
 } from "../../../utils/Interfaces";
 import RefillNotification from "./RefillNotification";
+import { useAppSelector } from "../../../redux/hooks";
 
 function isPatientNotification(x: any): x is PatientNotificationsRequest {
-  return x && typeof x._id === "string" && "message" in x && !("refillId" in x);
+  return x && typeof x._id === "string";
 }
+
 function isRefill(x: any): x is RaiseRefillEO {
-  return x && typeof x.raiseRefillId === "string" && "message" in x;
+  return x && typeof x.raiseRefillId === "string";
 }
 
 const PatientNotificationStack: React.FC<NotificationDialogProps> = ({
-  notifications = [],
-  onRemove = () => {},
   navigateToRoute,
 }) => {
+  const notifications = useAppSelector(
+    (state) => state.appNotifications.notifications
+  );
   return (
     <Box
       sx={{
@@ -44,10 +47,7 @@ const PatientNotificationStack: React.FC<NotificationDialogProps> = ({
               unmountOnExit
             >
               <Box>
-                <PatientNotification
-                  notification={notification}
-                  onClose={() => onRemove(notification._id ?? "")}
-                />
+                <PatientNotification notification={notification} />
               </Box>
             </Slide>
           );
@@ -64,7 +64,6 @@ const PatientNotificationStack: React.FC<NotificationDialogProps> = ({
               <Box>
                 <RefillNotification
                   notification={notification}
-                  onClose={() => onRemove(notification.raiseRefillId ?? "")}
                   navigateToRoute={navigateToRoute}
                 />
               </Box>

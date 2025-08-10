@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from "react-router";
 import RoleConfig from "../utils/RoleConfig";
 import { useDemoRouter } from "@toolpad/core/internal";
 import AppTitle from "../components/MainApp/AppTitle";
-import { AppTheme, colors, showOsNotification } from "../utils/Constants";
+import { AppTheme, checkProfileComplete, colors, showOsNotification } from "../utils/Constants";
 import axios from "axios";
 import { APIEndpoints } from "../api/api";
 import type {
@@ -25,8 +25,15 @@ import {
   removeListener,
 } from "../utils/WebSocket";
 import ToolbarActionsSearch from "../components/MainApp/ToolbarActionsSearch";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { addAppNotification } from "../redux/features/appNotificationsSlice";
+import { fetchAllNotifications } from "../redux/features/patientNotificationsSlice";
+import { fetchAllPharmacyNotifications } from "../redux/features/pharmacyNotificationsSlice";
+import IncompleteProfileModal from "../components/Common/IncompleteProfileModal";
+import { setProfileStatus } from "../redux/features/setProfileCompleteSlice";
 
 const MainApp = () => {
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const { name, email, role, userId } = location.state;
 
@@ -73,6 +80,7 @@ const MainApp = () => {
     PatientEO | PharmacyEO | ProviderEO | undefined
   >(undefined);
 
+
   const getUserData = async () => {
     try {
       const user = await axios.get(
@@ -94,41 +102,6 @@ const MainApp = () => {
     }
   };
 
-  const [newNotifications, setNewNotifications] = React.useState<
-    | PatientNotificationsRequest[]
-    | RaiseRefillEO[]
-    | InventoryRestockReminderNotification[]
-  >([]);
-
-  const addNotification = (
-    notification:
-      | PatientNotificationsRequest
-      | RaiseRefillEO
-      | InventoryRestockReminderNotification
-  ) => {
-    setNewNotifications((prevNotifications) => [
-      ...prevNotifications,
-      notification,
-    ]);
-  };
-
-  const removeNotification = (id: string) => {
-    setNewNotifications((prevNotifications) =>
-      prevNotifications.filter((notification) => {
-        if ("_id" in notification) {
-          return notification._id !== id;
-        }
-        if ("raiseRefillId" in notification) {
-          return notification.raiseRefillId !== id;
-        }
-        if ("inventoryRestockReminderNotificationId" in notification) {
-          return notification.inventoryRestockReminderNotificationId !== id;
-        }
-        return true;
-      })
-    );
-  };
-
   useEffect(() => {
     getUserData();
 
@@ -144,22 +117,30 @@ const MainApp = () => {
       ) => {
         console.log(`Received ${type} message:`, message);
 
-        if (role === "Patient" && "raiseRefillId" in message) {
-          setTimeout(() => {
-            addNotification(message);
+        if (role === "Patient") {
+          if ("raiseRefillId" in message) {
+            setTimeout(() => {
+              dispatch(addAppNotification(message));
+              showOsNotification(message);
+              dispatch(fetchAllNotifications(userId));
+            }, 2000);
+          } else {
+            dispatch(addAppNotification(message));
             showOsNotification(message);
-          }, 2000);
-        } else if (
-          role === "Pharmacy" &&
-          "  inventoryRestockReminderNotificationId" in message
-        ) {
-          setTimeout(() => {
-            addNotification(message);
+            dispatch(fetchAllNotifications(userId));
+          }
+        } else if (role === "Pharmacy") {
+          if ("inventoryRestockReminderNotificationId" in message) {
+            setTimeout(() => {
+              dispatch(addAppNotification(message));
+              showOsNotification(message);
+              dispatch(fetchAllPharmacyNotifications(userId));
+            }, 2000);
+          } else {
+            dispatch(addAppNotification(message));
             showOsNotification(message);
-          }, 2000);
-        } else {
-          addNotification(message);
-          showOsNotification(message);
+            dispatch(fetchAllPharmacyNotifications(userId));
+          }
         }
       };
 
@@ -182,6 +163,29 @@ const MainApp = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      const isComplete = checkProfileComplete(user, role);
+      dispatch(setProfileStatus(isComplete))
+    }
+  }, [user, role])
+
+  const isProfileComplete = useAppSelector((state) => state.setProfileComplete.isProfileComplete);
+
+  const handleGoToProfile = () => {
+    router.navigate("/profile");
+  };
+
+  if (user && !isProfileComplete && pathname !== "profile") {
+    return (
+      <IncompleteProfileModal
+        open={true}
+        userRole={role}
+        onGoToProfile={handleGoToProfile}
+      />
+    );
+  }
+
   return (
     <>
       <AppProvider
@@ -200,7 +204,6 @@ const MainApp = () => {
                 role={role}
                 user={user}
                 navigateToRoute={router}
-                onRemove={removeNotification}
               />
             ),
           }}
@@ -227,12 +230,7 @@ const MainApp = () => {
       </AppProvider>
 
       {NoticiationComponent && (
-        <NoticiationComponent
-          notifications={newNotifications}
-          onRemove={removeNotification}
-          navigateToRoute={router}
-          userId={user?._id}
-        />
+        <NoticiationComponent navigateToRoute={router} userId={userId} />
       )}
     </>
   );

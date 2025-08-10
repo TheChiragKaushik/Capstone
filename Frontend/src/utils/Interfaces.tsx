@@ -31,7 +31,6 @@ export interface NotificationPanelProps {
   onClose: () => void;
   userId?: string;
   navigateToRoute?: Router;
-  onRemove?: (id: string) => void;
 }
 
 export interface NotificationDialogProps {
@@ -40,7 +39,6 @@ export interface NotificationDialogProps {
     | RaiseRefillEO
     | InventoryRestockReminderNotification
   )[];
-  onRemove?: (id: string) => void;
   navigateToRoute?: Router;
   userId?: string;
 }

@@ -14,19 +14,19 @@ import { useAppDispatch } from "../../../../redux/hooks";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { addPharmacyUpdateInventoryNotificationId } from "../../../../redux/features/pharmacyUpdateInventoryNotificationIdSlice";
+import { removeAppNotification } from "../../../../redux/features/appNotificationsSlice";
+import { fetchAllPharmacyNotifications } from "../../../../redux/features/pharmacyNotificationsSlice";
 
 type PharmacyNotificationItemProps = {
   notification?: SinglePharmacyNotification;
   userId?: string;
   navigateToRoute?: Router;
-  onRemove?: (id: string) => void;
 };
 
 const PharmacyNotificationItem: React.FC<PharmacyNotificationItemProps> = ({
   notification,
   userId,
   navigateToRoute,
-  onRemove,
 }) => {
   const typeOfNotification = notification?.type;
   const dispatch = useAppDispatch();
@@ -78,9 +78,8 @@ const PharmacyNotificationItem: React.FC<PharmacyNotificationItemProps> = ({
     } catch (error) {
       console.error(error);
     }
-    if (onRemove) {
-      onRemove(refillRequestObject?.raiseRefillId ?? "");
-    }
+    dispatch(removeAppNotification(refillRequestObject?.raiseRefillId ?? ""));
+    dispatch(fetchAllPharmacyNotifications(userId ?? ""));
     navigateToRoute?.navigate("processRefill");
   };
 
@@ -114,11 +113,12 @@ const PharmacyNotificationItem: React.FC<PharmacyNotificationItemProps> = ({
     } catch (error) {
       console.error(error);
     }
-    if (onRemove) {
-      onRemove(
+    dispatch(
+      removeAppNotification(
         inventoryUpdateObject?.inventoryRestockReminderNotificationId ?? ""
-      );
-    }
+      )
+    );
+    dispatch(fetchAllPharmacyNotifications(userId ?? ""));
     navigateToRoute?.navigate("inventoryUpdate");
   };
 

@@ -8,19 +8,20 @@ import { APIEndpoints } from "../../../api/api";
 import { useEffect, useRef, useState } from "react";
 import { useAppDispatch } from "../../../redux/hooks";
 import { addPharmacyUpdateInventoryNotificationId } from "../../../redux/features/pharmacyUpdateInventoryNotificationIdSlice";
+import { removeAppNotification } from "../../../redux/features/appNotificationsSlice";
+import { fetchAllPharmacyNotifications } from "../../../redux/features/pharmacyNotificationsSlice";
 
 const DEFAULT_RING_ID = "6890a2df83c52777f2a65306";
 
 type PharmacyInventoryNotificationProps = {
   notification?: InventoryRestockReminderNotification;
-  onClose?: () => void;
   navigateToRoute?: Router;
   userId?: string;
 };
 
 const PharmacyInventoryNotification: React.FC<
   PharmacyInventoryNotificationProps
-> = ({ notification, onClose, userId, navigateToRoute }) => {
+> = ({ notification, userId, navigateToRoute }) => {
   const dispatch = useAppDispatch();
   const [sounds, setSounds] = useState<
     { _id: string; url: string; name?: string }[]
@@ -101,14 +102,20 @@ const PharmacyInventoryNotification: React.FC<
   }, [notification, sounds, defaultRingUrl]);
 
   useEffect(() => {
-    if (!onClose) return;
+    if (!notification?.inventoryRestockReminderNotificationId) {
+      return;
+    }
     const timeout = setTimeout(() => {
       stopAudio();
-      if (onClose) onClose();
+      dispatch(
+        removeAppNotification(
+          notification?.inventoryRestockReminderNotificationId ?? ""
+        )
+      );
     }, 60000);
 
     return () => clearTimeout(timeout);
-  }, [onClose]);
+  }, [dispatch, notification]);
 
   const handleInventory = async () => {
     dispatch(
@@ -130,10 +137,13 @@ const PharmacyInventoryNotification: React.FC<
       console.error(error);
     }
     stopAudio();
+    dispatch(
+      removeAppNotification(
+        notification?.inventoryRestockReminderNotificationId ?? ""
+      )
+    );
+    dispatch(fetchAllPharmacyNotifications(userId ?? ""));
     navigateToRoute?.navigate("inventoryUpdate");
-    if (onClose) {
-      onClose();
-    }
   };
 
   return (

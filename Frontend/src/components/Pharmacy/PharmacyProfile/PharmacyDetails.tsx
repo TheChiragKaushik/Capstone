@@ -1,19 +1,22 @@
 import type React from "react";
 import type { PharmacyEO } from "../../../utils/Interfaces";
 import { Avatar, Button, InputAdornment } from "@mui/material";
-import { colors, stringAvatar } from "../../../utils/Constants";
+import { checkProfileComplete, colors, stringAvatar } from "../../../utils/Constants";
 import CommonTextfield from "../../Common/CommonTextfield";
 import { useEffect, useState } from "react";
 import { getEmailSuffix, validateField } from "../../../utils/Validations";
 import { Snackbar, Alert } from "@mui/material";
 import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
+import { useAppDispatch } from "../../../redux/hooks";
+import { setProfileStatus } from "../../../redux/features/setProfileCompleteSlice";
 
 type PharmacyDetailsProps = {
   user?: PharmacyEO;
 };
 
 const PharmacyDetails: React.FC<PharmacyDetailsProps> = ({ user }) => {
+  const dispatch = useAppDispatch();
   const [edit, setEdit] = useState(false);
   const [userDetails, setUserDetails] = useState<PharmacyEO>(
     user ?? ({} as PharmacyEO)
@@ -112,6 +115,8 @@ const PharmacyDetails: React.FC<PharmacyDetailsProps> = ({ user }) => {
       );
 
       if (!res.data) throw new Error("Update failed");
+      const isComplete = checkProfileComplete(updatedUserDetails, "Pharmacy");
+      dispatch(setProfileStatus(isComplete));
 
       setSnackbarSeverity("success");
       setSnackbarMessage("Pharmacy details updated successfully!");

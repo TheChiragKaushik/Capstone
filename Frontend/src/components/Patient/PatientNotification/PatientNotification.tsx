@@ -10,17 +10,17 @@ import { APIEndpoints } from "../../../api/api";
 import { colors } from "../../../utils/Constants";
 import { useAppDispatch } from "../../../redux/hooks";
 import { fetchAllNotifications } from "../../../redux/features/patientNotificationsSlice";
+import { removeAppNotification } from "../../../redux/features/appNotificationsSlice";
+import { fetchPatientDetails } from "../../../redux/features/patientDetailsSlice";
 
 type PatientNotificationProps = {
   notification?: PatientNotificationsRequest;
-  onClose?: () => void;
 };
 
 const DEFAULT_RING_ID = "6890a2df83c52777f2a65306";
 
 const PatientNotification: React.FC<PatientNotificationProps> = ({
   notification,
-  onClose,
 }) => {
   const [sounds, setSounds] = useState<
     { _id: string; url: string; name?: string }[]
@@ -114,7 +114,7 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
   };
 
   useEffect(() => {
-    if (!onClose) return;
+    if (!notification?._id) return;
     const timeout = setTimeout(async () => {
       const updatedStatus: DoseStatusSetRequest = {
         ...doseStatusUpdate,
@@ -140,22 +140,28 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
       }
 
       stopAudio();
-      if (onClose) onClose();
+      dispatch(removeAppNotification(notification?._id ?? ""));
     }, 60000);
 
     return () => clearTimeout(timeout);
-  }, [onClose]);
+  }, [dispatch, notification]);
 
   const handleTaken = async () => {
     if (!notification) return;
-    let tabletsTaken: number;
-    if (
-      notification.doseTablets !== null &&
-      notification.doseTablets !== undefined
-    ) {
-      tabletsTaken = notification.doseTablets;
+
+    let doseUpdatePayload = {};
+    if (notification.doseTablets !== null && notification.doseTablets !== undefined) {
+      doseUpdatePayload = { tabletsTaken: notification.doseTablets };
+    } else if (notification.doseVolume !== null && notification.doseVolume !== undefined) {
+      doseUpdatePayload = { volumeTaken: notification.doseVolume };
     } else {
-      tabletsTaken = notification.doseVolume ?? 0;
+      console.error("Dose type (tablets or volume) not specified in notification.");
+      setSnackbar({
+        open: true,
+        severity: "error",
+        message: "Failed to mark as taken. Dose type not found.",
+      });
+      return;
     }
 
     const now = new Date();
@@ -167,7 +173,7 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
         ...doseStatusUpdate.doseStatusUpdate,
         scheduleId: notification.scheduleId,
         taken: true,
-        tabletsTaken,
+        ...doseUpdatePayload,
         actualTimeTaken,
       },
     });
@@ -198,7 +204,8 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
     }
 
     stopAudio();
-    if (onClose) onClose();
+    dispatch(removeAppNotification(notification?._id ?? ""));
+    dispatch(fetchPatientDetails(notification.patientId));
   };
 
   const handleSnackbarClose = (
@@ -254,7 +261,7 @@ const PatientNotification: React.FC<PatientNotificationProps> = ({
                     <p>
                       💊 Take{" "}
                       {notification?.doseTablets !== null &&
-                      notification?.doseTablets !== undefined
+                        notification?.doseTablets !== undefined
                         ? `${notification?.doseTablets} Tablet`
                         : `${notification?.doseVolume ?? 0} ml`}
                     </p>

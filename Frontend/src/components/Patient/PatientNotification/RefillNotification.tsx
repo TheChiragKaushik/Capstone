@@ -10,10 +10,10 @@ import { APIEndpoints } from "../../../api/api";
 import type { Router } from "@toolpad/core/AppProvider";
 import { useDispatch } from "react-redux";
 import { addPatientRaiseRefillNotificationId } from "../../../redux/features/patientRaiseRefillNotificationId";
+import { removeAppNotification } from "../../../redux/features/appNotificationsSlice";
 
 type RefillNotificationProps = {
   notification?: RaiseRefillEO;
-  onClose?: () => void;
   navigateToRoute?: Router;
 };
 
@@ -21,7 +21,6 @@ const DEFAULT_RING_ID = "6890a2df83c52777f2a65306";
 
 const RefillNotification: React.FC<RefillNotificationProps> = ({
   notification,
-  onClose,
   navigateToRoute,
 }) => {
   const isApprovedNotification =
@@ -111,14 +110,15 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
   }, [notification]);
 
   useEffect(() => {
-    if (!onClose) return;
+    if (!notification?.raiseRefillId)
+      return;
     const timeout = setTimeout(() => {
       stopAudio();
-      if (onClose) onClose();
+      dispatch(removeAppNotification(notification?.raiseRefillId ?? ""))
     }, 60000);
 
     return () => clearTimeout(timeout);
-  }, [onClose]);
+  }, [dispatch, notification]);
 
   const handleOrderRefill = async () => {
     dispatch(addPatientRaiseRefillNotificationId(notification?.raiseRefillId));
@@ -135,7 +135,7 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
       return;
     }
     stopAudio();
-    if (onClose) onClose();
+    dispatch(removeAppNotification(notification?.raiseRefillId ?? ""));
     navigateToRoute?.navigate("refillRequests");
   };
 
@@ -157,7 +157,7 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
       console.error(error);
     }
     stopAudio();
-    if (onClose) onClose();
+    dispatch(removeAppNotification(notification?.raiseRefillId ?? ""));
     navigateToRoute?.navigate("refillRequests");
   };
 

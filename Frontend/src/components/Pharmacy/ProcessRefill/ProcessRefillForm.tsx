@@ -46,7 +46,7 @@ const ProcessRefillForm: React.FC<ProcessRefillFormProps> = ({
 
     const maxAllowed =
       refillMedication.doseTabletsRequired !== null &&
-      refillMedication.doseTabletsRequired !== undefined
+        refillMedication.doseTabletsRequired !== undefined
         ? refillMedication.doseTabletsRequired
         : refillMedication.doseVolumeRequired;
 
@@ -92,6 +92,7 @@ const ProcessRefillForm: React.FC<ProcessRefillFormProps> = ({
         `${APIEndpoints.Notifications}/approve-request`,
         payload
       );
+
       if (response.data) {
         setSnackbarSeverity("success");
         setSnackbarMessage("Refill request approved successfully.");
@@ -108,6 +109,7 @@ const ProcessRefillForm: React.FC<ProcessRefillFormProps> = ({
     } catch (error: any) {
       console.error("Error approving refill request:", error);
       setSnackbarSeverity("error");
+
       if (error.response?.data?.message) {
         setSnackbarMessage(error.response.data.message);
       } else {

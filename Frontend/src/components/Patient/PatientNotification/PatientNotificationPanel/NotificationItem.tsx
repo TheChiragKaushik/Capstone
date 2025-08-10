@@ -16,6 +16,13 @@ import { fetchAllNotifications } from "../../../../redux/features/patientNotific
 import { addPatientRaiseRefillNotificationId } from "../../../../redux/features/patientRaiseRefillNotificationId";
 import type { Router } from "@toolpad/core/AppProvider";
 import { colors } from "../../../../utils/Constants";
+import { removeAppNotification } from "../../../../redux/features/appNotificationsSlice";
+
+type DoseUpdatePayload = {
+  tabletsTaken?: number;
+  volumeTaken?: number;
+};
+
 
 const setDoseStatus = async (
   notification: PatientNotificationsRequest,
@@ -52,11 +59,11 @@ type NotificationItemProps = {
   navigateToRoute?: Router;
   onRemove?: (id: string) => void;
 };
+
 const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   userId,
   navigateToRoute,
-  onRemove,
 }) => {
   const typeOfNotification = notification?.type;
   const dispatch = useAppDispatch();
@@ -96,8 +103,14 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       return;
     }
 
-    const tabletsTaken: number =
-      doseReminderDetails?.doseTablets ?? doseReminderDetails?.doseVolume ?? 0;
+    const doseValue = doseReminderDetails?.doseTablets ?? doseReminderDetails?.doseVolume ?? 0;
+
+    const doseUpdatePayload: DoseUpdatePayload = {};
+    if (doseReminderDetails?.doseTablets !== null && doseReminderDetails?.doseTablets !== undefined) {
+      doseUpdatePayload.tabletsTaken = doseValue;
+    } else if (doseReminderDetails?.doseVolume !== null && doseReminderDetails?.doseVolume !== undefined) {
+      doseUpdatePayload.volumeTaken = doseValue;
+    }
 
     const now = new Date();
     const actualTimeTaken = now.toTimeString().slice(0, 5);
@@ -105,25 +118,23 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     const isTaken =
       status === "Taken" ? true : status === "Missed" ? false : false;
 
-    const finalPayload: DoseStatusSetRequest = {
+    const finalPayload = {
       ...doseStatusUpdatePayload,
       doseStatusUpdate: {
         ...doseStatusUpdatePayload.doseStatusUpdate,
         taken: isTaken,
-        tabletsTaken,
+        ...doseUpdatePayload,
         actualTimeTaken,
       },
     };
 
-    if (onRemove) {
-      onRemove(doseReminderDetails?._id ?? "");
-    }
     const success = await setDoseStatus(
       doseReminderDetails ?? {},
       finalPayload,
       isTaken
     );
     dispatch(fetchAllNotifications(userId ?? ""));
+    dispatch(removeAppNotification(doseReminderDetails?._id ?? ""));
 
     if (success) {
       setSnackbar({
@@ -196,9 +207,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     if (!checkNotification.data) {
       return;
     }
-    if (onRemove) {
-      onRemove(raiseRefillObject?.raiseRefillId ?? "");
-    }
+    dispatch(removeAppNotification(raiseRefillObject?.raiseRefillId ?? ""));
+    dispatch(fetchAllNotifications(userId ?? ""));
     navigateToRoute?.navigate("refillRequests");
   };
 
@@ -228,6 +238,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     } catch (error) {
       console.error(error);
     }
+    dispatch(removeAppNotification(approvedRefillObject?.raiseRefillId ?? ""));
+    dispatch(fetchAllNotifications(userId ?? ""));
     navigateToRoute?.navigate("refillRequests");
   };
 
@@ -251,7 +263,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                   <p>
                     💊 Medication:{" "}
                     {doseReminderDetails?.doseTablets !== null &&
-                    doseReminderDetails?.doseTablets !== undefined
+                      doseReminderDetails?.doseTablets !== undefined
                       ? `${doseReminderDetails?.doseTablets} Tablet`
                       : `${doseReminderDetails?.doseVolume ?? 0} ml`}
                   </p>
@@ -282,7 +294,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                   <p>
                     💊 Take{" "}
                     {doseReminderDetails?.doseTablets !== null &&
-                    doseReminderDetails?.doseTablets !== undefined
+                      doseReminderDetails?.doseTablets !== undefined
                       ? `${doseReminderDetails?.doseTablets} Tablet`
                       : `${doseReminderDetails?.doseVolume ?? 0} ml`}
                   </p>
@@ -325,11 +337,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             {notification?.checked ? (
               <Box
                 key={notification?.id}
-                className={`p-4 my-2 rounded-lg shadow-sm ${
-                  notification?.checked
-                    ? "border-l-4 border-brown-500 bg-beige-200"
-                    : "bg-beige-100 border-l-4 border-brown-500"
-                }`}
+                className={`p-4 my-2 rounded-lg shadow-sm ${notification?.checked
+                  ? "border-l-4 border-brown-500 bg-beige-200"
+                  : "bg-beige-100 border-l-4 border-brown-500"
+                  }`}
               >
                 <Typography variant="body1" fontWeight="bold">
                   {notification?.type}
@@ -355,11 +366,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             ) : (
               <Box
                 key={notification?.id}
-                className={`p-4 my-2 rounded-lg shadow-sm ${
-                  notification?.checked
-                    ? "border-l-4 border-brown-500 bg-beige-200"
-                    : "bg-beige-100 border-l-4 border-brown-500"
-                }`}
+                className={`p-4 my-2 rounded-lg shadow-sm ${notification?.checked
+                  ? "border-l-4 border-brown-500 bg-beige-200"
+                  : "bg-beige-100 border-l-4 border-brown-500"
+                  }`}
               >
                 <Typography variant="body1" fontWeight="bold">
                   {notification?.type}
@@ -402,11 +412,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             {notification?.checked ? (
               <Box
                 key={notification?.id}
-                className={`p-4 my-2 rounded-lg shadow-sm ${
-                  notification?.checked
-                    ? "border-l-4 border-brown-500 bg-beige-200"
-                    : "bg-beige-100 border-l-4 border-brown-500"
-                }`}
+                className={`p-4 my-2 rounded-lg shadow-sm ${notification?.checked
+                  ? "border-l-4 border-brown-500 bg-beige-200"
+                  : "bg-beige-100 border-l-4 border-brown-500"
+                  }`}
               >
                 <Typography variant="body1" fontWeight="bold">
                   {notification?.type}
@@ -422,11 +431,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             ) : (
               <Box
                 key={notification?.id}
-                className={`p-4 my-2 rounded-lg shadow-sm ${
-                  notification?.checked
-                    ? "border-l-4 border-brown-500 bg-beige-200"
-                    : "bg-beige-100 border-l-4 border-brown-500"
-                }`}
+                className={`p-4 my-2 rounded-lg shadow-sm ${notification?.checked
+                  ? "border-l-4 border-brown-500 bg-beige-200"
+                  : "bg-beige-100 border-l-4 border-brown-500"
+                  }`}
               >
                 <Typography variant="body1" fontWeight="bold">
                   {notification?.type}

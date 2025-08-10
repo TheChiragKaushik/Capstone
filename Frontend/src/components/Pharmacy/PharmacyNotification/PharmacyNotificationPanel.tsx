@@ -14,7 +14,6 @@ const PharmacyNotificationPanel: React.FC<NotificationPanelProps> = ({
   onClose,
   userId,
   navigateToRoute,
-  onRemove,
 }) => {
   const [activeNotificationType, setActiveNotificationType] =
     useState<NotificationType>("New");
@@ -23,6 +22,8 @@ const PharmacyNotificationPanel: React.FC<NotificationPanelProps> = ({
   const { newNotifications, checkedNotifications } = useAppSelector(
     (state) => state.pharmacyNotifications
   );
+
+  console.log(newNotifications)
 
   useEffect(() => {
     if (userId) {
@@ -111,7 +112,6 @@ const PharmacyNotificationPanel: React.FC<NotificationPanelProps> = ({
                     key={notification.id ?? "notId" + index}
                     userId={userId}
                     navigateToRoute={navigateToRoute}
-                    onRemove={onRemove}
                   />
                 ))
               ) : (
@@ -127,7 +127,6 @@ const PharmacyNotificationPanel: React.FC<NotificationPanelProps> = ({
                     key={notification.id ?? "notId" + index}
                     userId={userId}
                     navigateToRoute={navigateToRoute}
-                    onRemove={onRemove}
                   />
                 ))
               ) : (

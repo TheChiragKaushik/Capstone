@@ -11,19 +11,19 @@ import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
 import { useAppDispatch } from "../../../redux/hooks";
 import { addPharmacyProcessRefillNotificationId } from "../../../redux/features/pharmacyProcessRefillNotificationIdSlice";
+import { removeAppNotification } from "../../../redux/features/appNotificationsSlice";
+import { fetchAllPharmacyNotifications } from "../../../redux/features/pharmacyNotificationsSlice";
 
 const DEFAULT_RING_ID = "6890a2df83c52777f2a65306";
 
 type PharmacyRefillNotificationProps = {
   notification?: RaiseRefillEO;
-  onClose?: () => void;
   navigateToRoute?: Router;
   userId?: string;
 };
 
 const PharmacyRefillNotification: React.FC<PharmacyRefillNotificationProps> = ({
   notification,
-  onClose,
   navigateToRoute,
   userId,
 }) => {
@@ -126,14 +126,15 @@ const PharmacyRefillNotification: React.FC<PharmacyRefillNotificationProps> = ({
   }, [notification]);
 
   useEffect(() => {
-    if (!onClose) return;
+    if (!notification?.raiseRefillId)
+      return;
     const timeout = setTimeout(() => {
       stopAudio();
-      if (onClose) onClose();
+      dispatch(removeAppNotification(notification?.raiseRefillId ?? ""));
     }, 60000);
 
     return () => clearTimeout(timeout);
-  }, [onClose]);
+  }, [dispatch, notification]);
 
   const handleRefillRequest = async () => {
     dispatch(
@@ -155,8 +156,9 @@ const PharmacyRefillNotification: React.FC<PharmacyRefillNotificationProps> = ({
       console.error(error);
     }
     stopAudio();
+    dispatch(removeAppNotification(notification?.raiseRefillId ?? ""));
+    dispatch(fetchAllPharmacyNotifications(userId ?? ""));
     navigateToRoute?.navigate("processRefill");
-    if (onClose) onClose();
   };
   return (
     <>

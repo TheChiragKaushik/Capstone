@@ -1,18 +1,14 @@
-import React, { useEffect, useState } from "react";
-import type {
-  Allergy,
-  PatientEO,
-  Prescription,
-} from "../../../utils/Interfaces";
+import React, { useEffect } from "react";
+import type { Allergy } from "../../../utils/Interfaces";
 import CommonHeading from "../../Common/CommonHeading";
-import axios from "axios";
-import { APIEndpoints } from "../../../api/api";
 import { Avatar } from "@mui/material";
 import { stringAvatar } from "../../../utils/Constants";
 import PatientMedicalDetailCard, {
   MedicalDetail,
 } from "./PatientPrescriptions/PatientMedicalDetailCard";
 import PrescriptionTable from "./PatientPrescriptions/PrescriptionTable";
+import { fetchPatientDetails } from "../../../redux/features/patientDetailsSlice";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 
 type PatientPrescriptionsProps = {
   patientId?: string;
@@ -20,84 +16,27 @@ type PatientPrescriptionsProps = {
 const PatientPrescriptions: React.FC<PatientPrescriptionsProps> = ({
   patientId,
 }) => {
-  const [userDetails, setUserDetails] = useState<PatientEO | null>(null);
-  const [allergies, setAllergies] = useState<Allergy[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { userDetails, allergies, isLoading, error } = useAppSelector(
+    (state) => state.patientDetails
+  );
 
-  const fetchPatientDetails = async () => {
-    setIsLoading(true);
-    setUserDetails(null);
-    setAllergies([]);
-
-    try {
-      const patientResponse = await axios.get(
-        `${APIEndpoints.UserProfile}?PatientId=${patientId}`
-      );
-
-      if (!patientResponse.data) {
-        setIsLoading(false);
-        return;
-      }
-
-      const patientData = patientResponse.data;
-
-      if (patientData.allergyIds && patientData.allergyIds.length > 0) {
-        const allergyPromises = patientData.allergyIds.map(
-          (allergyId: string) =>
-            axios.get(`${APIEndpoints.Admin}/allergies?AllergyId=${allergyId}`)
-        );
-        const allergyResponses = await Promise.all(allergyPromises);
-        const allergyData = allergyResponses.map((r) => r.data);
-        setAllergies(allergyData);
-      }
-
-      if (
-        patientData.prescriptions &&
-        Array.isArray(patientData.prescriptions)
-      ) {
-        const prescriptionsWithDetails = await Promise.all(
-          patientData.prescriptions.map(async (prescription: Prescription) => {
-            const providerResponse = await axios.get(
-              `${APIEndpoints.UserProfile}?ProviderId=${prescription.providerId}`
-            );
-            const providedBy = providerResponse.data;
-
-            const medsWithDetails = await Promise.all(
-              (prescription.medicationsPrescribed || []).map(async (med) => {
-                const medResponse = await axios.get(
-                  `${APIEndpoints.Admin}/medications?MedicationId=${med.medicationId}`
-                );
-                return {
-                  ...med,
-                  medication: medResponse.data,
-                };
-              })
-            );
-            return {
-              ...prescription,
-              prescribedBy: providedBy,
-              medicationsPrescribed: medsWithDetails,
-            };
-          })
-        );
-        patientData.prescriptions = prescriptionsWithDetails;
-      }
-
-      setUserDetails(patientData);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const newNotifications = useAppSelector(
+    (state) => state.patientNotifications.newNotificationsCount
+  );
 
   useEffect(() => {
-    fetchPatientDetails();
-  }, [patientId]);
+    if (patientId) {
+      dispatch(fetchPatientDetails(patientId));
+    }
+  }, [patientId, newNotifications, dispatch]);
+
   return (
     <>
       {isLoading ? (
         <div>Loading..</div>
+      ) : error ? (
+        <div>Error: {error}</div>
       ) : (
         userDetails && (
           <div className="bg-white rounded-lg shadow-sm p-6 border border-beige-100 mb-8">

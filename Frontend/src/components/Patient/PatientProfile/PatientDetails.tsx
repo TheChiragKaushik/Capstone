@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import {
   bloodGroupDropdownValues,
+  checkProfileComplete,
   colors,
   ExistingConditions,
   fetchAllAllergies,
@@ -25,12 +26,15 @@ import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
 import CommonMultiSelect from "../../Common/CommonMultiSelect";
 import { getEmailSuffix, validateField } from "../../../utils/Validations";
+import { useAppDispatch } from "../../../redux/hooks";
+import { setProfileStatus } from "../../../redux/features/setProfileCompleteSlice";
 
 type PatientDetailsProps = {
   userId?: string;
 };
 
 const PatientDetails: React.FC<PatientDetailsProps> = ({ userId }) => {
+  const dispatch = useAppDispatch();
   const [edit, setEdit] = useState(false);
   const [user, setUser] = useState<PatientEO>({} as PatientEO);
   const [allAllergies, setAllAllergies] = useState<AllergyEO[]>();
@@ -115,6 +119,11 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ userId }) => {
           [name]: value,
         },
       }));
+    } else if (name === "dateOfBirth" || name === "gender" || name === "bloodGroup") {
+      setUser((prevUser) => ({
+        ...prevUser,
+        [name]: value,
+      }));
     } else {
       setUser((prevUser) => ({
         ...prevUser,
@@ -164,6 +173,9 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ userId }) => {
       );
 
       if (!res.data) throw new Error("Update failed");
+      const isComplete = checkProfileComplete(updatedUserDetails, "Patient");
+      console.log(isComplete)
+      dispatch(setProfileStatus(isComplete));
 
       setSnackbarSeverity("success");
       setSnackbarMessage("Patient details updated successfully!");
@@ -293,17 +305,24 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ userId }) => {
                   type="date"
                   value={user?.dateOfBirth}
                   disabled={!edit}
+                  onChange={handleUserChange}
+                  name="dateOfBirth"
                   slotProps={{
                     inputLabel: {
                       shrink: true,
                     },
+                    htmlInput: {
+                      max: new Date().toISOString().split("T")[0],
+                    }
                   }}
                 />
                 <CommonTextfield
                   label="Gender"
                   isSelect
+                  name="gender"
                   value={user?.gender ?? ""}
                   disabled={!edit}
+                  onChange={handleUserChange}
                 >
                   {genderDropdownValues.map((option) => (
                     <MenuItem key={option.value} value={option.value}>

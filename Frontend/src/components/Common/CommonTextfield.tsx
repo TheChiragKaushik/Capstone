@@ -22,9 +22,6 @@ const CommonTextfield: React.FC<CommonTextfieldProps> = ({
   value,
   ...props
 }) => {
-  // if (isSelect && !children) {
-  //   throw new Error("Children must be provided when 'isSelect' is true.");
-  // }
   const normalizedValue = value ?? "";
   return (
     <TextField
@@ -51,7 +48,6 @@ const CommonTextfield: React.FC<CommonTextfieldProps> = ({
       value={normalizedValue}
       margin="normal"
       fullWidth
-      autoFocus
       select={isSelect}
       {...props}
     >

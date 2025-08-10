@@ -14,7 +14,6 @@ const PatientNotificationPanel: React.FC<NotificationPanelProps> = ({
   onClose,
   userId,
   navigateToRoute,
-  onRemove,
 }) => {
   const [activeNotificationType, setActiveNotificationType] =
     useState<NotificationType>("New");
@@ -112,7 +111,6 @@ const PatientNotificationPanel: React.FC<NotificationPanelProps> = ({
                     key={notification?.id ?? "" + index}
                     userId={userId}
                     navigateToRoute={navigateToRoute}
-                    onRemove={onRemove}
                   />
                 ))
               ) : (
@@ -128,7 +126,6 @@ const PatientNotificationPanel: React.FC<NotificationPanelProps> = ({
                     key={notification?.id ?? "" + index}
                     userId={userId}
                     navigateToRoute={navigateToRoute}
-                    onRemove={onRemove}
                   />
                 ))
               ) : (

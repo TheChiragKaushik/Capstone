@@ -4,9 +4,17 @@ import { pharmacyProcessRefillNotificationIdSlice } from "./features/pharmacyPro
 import { pharmacyUpdateInventoryNotificationIdSlice } from "./features/pharmacyUpdateInventoryNotificationIdSlice";
 import patientNotificationsSlice from "./features/patientNotificationsSlice";
 import pharmacyNotificationsSlice from "./features/pharmacyNotificationsSlice";
+import patientDetailsSlice from "./features/patientDetailsSlice";
+import appNotificationSlice from "./features/appNotificationsSlice";
+import appUserDetailsSlice from "./features/appUserDetailsSlice";
+import setProfileCompleteSlice from "./features/setProfileCompleteSlice";
 
 export const capstoneStore = configureStore({
   reducer: {
+    setProfileComplete: setProfileCompleteSlice,
+    appUserDetails: appUserDetailsSlice,
+    appNotifications: appNotificationSlice,
+    patientDetails: patientDetailsSlice,
     patientNotifications: patientNotificationsSlice,
     patientRaiseRefillNotification:
       patientRaiseRefillNotificationIdSlice.reducer,

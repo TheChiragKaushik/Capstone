@@ -11,6 +11,8 @@ import Button from "@mui/material/Button";
 import PersonIcon from "@mui/icons-material/Person";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import VaccinesIcon from "@mui/icons-material/Vaccines";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import { colors } from "../../utils/Constants";
 import axios from "axios";
 import { APIEndpoints } from "../../api/api";
@@ -49,6 +51,8 @@ const SignupPage: React.FC = () => {
   const [passwordError, setPasswordError] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -62,22 +66,38 @@ const SignupPage: React.FC = () => {
           [name]: value,
         },
       }));
-      if (name === "email")
+      if (name === "email") {
         setEmailError(validateEmail(value + getEmailSuffix(role), role));
-      if (name === "phone") setPhoneError(validateMobile(value));
+      }
+      if (name === "phone") {
+        setPhoneError(validateMobile(value));
+      }
     } else {
       setUser((prevUser) => ({
         ...prevUser,
         [name]: value,
       }));
-      if (name === "firstName") setFirstNameError(validateFirstName(value));
-      if (name === "lastName") setLastNameError(validateLastName(value));
-      if (name === "password") setPasswordError(validatePassword(value));
+      if (name === "firstName") {
+        setFirstNameError(validateFirstName(value));
+      }
+      if (name === "lastName") {
+        setLastNameError(validateLastName(value));
+      }
+      if (name === "password") {
+        setPasswordError(validatePassword(value));
+      }
     }
   };
 
   const handleSignup = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    // Clear all errors before re-validation
+    setFirstNameError("");
+    setLastNameError("");
+    setPhoneError("");
+    setEmailError("");
+    setPasswordError("");
 
     const fnValidation = validateFirstName(user.firstName);
     const lnValidation = validateLastName(user.lastName);
@@ -88,12 +108,6 @@ const SignupPage: React.FC = () => {
     );
     const passwordValidation = validatePassword(user.password);
 
-    setFirstNameError(fnValidation);
-    setLastNameError(lnValidation);
-    setPhoneError(mobileValidation);
-    setEmailError(emailValidation);
-    setPasswordError(passwordValidation);
-
     if (
       fnValidation ||
       (role !== Role.pharmacy && lnValidation) ||
@@ -101,13 +115,11 @@ const SignupPage: React.FC = () => {
       emailValidation ||
       passwordValidation
     ) {
-      console.log({
-        fnValidation,
-        lnValidation,
-        mobileValidation,
-        emailValidation,
-        passwordValidation,
-      });
+      setFirstNameError(fnValidation);
+      setLastNameError(lnValidation);
+      setPhoneError(mobileValidation);
+      setEmailError(emailValidation);
+      setPasswordError(passwordValidation);
       return;
     }
 
@@ -134,7 +146,9 @@ const SignupPage: React.FC = () => {
 
       const signedUpUser = response.data;
       if (!signedUpUser) {
-        console.error("Failed to sign up");
+        console.error("Failed to sign up: no user data received");
+        setSnackbarMessage("Failed to create account. Please try again.");
+        setSnackbarOpen(true);
         return;
       }
 
@@ -153,7 +167,30 @@ const SignupPage: React.FC = () => {
       });
     } catch (error) {
       console.error("Signup error:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        const serverError = error.response.data;
+        if (serverError.message && serverError.message.includes('duplicate key error')) {
+          setSnackbarMessage("This email is already in use. Please use a different one.");
+          setSnackbarOpen(true);
+        } else {
+          setSnackbarMessage("An unexpected error occurred. Please try again.");
+          setSnackbarOpen(true);
+        }
+      } else {
+        setSnackbarMessage("Network error. Please check your connection.");
+        setSnackbarOpen(true);
+      }
     }
+  };
+
+  const handleSnackbarClose = (
+    _?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
   };
 
   return (
@@ -475,6 +512,21 @@ const SignupPage: React.FC = () => {
       >
         Create Account
       </Button>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
