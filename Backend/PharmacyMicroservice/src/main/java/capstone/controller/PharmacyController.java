@@ -17,6 +17,7 @@ import com.mongodb.client.result.UpdateResult;
 import capstone.entities.PharmacyEO;
 import capstone.entities.Constants.PharmacySoundPreference;
 import capstone.entities.PharmacyEO.PharmacyInventory;
+import capstone.entities.PharmacyNotificationsEO;
 import capstone.services.PharmacyServices;
 import lombok.Data;
 import reactor.core.publisher.Flux;
@@ -134,6 +135,9 @@ public class PharmacyController {
 		
 		return null;
 	}
-
-
+	
+	@GetMapping("/notifications/{pharmacyId}")
+	public Mono<PharmacyNotificationsEO> getAllPatientNotifications(@PathVariable String pharmacyId){
+		return pharmacyServicesRef.getAllPharmacyNotifications(pharmacyId);
+	}
 }

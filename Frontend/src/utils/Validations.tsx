@@ -14,7 +14,7 @@ export const validateMobile = (value: string) => {
 
 export const Role = {
   patient: "Patient",
-  provider: "Doctor",
+  provider: "Provider",
   pharmacy: "Pharmacy",
 };
 

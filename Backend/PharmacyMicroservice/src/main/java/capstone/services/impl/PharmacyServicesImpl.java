@@ -22,6 +22,7 @@ import com.mongodb.client.result.UpdateResult;
 import capstone.entities.PharmacyEO;
 import capstone.entities.Constants.PharmacySoundPreference;
 import capstone.entities.PharmacyEO.PharmacyInventory;
+import capstone.entities.PharmacyNotificationsEO;
 import capstone.services.PharmacyServices;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -165,20 +166,26 @@ public class PharmacyServicesImpl implements PharmacyServices {
 	}
 	
 	@Override
-	public Mono<UpdateResult> updateInventoryRestockReminderNotificationCheck(String pharmacyId, String inventoryId){
+	public Mono<UpdateResult> updateInventoryRestockReminderNotificationCheck(String pharmacyId, String inventoryRestockReminderNotificationId){
+		
 		Query query = new Query(Criteria.where("pharmacyId").is(pharmacyId)
-				.and("inventoryRestockReminderNotifications.inventoryId").is(inventoryId));
+				.and("inventoryRestockReminderNotifications.inventoryRestockReminderNotificationId").is(inventoryRestockReminderNotificationId));
 
 		Update update = new Update().inc("totalPharmacyInventoryRestockReminderNotifications", -1)
 				.inc("totalPharmacyInventoryRestockReminderNotificationsChecked", 1).set("inventoryRestockReminderNotifications.$.checked", true);
 
 		return reactiveMongoTemplateRef.updateFirst(query, update, "pharmacynotifications")
 				.doOnError(e -> System.err.println("Failed to update inventory update request reminder notification for pharmacyId: "
-						+ pharmacyId + " and raiseRefillId: " + inventoryId + ". Error: "
+						+ pharmacyId + " and raiseRefillId: " + inventoryRestockReminderNotificationId + ". Error: "
 						+ e.getMessage()));
 	}
 
-	
-
+	@Override
+	public Mono<PharmacyNotificationsEO> getAllPharmacyNotifications(String pharmacyId){
+		 Query query = new Query(Criteria.where("pharmacyId").is(pharmacyId));
+		 return reactiveMongoTemplateRef.findOne(query, PharmacyNotificationsEO.class)
+				 .doOnSuccess(e -> System.out.println("Pharmacy notifications fetched! "))
+				 .doOnError(e -> System.err.println("Failed to fetch Pharmacy notification with ID: " + pharmacyId + " : " + e.getMessage()));
+		}
 
 }

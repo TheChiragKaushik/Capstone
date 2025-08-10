@@ -50,11 +50,13 @@ type NotificationItemProps = {
   notification?: SinglePatientNotification;
   userId?: string;
   navigateToRoute?: Router;
+  onRemove?: (id: string) => void;
 };
 const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   userId,
   navigateToRoute,
+  onRemove,
 }) => {
   const typeOfNotification = notification?.type;
   const dispatch = useAppDispatch();
@@ -113,12 +115,16 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       },
     };
 
+    if (onRemove) {
+      onRemove(doseReminderDetails?._id ?? "");
+    }
     const success = await setDoseStatus(
       doseReminderDetails ?? {},
       finalPayload,
       isTaken
     );
     dispatch(fetchAllNotifications(userId ?? ""));
+
     if (success) {
       setSnackbar({
         open: true,
@@ -189,6 +195,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
     if (!checkNotification.data) {
       return;
+    }
+    if (onRemove) {
+      onRemove(raiseRefillObject?.raiseRefillId ?? "");
     }
     navigateToRoute?.navigate("refillRequests");
   };

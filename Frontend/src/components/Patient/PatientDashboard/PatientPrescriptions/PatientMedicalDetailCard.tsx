@@ -10,8 +10,10 @@ export const MedicalDetail: React.FC<MedicalDetailProps> = ({
   className,
 }) => {
   return (
-    <div className="flex items-center">
-      <span className={`h-2 w-2 rounded-full mr-2 ${className}`}></span>
+    <div className="flex gap-1 justify-start items-center">
+      <span
+        className={`h-2 w-2 rounded-full mr-2 flex-shrink-0 ${className}`}
+      ></span>
       <span className="text-sm text-brown-700">{name}</span>
     </div>
   );

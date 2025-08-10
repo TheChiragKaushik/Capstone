@@ -16,6 +16,7 @@ import {
   ExistingConditions,
   fetchAllAllergies,
   genderDropdownValues,
+  RelationShipWithUser,
   stringAvatar,
 } from "../../../utils/Constants";
 import CommonTextfield from "../../Common/CommonTextfield";
@@ -519,8 +520,10 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ userId }) => {
                 </CommonMultiSelect>
                 <CommonTextfield
                   label="Blood Group"
+                  name="bloodGroup"
                   isSelect
                   value={user?.bloodGroup ?? ""}
+                  onChange={handleUserChange}
                   disabled={!edit}
                 >
                   {bloodGroupDropdownValues.map((option) => (
@@ -558,7 +561,10 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ userId }) => {
                 />
                 <CommonTextfield
                   label="Relationship"
+                  name="relationship"
+                  required
                   type="text"
+                  isSelect
                   value={user?.emergencyContact?.relationship}
                   disabled={!edit}
                   onChange={(e) =>
@@ -570,11 +576,14 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ userId }) => {
                       },
                     }))
                   }
-                  name="relationship"
-                  error={!!errors["name"]}
-                  helperText={errors["name"] || " "}
                   onChangeCapture={handleUserChange}
-                />
+                >
+                  {RelationShipWithUser.map((relationship, index) => (
+                    <MenuItem value={relationship} key={relationship + index}>
+                      {relationship}
+                    </MenuItem>
+                  ))}
+                </CommonTextfield>
                 <CommonTextfield
                   label="Phone"
                   type="text"
@@ -645,7 +654,6 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ userId }) => {
           onClose={handleSnackbarClose}
           severity={snackbarSeverity}
           sx={{ width: "100%" }}
-          variant="filled"
         >
           {snackbarMessage}
         </Alert>

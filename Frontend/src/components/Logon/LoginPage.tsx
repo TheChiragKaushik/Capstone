@@ -1,11 +1,11 @@
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import axios from "axios";
 import type { LoggedInUser } from "../../utils/Interfaces";
 import { APIEndpoints } from "../../api/api";
-import { Button, Checkbox, IconButton, InputAdornment } from "@mui/material";
+import { Button, IconButton, InputAdornment } from "@mui/material";
 import { colors } from "../../utils/Constants";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -58,7 +58,6 @@ const LoginPage: React.FC = () => {
           email: email,
           password: password,
         });
-        console.log(response.data + "-------data");
         return response.data;
       };
 
@@ -74,7 +73,7 @@ const LoginPage: React.FC = () => {
         role = "Patient";
         name = loggedInUser.firstName + " " + loggedInUser.lastName;
       } else if (email.includes("@capstone.care")) {
-        role = "Doctor";
+        role = "Provider";
         name = loggedInUser.firstName + " " + loggedInUser.lastName;
       } else if (email.includes("@capstone.med")) {
         role = "Pharmacy";
@@ -208,7 +207,7 @@ const LoginPage: React.FC = () => {
           }}
         />
       </div>
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div className="flex items-center">
           <Checkbox
             sx={{
@@ -228,7 +227,7 @@ const LoginPage: React.FC = () => {
         >
           Forgot password?
         </Link>
-      </div>
+      </div> */}
       <Button
         onClick={handleLogin}
         sx={{

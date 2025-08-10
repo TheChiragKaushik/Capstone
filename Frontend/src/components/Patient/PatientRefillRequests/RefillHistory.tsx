@@ -11,7 +11,7 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import type React from "react";
+import React from "react";
 import { useEffect, useState } from "react";
 import { type RaiseRefillEO } from "../../../utils/Interfaces";
 import axios from "axios";
@@ -134,6 +134,7 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
             }}
             placeholder="Search refills requests"
             className="md:col-span-2"
+            disabled={!filteredRefillMedication}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             slotProps={{
@@ -156,6 +157,7 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
             label={"Filter Results"}
             value={filter}
             isSelect
+            disabled={!filteredRefillMedication}
             onChange={(e) => {
               const value = e.target.value as FilterValue;
               setFilter(value);
@@ -229,17 +231,20 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
             </TableHead>
             <TableBody>
               {filteredRefillMedication &&
+              filteredRefillMedication.length > 0 ? (
                 filteredRefillMedication
                   ?.slice()
                   .reverse()
                   ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((refillMedication: RaiseRefillEO, index: number) => (
-                    <>
+                    <React.Fragment
+                      key={refillMedication?.raiseRefillId ?? index}
+                    >
                       <TableRow key={refillMedication?.raiseRefillId ?? index}>
                         <TableCell align="center">
-                          <div className="flex gap-4 items-center justify-center">
+                          <div className="flex items-center justify-start gap-6">
                             {refillMedication?.doseTabletsRequired !== null ? (
-                              <div className="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-500">
+                              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-500">
                                 <i className="fas fa-tablets"></i>
                               </div>
                             ) : (
@@ -292,7 +297,7 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
                           ) : refillMedication?.status === "Request Raised" ? (
                             <strong>Confirmation Awaited!</strong>
                           ) : (
-                            <Button></Button>
+                            <strong>Request Approved!</strong>
                           )}
                         </TableCell>
                       </TableRow>
@@ -316,8 +321,17 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
                           </Collapse>
                         </TableCell>
                       </TableRow>
-                    </>
-                  ))}
+                    </React.Fragment>
+                  ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <p className="flex items-center text-gray-500 justify-center text-xl">
+                      No new Refill Requests!
+                    </p>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>

@@ -372,3 +372,12 @@ export const getMinEndDate = (startDateString: string) => {
   startDate.setDate(startDate.getDate() + 1);
   return startDate.toISOString().split("T")[0];
 };
+
+export const RelationShipWithUser = [
+  "Father",
+  "Mother",
+  "Brother",
+  "Wife",
+  "Son",
+  "Daughter",
+];

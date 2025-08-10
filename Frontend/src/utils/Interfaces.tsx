@@ -31,6 +31,7 @@ export interface NotificationPanelProps {
   onClose: () => void;
   userId?: string;
   navigateToRoute?: Router;
+  onRemove?: (id: string) => void;
 }
 
 export interface NotificationDialogProps {
@@ -383,6 +384,15 @@ export interface AlarmRingtones {
   url?: string;
 }
 
+export interface NotificationsState {
+  newNotifications: SinglePatientNotification[];
+  newNotificationsCount: number;
+  checkedNotifications: SinglePatientNotification[];
+  checkedNotificationsCount: number;
+  status: "idle" | "loading" | "succeeded" | "failed";
+  error: string | null;
+}
+
 export interface PatientNotifications {
   _id?: string;
   patientId?: string;
@@ -427,4 +437,47 @@ export interface SinglePatientNotification {
     | DoseReminderNotification
     | RefillApprovedNotifications
     | RaiseRefillNotifications;
+}
+
+export interface PharmacyNotificationsState {
+  newNotifications: SinglePharmacyNotification[];
+  newNotificationsCount: number;
+  checkedNotifications: SinglePharmacyNotification[];
+  checkedNotificationsCount: number;
+  status: "idle" | "loading" | "succeeded" | "failed";
+  error: string | null;
+}
+
+export interface PharmacyNotifications {
+  _id?: string;
+  pharmacyId?: string;
+  totalRefillRequests?: number;
+  totalRefillRequestsChecked?: number;
+  refillRequestsNotifications?: PharmacyRefillRequest[];
+  totalPharmacyInventoryRestockReminderNotifications?: number;
+  totalPharmacyInventoryRestockReminderNotificationsChecked?: number;
+  inventoryRestockReminderNotifications?: InventoryRestockReminderNotifications[];
+}
+
+export interface PharmacyRefillRequest {
+  pharmacyRefillRequestId?: string;
+  checked?: boolean;
+  refillRequest?: RaiseRefillEO;
+}
+
+export interface InventoryRestockReminderNotifications {
+  inventoryRestockReminderNotificationId?: string;
+  checked?: boolean;
+  medicationName?: string;
+  medicationId?: string;
+  inventoryId?: string;
+  message?: string;
+}
+
+export interface SinglePharmacyNotification {
+  id?: string;
+  type?: "Refill Request" | "Inventory Update";
+  checked?: boolean;
+  date?: string;
+  notification?: PharmacyRefillRequest | InventoryRestockReminderNotifications;
 }

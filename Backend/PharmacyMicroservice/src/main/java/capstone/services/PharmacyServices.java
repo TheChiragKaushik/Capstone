@@ -7,6 +7,7 @@ import com.mongodb.client.result.UpdateResult;
 import capstone.entities.Constants.PharmacySoundPreference;
 import capstone.entities.PharmacyEO;
 import capstone.entities.PharmacyEO.PharmacyInventory;
+import capstone.entities.PharmacyNotificationsEO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -31,6 +32,8 @@ public interface PharmacyServices {
 
 	public Mono<UpdateResult> updateRefillRequestReminderNotificationCheck(String pharmacyId, String raiseRefillId);
 
-	public Mono<UpdateResult> updateInventoryRestockReminderNotificationCheck(String pharmacyId, String inventoryId);
+	public Mono<UpdateResult> updateInventoryRestockReminderNotificationCheck(String pharmacyId, String inventoryRestockReminderNotificationId);
+
+	public Mono<PharmacyNotificationsEO> getAllPharmacyNotifications(String pharmacyId);
 	
 }

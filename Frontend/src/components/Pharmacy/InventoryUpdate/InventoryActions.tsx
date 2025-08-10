@@ -54,9 +54,9 @@ const InventoryActions: React.FC<InventoryActionsProps> = ({
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [addInventory, setAddInventory] = useState(false);
 
-  const [pharmacyInventory, setPharmacyInventory] = useState<
-    InventoryItem[] | undefined
-  >([]);
+  const [pharmacyInventory, setPharmacyInventory] = useState<InventoryItem[]>(
+    []
+  );
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const handleAccordionToggle = (id: string) => {
@@ -157,6 +157,7 @@ const InventoryActions: React.FC<InventoryActionsProps> = ({
                 },
               }}
               placeholder="Search medications..."
+              disabled={filteredInventory?.length === 0}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               slotProps={{
@@ -177,6 +178,7 @@ const InventoryActions: React.FC<InventoryActionsProps> = ({
                 },
               }}
               label="Filter Results"
+              disabled={filteredInventory?.length === 0}
               isSelect
               value={filter}
               onChange={(e) => {
@@ -341,7 +343,7 @@ const InventoryActions: React.FC<InventoryActionsProps> = ({
                 ) : (
                   <TableRow>
                     <TableCell colSpan={8} align="center">
-                      <div className="p-4 text-center text-gray-500">
+                      <div className="p-4 text-xl text-center text-gray-500">
                         {search || filter !== "All"
                           ? "No matching medications found."
                           : "No medications in inventory. Add a medication to get started."}

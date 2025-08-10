@@ -81,7 +81,7 @@ const MainApp = () => {
       const fetchedUser = user.data;
       if (role === "Patient") {
         setUser(fetchedUser as PatientEO);
-      } else if (role === "Doctor") {
+      } else if (role === "Provider") {
         setUser(fetchedUser as ProviderEO);
       } else if (role === "Pharmacy") {
         setUser(fetchedUser as PharmacyEO);
@@ -200,6 +200,7 @@ const MainApp = () => {
                 role={role}
                 user={user}
                 navigateToRoute={router}
+                onRemove={removeNotification}
               />
             ),
           }}

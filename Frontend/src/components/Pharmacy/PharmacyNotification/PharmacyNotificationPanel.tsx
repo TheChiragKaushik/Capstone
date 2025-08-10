@@ -1,29 +1,143 @@
 import Box from "@mui/material/Box";
 import type React from "react";
 import type { NotificationPanelProps } from "../../../utils/Interfaces";
+import { Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
+import { colors } from "../../../utils/Constants";
+import { fetchAllPharmacyNotifications } from "../../../redux/features/pharmacyNotificationsSlice";
+import PharmacyNotificationItem from "./PharmacyNotificationPanel/PharmacyNotificationItem";
+type NotificationType = "New" | "Checked";
 
 const PharmacyNotificationPanel: React.FC<NotificationPanelProps> = ({
   visibility,
   onClose,
+  userId,
+  navigateToRoute,
+  onRemove,
 }) => {
+  const [activeNotificationType, setActiveNotificationType] =
+    useState<NotificationType>("New");
+
+  const dispatch = useAppDispatch();
+  const { newNotifications, checkedNotifications } = useAppSelector(
+    (state) => state.pharmacyNotifications
+  );
+
+  useEffect(() => {
+    if (userId) {
+      dispatch(fetchAllPharmacyNotifications(userId));
+    }
+  }, [dispatch, userId]);
   return (
     <>
       {visibility === "visible" && (
         <div
-          className="fixed inset-0 bg-white opacity-85 z-40 transition-opacity duration-300 ease-in-out"
+          className="fixed inset-0 bg-beige-50 opacity-85 z-40 transition-opacity duration-300 ease-in-out"
           onClick={onClose}
         ></div>
       )}
       <Box
-        className={`fixed top-0 right-0 h-screen w-1/3 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50
+        className={`fixed overflow-y-auto top-0 right-0 h-screen w-2/3 md:w-1/2 bg-beige-50 shadow-lg transform transition-transform duration-300 ease-in-out z-50
           ${visibility === "visible" ? "translate-x-0" : "translate-x-full"}`}
         sx={{}}
       >
-        <div className="flex justify-center items-center p-4 border-b border-gray-200">
-          <h2 className="Heading">Pharmacy Notifications</h2>
+        <div className="bg-beige-100 flex justify-center items-center p-4 border-b border-gray-200">
+          <h2 className="Heading">Notifications</h2>
         </div>
 
-        <div className="p-4"></div>
+        <div className="flex flex-col relative justify-center py-4">
+          <div className="bg-beige-400 sticky top-10 flex items-center rounded-full justify-center mx-16 ">
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: activeNotificationType === "New" ? 0 : "50%",
+                height: "100%",
+                width: "50%",
+                backgroundColor: colors.brown500,
+                borderRadius: "9999px",
+                transition: "left 0.3s ease-in-out",
+                zIndex: 1,
+              }}
+            />
+            <Typography
+              sx={{
+                width: "100%",
+                display: "flex",
+                padding: 1,
+                alignItems: "center",
+                fontWeight: 900,
+                color: "white",
+                justifyContent: "center",
+                fontSize: {
+                  xs: 8,
+                  md: 15,
+                },
+                zIndex: 2,
+              }}
+              className="rounded-full cursor-pointer relative"
+              onClick={() => setActiveNotificationType("New")}
+            >
+              New
+            </Typography>
+            <Typography
+              className="rounded-full cursor-pointer relative"
+              onClick={() => setActiveNotificationType("Checked")}
+              sx={{
+                width: "100%",
+                display: "flex",
+                padding: 1,
+                color: "white",
+                fontWeight: 900,
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: {
+                  xs: 8,
+                  md: 15,
+                },
+                zIndex: 2,
+              }}
+            >
+              Checked
+            </Typography>
+          </div>
+          <div className="p-4">
+            {activeNotificationType === "New" ? (
+              newNotifications && newNotifications.length > 0 ? (
+                newNotifications.map((notification, index) => (
+                  <PharmacyNotificationItem
+                    notification={notification}
+                    key={notification.id ?? "notId" + index}
+                    userId={userId}
+                    navigateToRoute={navigateToRoute}
+                    onRemove={onRemove}
+                  />
+                ))
+              ) : (
+                <Typography className="text-center text-gray-500 my-4">
+                  No new notifications.
+                </Typography>
+              )
+            ) : activeNotificationType === "Checked" ? (
+              checkedNotifications && checkedNotifications.length > 0 ? (
+                checkedNotifications.map((notification, index) => (
+                  <PharmacyNotificationItem
+                    notification={notification}
+                    key={notification.id ?? "notId" + index}
+                    userId={userId}
+                    navigateToRoute={navigateToRoute}
+                    onRemove={onRemove}
+                  />
+                ))
+              ) : (
+                <Typography className="text-center text-gray-500 my-4">
+                  No checked notifications.
+                </Typography>
+              )
+            ) : null}
+          </div>
+        </div>
       </Box>
     </>
   );

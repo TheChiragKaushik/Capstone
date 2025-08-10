@@ -26,7 +26,7 @@ import {
 
 const Role = {
   patient: "Patient",
-  provider: "Doctor",
+  provider: "Provider",
   pharmacy: "Pharmacy",
 };
 
@@ -198,10 +198,10 @@ const SignupPage: React.FC = () => {
             Patient
           </Button>
           <Button
-            onClick={() => setRole("Doctor")}
+            onClick={() => setRole("Provider")}
             sx={{
               backgroundColor:
-                role === "Doctor" ? colors.brown600 : colors.brown300,
+                role === "Provider" ? colors.brown600 : colors.brown300,
               minWidth: 100,
               color: "black",
               borderRadius: "0.5rem",

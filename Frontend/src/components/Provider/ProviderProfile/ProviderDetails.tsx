@@ -107,9 +107,9 @@ const ProviderDetails: React.FC<ProviderDetailsProps> = ({ userId }) => {
       contact: {
         ...userDetails.contact,
         email: userDetails.contact?.email
-          ? userDetails.contact.email.includes(getEmailSuffix("Doctor"))
+          ? userDetails.contact.email.includes(getEmailSuffix("Provider"))
             ? userDetails.contact.email
-            : userDetails.contact.email + getEmailSuffix("Doctor")
+            : userDetails.contact.email + getEmailSuffix("Provider")
           : undefined,
       },
     };
@@ -147,9 +147,7 @@ const ProviderDetails: React.FC<ProviderDetailsProps> = ({ userId }) => {
             <div className="h-20 w-20 rounded-full bg-white flex items-center justify-center text-brown-500 text-2xl font-bold">
               <Avatar
                 {...stringAvatar(
-                  `Dr. ${userDetails?.firstName ?? ""} ${
-                    userDetails?.lastName ?? ""
-                  }`
+                  `${userDetails?.firstName + " " + userDetails?.lastName}`
                 )}
               />
             </div>
@@ -226,7 +224,7 @@ const ProviderDetails: React.FC<ProviderDetailsProps> = ({ userId }) => {
                         position="start"
                         style={{ pointerEvents: "none" }}
                       >
-                        {getEmailSuffix("Doctor")}
+                        {getEmailSuffix("Provider")}
                       </InputAdornment>
                     ),
                   }}

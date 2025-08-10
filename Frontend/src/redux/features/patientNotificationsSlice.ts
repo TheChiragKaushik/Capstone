@@ -4,20 +4,12 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 import type {
+  NotificationsState,
   PatientNotifications,
   SinglePatientNotification,
 } from "../../utils/Interfaces";
 import axios from "axios";
 import { APIEndpoints } from "../../api/api";
-
-interface NotificationsState {
-  newNotifications: SinglePatientNotification[];
-  newNotificationsCount: number;
-  checkedNotifications: SinglePatientNotification[];
-  checkedNotificationsCount: number;
-  status: "idle" | "loading" | "succeeded" | "failed";
-  error: string | null;
-}
 
 const initialState: NotificationsState = {
   newNotifications: [],

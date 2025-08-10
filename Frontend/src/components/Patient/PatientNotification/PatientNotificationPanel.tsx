@@ -13,7 +13,8 @@ const PatientNotificationPanel: React.FC<NotificationPanelProps> = ({
   visibility,
   onClose,
   userId,
-  navigateToRoute
+  navigateToRoute,
+  onRemove,
 }) => {
   const [activeNotificationType, setActiveNotificationType] =
     useState<NotificationType>("New");
@@ -43,17 +44,28 @@ const PatientNotificationPanel: React.FC<NotificationPanelProps> = ({
         sx={{}}
       >
         <div className="bg-beige-100 flex justify-center items-center p-4 border-b border-gray-200">
-          <h2 className="Heading">Patient Notifications</h2>
+          <h2 className="Heading">Notifications</h2>
         </div>
 
         <div className="flex flex-col relative justify-center py-4">
           <div className="bg-beige-400 sticky top-10 flex items-center rounded-full justify-center mx-16">
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: activeNotificationType === "New" ? 0 : "50%",
+                height: "100%",
+                width: "50%",
+                backgroundColor: colors.brown500,
+                borderRadius: "9999px",
+                transition: "left 0.3s ease-in-out",
+                zIndex: 1,
+              }}
+            />
             <Typography
               sx={{
                 width: "100%",
                 display: "flex",
-                backgroundColor:
-                  activeNotificationType === "New" ? colors.brown500 : null,
                 padding: 1,
                 alignItems: "center",
                 fontWeight: 900,
@@ -63,28 +75,19 @@ const PatientNotificationPanel: React.FC<NotificationPanelProps> = ({
                   xs: 8,
                   md: 15,
                 },
+                zIndex: 2,
               }}
-              className="rounded-full cursor-pointer"
-              onClick={() =>
-                setActiveNotificationType((prev) =>
-                  prev === "New" ? "Checked" : "New"
-                )
-              }
+              className="rounded-full cursor-pointer relative"
+              onClick={() => setActiveNotificationType("New")}
             >
               New
             </Typography>
             <Typography
-              className="rounded-full cursor-pointer"
-              onClick={() =>
-                setActiveNotificationType((prev) =>
-                  prev === "New" ? "Checked" : "New"
-                )
-              }
+              className="rounded-full cursor-pointer relative"
+              onClick={() => setActiveNotificationType("Checked")}
               sx={{
                 width: "100%",
                 display: "flex",
-                backgroundColor:
-                  activeNotificationType === "Checked" ? colors.brown500 : null,
                 padding: 1,
                 color: "white",
                 fontWeight: 900,
@@ -94,6 +97,7 @@ const PatientNotificationPanel: React.FC<NotificationPanelProps> = ({
                   xs: 8,
                   md: 15,
                 },
+                zIndex: 2,
               }}
             >
               Checked
@@ -108,6 +112,7 @@ const PatientNotificationPanel: React.FC<NotificationPanelProps> = ({
                     key={notification?.id ?? "" + index}
                     userId={userId}
                     navigateToRoute={navigateToRoute}
+                    onRemove={onRemove}
                   />
                 ))
               ) : (
@@ -123,6 +128,7 @@ const PatientNotificationPanel: React.FC<NotificationPanelProps> = ({
                     key={notification?.id ?? "" + index}
                     userId={userId}
                     navigateToRoute={navigateToRoute}
+                    onRemove={onRemove}
                   />
                 ))
               ) : (

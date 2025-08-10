@@ -12,12 +12,14 @@ type ToolbarActionsSearchProps = {
   role: string;
   user?: PatientEO | ProviderEO | PharmacyEO;
   navigateToRoute?: Router;
+  onRemove?: (id: string) => void;
 };
 
 const ToolbarActionsSearch: React.FC<ToolbarActionsSearchProps> = ({
   role,
   user,
   navigateToRoute,
+  onRemove,
 }) => {
   const name: string | undefined = (() => {
     if (role === "Pharmacy" && user && "name" in user) {
@@ -37,9 +39,20 @@ const ToolbarActionsSearch: React.FC<ToolbarActionsSearchProps> = ({
 
   const NotificationPanelComponent = RoleConfig[role]?.notifications?.panel;
 
-  const newNotificationsCount = useAppSelector(
+  const newPatientNotificationsCount = useAppSelector(
     (state) => state.patientNotifications.newNotificationsCount
   );
+
+  const newPharmacyNotificationsCount = useAppSelector(
+    (state) => state.pharmacyNotifications.newNotificationsCount
+  );
+
+  const newNotificationsCount =
+    role === "Patient"
+      ? newPatientNotificationsCount
+      : role === "Pharmacy"
+        ? newPharmacyNotificationsCount
+        : 0;
 
   return (
     <div className="flex">
@@ -60,6 +73,7 @@ const ToolbarActionsSearch: React.FC<ToolbarActionsSearchProps> = ({
           visibility={handleAside ? "visible" : "hidden"}
           userId={user?._id}
           navigateToRoute={navigateToRoute}
+          onRemove={onRemove}
         />
       )}
       <Account

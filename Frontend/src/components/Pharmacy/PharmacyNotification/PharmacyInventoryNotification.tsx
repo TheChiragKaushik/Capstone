@@ -117,7 +117,7 @@ const PharmacyInventoryNotification: React.FC<
     try {
       const checkNotificationPayload = {
         pharmacyId: userId,
-        fieldToUpdateId: notification?.inventoryId,
+        fieldToUpdateId: notification?.inventoryRestockReminderNotificationId,
       };
       const checkNotification = await axios.put(
         `${APIEndpoints.Pharmacy}/check?inventory=true`,

@@ -200,6 +200,7 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
                 }}
                 placeholder="Search refills requests"
                 className="md:col-span-2"
+                disabled={!filteredInventory}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 slotProps={{
@@ -221,6 +222,7 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
                 }}
                 label="Filter Results"
                 isSelect
+                disabled={!filteredInventory}
                 value={filter}
                 onChange={(e) => {
                   const value = e.target.value as Filter;
@@ -252,7 +254,7 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredInventory !== null ? (
+                {filteredInventory && filteredInventory.length > 0 ? (
                   filteredInventory
                     ?.slice()
                     .reverse()
@@ -384,7 +386,7 @@ const RefillQueue: React.FC<RefillQueueProps> = ({ pharmacyId }) => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6}>
-                      <p className="flex items-center justify-center my-6">
+                      <p className="flex text-gray-500 items-center justify-center my-4 text-xl">
                         No records available!
                       </p>
                     </TableCell>

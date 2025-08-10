@@ -69,98 +69,110 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ user }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {user?.prescriptions
-              ?.slice()
-              .reverse()
-              ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((prescription: Prescription, idx: number) => (
-                <React.Fragment key={prescription.prescriptionId || idx}>
-                  <TableRow>
-                    <TableCell align="center">{idx + 1}</TableCell>
-                    <TableCell align="center">
-                      {prescription.prescribedBy?.firstName}{" "}
-                      {prescription.prescribedBy?.lastName}
-                    </TableCell>
-                    <TableCell align="center">
-                      {prescription.prescriptionForDescription}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        onClick={() =>
-                          handleAccordionToggle(
-                            prescription?.prescriptionId ?? ""
-                          )
-                        }
-                        sx={{
-                          color: colors.brown600,
-                          backgroundColor: colors.beige200,
-                          fontWeight: 500,
-                          textTransform: "none",
-                          "&:hover": { color: colors.brown700 },
-                        }}
-                        size="small"
-                      >
-                        Medications Prescribed
-                        {expandedId === prescription.prescriptionId ? (
-                          <ArrowDropUpIcon />
-                        ) : (
-                          <ArrowDropDownIcon />
-                        )}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        onClick={() =>
-                          handleTrackerAccordionToggle(
-                            prescription?.prescriptionId ?? ""
-                          )
-                        }
-                        sx={{
-                          color: colors.brown600,
-                          backgroundColor: colors.beige200,
-                          fontWeight: 500,
-                          textTransform: "none",
-                          "&:hover": { color: colors.brown700 },
-                        }}
-                        size="small"
-                      >
-                        See Track
-                        {trackerExpandedId === prescription.prescriptionId ? (
-                          <ArrowDropUpIcon />
-                        ) : (
-                          <ArrowDropDownIcon />
-                        )}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      style={{ paddingBottom: 0, paddingTop: 0 }}
-                    >
-                      <Collapse in={expandedId === prescription.prescriptionId}>
-                        <MedicationsPrescribed
-                          medicationPrescribed={
-                            prescription?.medicationsPrescribed
+            {user?.prescriptions && user?.prescriptions?.length > 0 ? (
+              user?.prescriptions
+                ?.slice()
+                .reverse()
+                ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((prescription: Prescription, idx: number) => (
+                  <React.Fragment key={prescription.prescriptionId || idx}>
+                    <TableRow>
+                      <TableCell align="center">{idx + 1}</TableCell>
+                      <TableCell align="center">
+                        {prescription.prescribedBy?.firstName}{" "}
+                        {prescription.prescribedBy?.lastName}
+                      </TableCell>
+                      <TableCell align="center">
+                        {prescription.prescriptionForDescription}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          onClick={() =>
+                            handleAccordionToggle(
+                              prescription?.prescriptionId ?? ""
+                            )
                           }
-                        />
-                      </Collapse>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      style={{ paddingBottom: 0, paddingTop: 0 }}
-                    >
-                      <Collapse
-                        in={trackerExpandedId === prescription.prescriptionId}
+                          sx={{
+                            color: colors.brown600,
+                            backgroundColor: colors.beige200,
+                            fontWeight: 500,
+                            textTransform: "none",
+                            "&:hover": { color: colors.brown700 },
+                          }}
+                          size="small"
+                        >
+                          Medications Prescribed
+                          {expandedId === prescription.prescriptionId ? (
+                            <ArrowDropUpIcon />
+                          ) : (
+                            <ArrowDropDownIcon />
+                          )}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          onClick={() =>
+                            handleTrackerAccordionToggle(
+                              prescription?.prescriptionId ?? ""
+                            )
+                          }
+                          sx={{
+                            color: colors.brown600,
+                            backgroundColor: colors.beige200,
+                            fontWeight: 500,
+                            textTransform: "none",
+                            "&:hover": { color: colors.brown700 },
+                          }}
+                          size="small"
+                        >
+                          See Track
+                          {trackerExpandedId === prescription.prescriptionId ? (
+                            <ArrowDropUpIcon />
+                          ) : (
+                            <ArrowDropDownIcon />
+                          )}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        style={{ paddingBottom: 0, paddingTop: 0 }}
                       >
-                        <TrackerCalender prescription={prescription} />
-                      </Collapse>
-                    </TableCell>
-                  </TableRow>
-                </React.Fragment>
-              ))}
+                        <Collapse
+                          in={expandedId === prescription.prescriptionId}
+                        >
+                          <MedicationsPrescribed
+                            medicationPrescribed={
+                              prescription?.medicationsPrescribed
+                            }
+                          />
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        style={{ paddingBottom: 0, paddingTop: 0 }}
+                      >
+                        <Collapse
+                          in={trackerExpandedId === prescription.prescriptionId}
+                        >
+                          <TrackerCalender prescription={prescription} />
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <p className="flex items-center justify-center text-xl">
+                    No new prescriptions!
+                  </p>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>

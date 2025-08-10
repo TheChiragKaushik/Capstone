@@ -126,67 +126,81 @@ const PatientPrescriptions: React.FC<PatientPrescriptionsProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-              <PatientMedicalDetailCard heading="Address">
-                <MedicalDetail
-                  className="bg-green-400"
-                  name={`Street: ` + userDetails.address?.street}
-                />
-                <MedicalDetail
-                  className="bg-green-400"
-                  name={`City: ` + userDetails.address?.city}
-                />
-                <MedicalDetail
-                  className="bg-green-400"
-                  name={`State: ` + userDetails.address?.state}
-                />
-                <MedicalDetail
-                  className="bg-green-400"
-                  name={`Zipcode: ` + userDetails.address?.zipCode}
-                />
-              </PatientMedicalDetailCard>
-              <PatientMedicalDetailCard heading="Allergies">
-                {allergies.map((allergy: Allergy, index: number) => (
+              {userDetails?.address && (
+                <PatientMedicalDetailCard heading="Address">
                   <MedicalDetail
-                    className="bg-yellow-400"
-                    key={index}
-                    name={allergy.name}
+                    className="bg-green-400"
+                    name={`Street: ` + userDetails.address?.street}
                   />
-                ))}
-              </PatientMedicalDetailCard>
-              <PatientMedicalDetailCard heading="Conditions">
-                {userDetails?.existingConditions?.map(
-                  (condition, index: number) => (
+                  <MedicalDetail
+                    className="bg-green-400"
+                    name={`City: ` + userDetails.address?.city}
+                  />
+                  <MedicalDetail
+                    className="bg-green-400"
+                    name={`State: ` + userDetails.address?.state}
+                  />
+                  <MedicalDetail
+                    className="bg-green-400"
+                    name={`Zipcode: ` + userDetails.address?.zipCode}
+                  />
+                </PatientMedicalDetailCard>
+              )}
+              {allergies && allergies.length > 0 && (
+                <PatientMedicalDetailCard heading="Allergies">
+                  {allergies.map((allergy: Allergy, index: number) => (
                     <MedicalDetail
-                      className="bg-red-600"
+                      className="bg-yellow-400"
                       key={index}
-                      name={condition}
+                      name={allergy.name}
                     />
-                  )
+                  ))}
+                </PatientMedicalDetailCard>
+              )}
+              {userDetails?.existingConditions &&
+                userDetails?.existingConditions.length > 0 && (
+                  <PatientMedicalDetailCard heading="Conditions">
+                    {userDetails?.existingConditions?.map(
+                      (condition, index: number) => (
+                        <MedicalDetail
+                          className="bg-red-600"
+                          key={index}
+                          name={condition}
+                        />
+                      )
+                    )}
+                  </PatientMedicalDetailCard>
                 )}
-              </PatientMedicalDetailCard>
-              <PatientMedicalDetailCard heading="Emergency Contact">
-                <MedicalDetail
-                  className="bg-orange-400"
-                  name={`Name: ` + userDetails.emergencyContact?.name}
-                />
-                <MedicalDetail
-                  className="bg-orange-400"
-                  name={
-                    `Relationship: ` +
-                    userDetails.emergencyContact?.relationship
-                  }
-                />
-                <MedicalDetail
-                  className="bg-orange-400"
-                  name={`Phone Number: ` + userDetails.emergencyContact?.phone}
-                />
-              </PatientMedicalDetailCard>
+              {userDetails.emergencyContact && (
+                <PatientMedicalDetailCard heading="Emergency Contact">
+                  <MedicalDetail
+                    className="bg-orange-400"
+                    name={`Name: ` + userDetails.emergencyContact?.name}
+                  />
+                  <MedicalDetail
+                    className="bg-orange-400"
+                    name={
+                      `Relationship: ` +
+                      userDetails.emergencyContact?.relationship
+                    }
+                  />
+                  <MedicalDetail
+                    className="bg-orange-400"
+                    name={
+                      `Phone Number: ` + userDetails.emergencyContact?.phone
+                    }
+                  />
+                </PatientMedicalDetailCard>
+              )}
             </div>
 
-            <div>
-              <CommonHeading subHeading="Prescriptions History" />
-              <PrescriptionTable user={userDetails} />
-            </div>
+            {userDetails?.prescriptions &&
+            userDetails?.prescriptions.length > 0 ? (
+              <div>
+                <CommonHeading subHeading="Prescriptions History" />
+                <PrescriptionTable user={userDetails} />
+              </div>
+            ) : null}
           </div>
         )
       )}

@@ -54,7 +54,7 @@ const RoleConfig: RoleConfiguration = {
       dialog: PatientNotificationStack,
     },
   },
-  Doctor: {
+  Provider: {
     navigation: [
       {
         segment: "dashboard",
