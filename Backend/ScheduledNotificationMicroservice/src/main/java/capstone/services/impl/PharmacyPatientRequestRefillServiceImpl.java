@@ -75,7 +75,7 @@ public class PharmacyPatientRequestRefillServiceImpl implements PharmacyPatientR
 //	}
 	
 	public Mono<UpdateResult> checkPharmacyInventoryForEnoughMedication(RaiseRefillEO raiseRefillEO) {
-	    Integer doseRequired = raiseRefillEO.getDoseTabletsRequired() != null ? raiseRefillEO.getDoseTabletsRequired() : raiseRefillEO.getDoseVolumeRequired();
+	    Integer doseRequired = raiseRefillEO.getRefillQuantityTablets() != null ? raiseRefillEO.getRefillQuantityTablets() : raiseRefillEO.getRefillQuantityVolume();
 	    String pharmacyId = raiseRefillEO.getPharmacyId();
 	    String medicationId = raiseRefillEO.getMedicationId();
 
