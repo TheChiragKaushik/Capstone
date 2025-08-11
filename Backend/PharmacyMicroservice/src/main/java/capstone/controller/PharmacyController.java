@@ -145,4 +145,10 @@ public class PharmacyController {
 	public Mono<PharmacyNotificationsEO> getAllPatientNotifications(@PathVariable String pharmacyId){
 		return pharmacyServicesRef.getAllPharmacyNotifications(pharmacyId);
 	}
+	
+	
+	@GetMapping("/inventory/{pharmacyId}")
+	public Mono<PharmacyInventory> getCertainInventoryByMedicationId(@PathVariable String pharmacyId, @RequestParam(value="MedicationId", required=false) String medicationId){
+		return pharmacyServicesRef.getCertainPharmacyMedication(pharmacyId, medicationId);
+	}
 }

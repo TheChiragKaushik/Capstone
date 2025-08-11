@@ -8,9 +8,10 @@ import { Box, Button, Fade } from "@mui/material";
 import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
 import type { Router } from "@toolpad/core/AppProvider";
-import { useDispatch } from "react-redux";
-import { addPatientRaiseRefillNotificationId } from "../../../redux/features/patientRaiseRefillNotificationId";
+import { addPatientRaiseRefillNotificationId, removePatientRaiseRefillNotificationId } from "../../../redux/features/patientRaiseRefillNotificationId";
 import { removeAppNotification } from "../../../redux/features/appNotificationsSlice";
+import { fetchAllNotifications } from "../../../redux/features/patientNotificationsSlice";
+import { useAppDispatch } from "../../../redux/hooks";
 
 type RefillNotificationProps = {
   notification?: RaiseRefillEO;
@@ -27,7 +28,7 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
     notification?.refillQuantityTablets !== null
       ? notification?.refillQuantityTablets
       : notification?.refillQuantityVolume;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [medicationPrescribed, setMedicationPrescribed] =
     useState<MedicationPrescribed>({});
@@ -121,7 +122,7 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
   }, [dispatch, notification]);
 
   const handleOrderRefill = async () => {
-    dispatch(addPatientRaiseRefillNotificationId(notification?.raiseRefillId));
+    dispatch(removePatientRaiseRefillNotificationId());
     const checkNotificationPayload = {
       patientId: notification?.patientId,
       fieldToUpdateId: notification?.raiseRefillId,
@@ -135,12 +136,14 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
       return;
     }
     stopAudio();
+    dispatch(addPatientRaiseRefillNotificationId(notification?.raiseRefillId));
     dispatch(removeAppNotification(notification?.raiseRefillId ?? ""));
+    dispatch(fetchAllNotifications(notification?.patientId ?? ""));
     navigateToRoute?.navigate("refillRequests");
   };
 
   const handleAcknowledge = async () => {
-    dispatch(addPatientRaiseRefillNotificationId(notification?.raiseRefillId));
+    dispatch(removePatientRaiseRefillNotificationId());
     try {
       const checkNotificationPayload = {
         patientId: notification?.patientId,
@@ -157,8 +160,10 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
       console.error(error);
     }
     stopAudio();
+    dispatch(addPatientRaiseRefillNotificationId(notification?.raiseRefillId));
     dispatch(removeAppNotification(notification?.raiseRefillId ?? ""));
-    navigateToRoute?.navigate("refillRequests");
+    dispatch(fetchAllNotifications(notification?.patientId ?? ""));
+    // navigateToRoute?.navigate("refillRequests");
   };
 
   return (

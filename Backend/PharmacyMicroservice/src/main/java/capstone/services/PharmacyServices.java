@@ -35,5 +35,7 @@ public interface PharmacyServices {
 	public Mono<UpdateResult> updateInventoryRestockReminderNotificationCheck(String pharmacyId, String inventoryRestockReminderNotificationId);
 
 	public Mono<PharmacyNotificationsEO> getAllPharmacyNotifications(String pharmacyId);
+
+	public Mono<PharmacyInventory> getCertainPharmacyMedication(String pharmacyId, String medicationId);
 	
 }

@@ -13,7 +13,7 @@ import { APIEndpoints } from "../../../../api/api";
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { fetchAllNotifications } from "../../../../redux/features/patientNotificationsSlice";
-import { addPatientRaiseRefillNotificationId } from "../../../../redux/features/patientRaiseRefillNotificationId";
+import { addPatientRaiseRefillNotificationId, removePatientRaiseRefillNotificationId } from "../../../../redux/features/patientRaiseRefillNotificationId";
 import type { Router } from "@toolpad/core/AppProvider";
 import { colors } from "../../../../utils/Constants";
 import { removeAppNotification } from "../../../../redux/features/appNotificationsSlice";
@@ -193,8 +193,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   const handleOrderMedicationRefill = async () => {
     dispatch(
-      addPatientRaiseRefillNotificationId(raiseRefillObject?.raiseRefillId)
+      removePatientRaiseRefillNotificationId()
     );
+
     const checkNotificationPayload = {
       patientId: raiseRefillObject?.patientId,
       fieldToUpdateId: raiseRefillObject?.raiseRefillId,
@@ -207,6 +208,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     if (!checkNotification.data) {
       return;
     }
+    dispatch(
+      addPatientRaiseRefillNotificationId(raiseRefillObject?.raiseRefillId)
+    );
     dispatch(removeAppNotification(raiseRefillObject?.raiseRefillId ?? ""));
     dispatch(fetchAllNotifications(userId ?? ""));
     navigateToRoute?.navigate("refillRequests");
@@ -221,8 +225,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   const handleMedicationRefillApprovedAcknowledge = async () => {
     dispatch(
-      addPatientRaiseRefillNotificationId(approvedRefillObject?.raiseRefillId)
+      removePatientRaiseRefillNotificationId()
     );
+
     try {
       const checkNotificationPayload = {
         patientId: approvedRefillObject?.patientId,
@@ -238,9 +243,12 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     } catch (error) {
       console.error(error);
     }
+    dispatch(
+      addPatientRaiseRefillNotificationId(approvedRefillObject?.raiseRefillId)
+    );
     dispatch(removeAppNotification(approvedRefillObject?.raiseRefillId ?? ""));
     dispatch(fetchAllNotifications(userId ?? ""));
-    navigateToRoute?.navigate("refillRequests");
+    // navigateToRoute?.navigate("refillRequests");
   };
 
   return (

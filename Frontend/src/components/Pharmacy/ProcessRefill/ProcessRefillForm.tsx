@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, Snackbar, Alert } from "@mui/material";
+import { Button, Snackbar, Alert } from "@mui/material";
 import { colors } from "../../../utils/Constants";
 import Patient from "./ProcessRefillForm/Patient";
 import Prescription from "./ProcessRefillForm/Prescription";
@@ -8,6 +8,7 @@ import CommonTextfield from "../../Common/CommonTextfield";
 import type { RaiseRefillEO } from "../../../utils/Interfaces";
 import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
+import PharmacyInventoryDetail from "./ProcessRefillForm/PharmacyInventoryDetail";
 
 type ProcessRefillFormProps = {
   refillMedication?: RaiseRefillEO;
@@ -130,9 +131,16 @@ const ProcessRefillForm: React.FC<ProcessRefillFormProps> = ({
         <Prescription refillMedication={refillMedication} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="flex flex-col md:flex-row gap-6 mb-6 items-center justify-center">
         <CommonTextfield
           label="Quantity to Dispense"
+          size="small"
+          sx={{
+            width: {
+              sx: "100%",
+              md: "50%"
+            }
+          }}
           required
           type="text"
           variant="outlined"
@@ -155,31 +163,36 @@ const ProcessRefillForm: React.FC<ProcessRefillFormProps> = ({
           error={Boolean(error)}
           helperText={error ? error : ""}
         />
-      </div>
 
-      <Box display="flex" gap={2}>
-        <Button
-          sx={{
-            bgcolor: colors.brown600,
-            color: "white",
-            px: 2,
-            borderRadius: 2,
-            fontSize: "0.875rem",
-            fontWeight: 500,
-            transition: "background-color 0.3s",
-            border: "none",
-            "&:hover": {
-              bgcolor: colors.brown700,
-            },
-          }}
-          type="button"
-          id="complete-refill"
-          variant="contained"
-          onClick={handleApproveRefillRequest}
-        >
-          Complete Refill
-        </Button>
-      </Box>
+        <div className="flex items-center justify-center self-center mt-1">
+          <Button
+            sx={{
+              bgcolor: colors.brown600,
+              color: "white",
+              px: 2,
+              borderRadius: 2,
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              transition: "background-color 0.3s",
+              border: "none",
+              "&:hover": {
+                bgcolor: colors.brown700,
+              },
+              height: 35,
+            }}
+            type="button"
+            id="complete-refill"
+            variant="contained"
+            onClick={handleApproveRefillRequest}
+          >
+            Complete Refill
+          </Button>
+        </div>
+      </div>
+      <PharmacyInventoryDetail
+        pharmacyId={refillMedication?.pharmacyId}
+        medicationName={refillMedication?.medicationName}
+        medicationId={refillMedication?.medicationId} />
 
       <Snackbar
         open={snackbarOpen}

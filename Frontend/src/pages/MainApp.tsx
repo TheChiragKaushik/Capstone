@@ -31,6 +31,7 @@ import { fetchAllNotifications } from "../redux/features/patientNotificationsSli
 import { fetchAllPharmacyNotifications } from "../redux/features/pharmacyNotificationsSlice";
 import IncompleteProfileModal from "../components/Common/IncompleteProfileModal";
 import { setProfileStatus } from "../redux/features/setProfileCompleteSlice";
+import MainAppProvider from "../components/Common/MainAppProvider";
 
 const MainApp = () => {
   const dispatch = useAppDispatch();
@@ -178,11 +179,16 @@ const MainApp = () => {
 
   if (user && !isProfileComplete && pathname !== "profile") {
     return (
-      <IncompleteProfileModal
-        open={true}
-        userRole={role}
-        onGoToProfile={handleGoToProfile}
-      />
+      <MainAppProvider
+        session={session}
+        role={role}
+      >
+        <IncompleteProfileModal
+          open={true}
+          userRole={role}
+          onGoToProfile={handleGoToProfile}
+        />
+      </MainAppProvider>
     );
   }
 

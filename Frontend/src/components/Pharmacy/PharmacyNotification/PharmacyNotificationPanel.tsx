@@ -23,8 +23,6 @@ const PharmacyNotificationPanel: React.FC<NotificationPanelProps> = ({
     (state) => state.pharmacyNotifications
   );
 
-  console.log(newNotifications)
-
   useEffect(() => {
     if (userId) {
       dispatch(fetchAllPharmacyNotifications(userId));

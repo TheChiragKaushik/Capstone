@@ -128,10 +128,10 @@ public class PharmacyServicesImpl implements PharmacyServices {
 
 		return reactiveMongoTemplateRef.find(query, PharmacyEO.class);
 	}
-	
-	
+
 	@Override
-	public Mono<UpdateResult> updateNotificationSoundsById(ObjectId pharmacyId, PharmacySoundPreference soundPreference) {
+	public Mono<UpdateResult> updateNotificationSoundsById(ObjectId pharmacyId,
+			PharmacySoundPreference soundPreference) {
 		Query query = new Query(Criteria.where("_id").is(pharmacyId));
 
 		Update update = new Update();
@@ -150,42 +150,64 @@ public class PharmacyServicesImpl implements PharmacyServices {
 		return reactiveMongoTemplateRef.getCollection("pharmacies").flatMap(collection -> Mono
 				.from(collection.updateOne(query.getQueryObject(), update.getUpdateObject(), options)));
 	}
-	
+
 	@Override
-	public Mono<UpdateResult> updateRefillRequestReminderNotificationCheck(String pharmacyId, String raiseRefillId){
+	public Mono<UpdateResult> updateRefillRequestReminderNotificationCheck(String pharmacyId, String raiseRefillId) {
 		Query query = new Query(Criteria.where("pharmacyId").is(pharmacyId)
 				.and("refillRequestsNotifications.pharmacyRefillRequestId").is(raiseRefillId));
 
-		Update update = new Update().inc("totalRefillRequests", -1)
-				.inc("totalRefillRequestsChecked", 1).set("refillRequestsNotifications.$.checked", true);
+		Update update = new Update().inc("totalRefillRequests", -1).inc("totalRefillRequestsChecked", 1)
+				.set("refillRequestsNotifications.$.checked", true);
 
-		return reactiveMongoTemplateRef.updateFirst(query, update, "pharmacynotifications")
-				.doOnError(e -> System.err.println("Failed to update refill request reminder notification for pharmacyId: "
-						+ pharmacyId + " and raiseRefillId: " + raiseRefillId + ". Error: "
-						+ e.getMessage()));
+		return reactiveMongoTemplateRef.updateFirst(query, update, "pharmacynotifications").doOnError(
+				e -> System.err.println("Failed to update refill request reminder notification for pharmacyId: "
+						+ pharmacyId + " and raiseRefillId: " + raiseRefillId + ". Error: " + e.getMessage()));
 	}
-	
+
 	@Override
-	public Mono<UpdateResult> updateInventoryRestockReminderNotificationCheck(String pharmacyId, String inventoryRestockReminderNotificationId){
-		
+	public Mono<UpdateResult> updateInventoryRestockReminderNotificationCheck(String pharmacyId,
+			String inventoryRestockReminderNotificationId) {
+
 		Query query = new Query(Criteria.where("pharmacyId").is(pharmacyId)
-				.and("inventoryRestockReminderNotifications.inventoryRestockReminderNotificationId").is(inventoryRestockReminderNotificationId));
+				.and("inventoryRestockReminderNotifications.inventoryRestockReminderNotificationId")
+				.is(inventoryRestockReminderNotificationId));
 
 		Update update = new Update().inc("totalPharmacyInventoryRestockReminderNotifications", -1)
-				.inc("totalPharmacyInventoryRestockReminderNotificationsChecked", 1).set("inventoryRestockReminderNotifications.$.checked", true);
+				.inc("totalPharmacyInventoryRestockReminderNotificationsChecked", 1)
+				.set("inventoryRestockReminderNotifications.$.checked", true);
 
 		return reactiveMongoTemplateRef.updateFirst(query, update, "pharmacynotifications")
-				.doOnError(e -> System.err.println("Failed to update inventory update request reminder notification for pharmacyId: "
-						+ pharmacyId + " and raiseRefillId: " + inventoryRestockReminderNotificationId + ". Error: "
-						+ e.getMessage()));
+				.doOnError(e -> System.err
+						.println("Failed to update inventory update request reminder notification for pharmacyId: "
+								+ pharmacyId + " and raiseRefillId: " + inventoryRestockReminderNotificationId
+								+ ". Error: " + e.getMessage()));
 	}
 
 	@Override
-	public Mono<PharmacyNotificationsEO> getAllPharmacyNotifications(String pharmacyId){
-		 Query query = new Query(Criteria.where("pharmacyId").is(pharmacyId));
-		 return reactiveMongoTemplateRef.findOne(query, PharmacyNotificationsEO.class)
-				 .doOnSuccess(e -> System.out.println("Pharmacy notifications fetched! "))
-				 .doOnError(e -> System.err.println("Failed to fetch Pharmacy notification with ID: " + pharmacyId + " : " + e.getMessage()));
-		}
+	public Mono<PharmacyNotificationsEO> getAllPharmacyNotifications(String pharmacyId) {
+		Query query = new Query(Criteria.where("pharmacyId").is(pharmacyId));
+		return reactiveMongoTemplateRef.findOne(query, PharmacyNotificationsEO.class)
+				.doOnSuccess(e -> System.out.println("Pharmacy notifications fetched! "))
+				.doOnError(e -> System.err.println(
+						"Failed to fetch Pharmacy notification with ID: " + pharmacyId + " : " + e.getMessage()));
+	}
+
+	
+	@Override
+	public Mono<PharmacyInventory> getCertainPharmacyMedication(String pharmacyId, String medicationId) {
+		ObjectId id = new ObjectId(pharmacyId);
+		Query query = new Query(Criteria.where("_id").is(id).and("pharmacyInventory.medicationId").is(medicationId));
+
+		return reactiveMongoTemplateRef.findOne(query, PharmacyEO.class).flatMap(pharmacyEO -> {
+			if (pharmacyEO == null) {
+				return Mono.empty();
+			}
+
+			PharmacyInventory foundInventory = pharmacyEO.getPharmacyInventory().stream()
+					.filter(inventory -> medicationId.equals(inventory.getMedicationId())).findFirst().orElse(null);
+
+			return Mono.justOrEmpty(foundInventory);
+		});
+	}
 
 }

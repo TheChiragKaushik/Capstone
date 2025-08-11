@@ -8,8 +8,9 @@ import CommonTextfield from "../../Common/CommonTextfield";
 import { type RaiseRefillEO, type PharmacyEO } from "../../../utils/Interfaces";
 import axios from "axios";
 import { APIEndpoints } from "../../../api/api";
-import { Alert, Button, MenuItem, Snackbar } from "@mui/material";
+import { Alert, Button, Collapse, MenuItem, Snackbar } from "@mui/material";
 import { colors } from "../../../utils/Constants";
+import PharmacyDetails from "./PatientRefillRequest/PharmacyDetails";
 
 type PatientRaiseRefillRequestProps = {
   medicationId?: string;
@@ -27,12 +28,10 @@ const PatientRaiseRefillRequest: React.FC<PatientRaiseRefillRequestProps> = ({
   const [selectedMedicationPharmacies, setSelectedMedicationPharmacies] =
     useState<PharmacyEO[]>([]);
 
-  const [selectedPharmacy, setSelectedPharmacy] = useState<string>();
+  // ✅ Selected pharmacy is PharmacyEO instead of string
+  const [selectedPharmacy, setSelectedPharmacy] = useState<PharmacyEO | undefined>();
 
-  const [raiseRefillRequest, setRaiseRefillRequest] = useState<RaiseRefillEO>(
-    {}
-  );
-
+  const [raiseRefillRequest, setRaiseRefillRequest] = useState<RaiseRefillEO>({});
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<
@@ -77,7 +76,7 @@ const PatientRaiseRefillRequest: React.FC<PatientRaiseRefillRequestProps> = ({
 
     const payload: RaiseRefillEO = {
       ...raiseRefillRequest,
-      pharmacyId: selectedPharmacy,
+      pharmacyId: selectedPharmacy._id, // ✅ Now from selectedPharmacy
       status: "Request Raised",
       requestDate: new Date().toISOString(),
     };
@@ -106,13 +105,8 @@ const PatientRaiseRefillRequest: React.FC<PatientRaiseRefillRequestProps> = ({
     }
   };
 
-  const handleSnackbarClose = (
-    _: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === "clickaway") {
-      return;
-    }
+  const handleSnackbarClose = (_: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === "clickaway") return;
     setSnackbarOpen(false);
   };
 
@@ -121,10 +115,15 @@ const PatientRaiseRefillRequest: React.FC<PatientRaiseRefillRequestProps> = ({
       <div className="flex flex-col w-3/5 md:w-1/2 mx-auto p-4">
         <CommonTextfield
           className="md:col-span-2"
-          label="Select Pharmacy"
+          label="Select from available Pharmacies"
           isSelect
-          value={selectedPharmacy}
-          onChange={(e) => setSelectedPharmacy(e.target.value)}
+          value={selectedPharmacy?._id || ""}
+          onChange={(e) => {
+            const selected = selectedMedicationPharmacies.find(
+              (p) => p._id === e.target.value
+            );
+            setSelectedPharmacy(selected);
+          }}
           disabled={selectedMedicationPharmacies.length === 0}
         >
           {selectedMedicationPharmacies.length > 0 ? (
@@ -139,6 +138,14 @@ const PatientRaiseRefillRequest: React.FC<PatientRaiseRefillRequestProps> = ({
             </MenuItem>
           )}
         </CommonTextfield>
+
+
+        <Collapse in={!!selectedPharmacy}>
+          <div className="mt-4">
+            <PharmacyDetails pharmacy={selectedPharmacy} />
+          </div>
+        </Collapse>
+
         <Button
           onClick={handleSelectPharmacyRequest}
           sx={{
@@ -148,12 +155,12 @@ const PatientRaiseRefillRequest: React.FC<PatientRaiseRefillRequestProps> = ({
             mt: 2,
             "&:hover": { color: colors.brown700 },
           }}
-          size="small"
           disabled={selectedMedicationPharmacies.length === 0}
         >
           Raise Request
         </Button>
       </div>
+
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
