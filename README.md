@@ -112,8 +112,16 @@ npm run dev
 This will start the React frontend with **Vite’s development server**.
 
 ---
+## 10. Accessing API Swagger UI
+Once the backend services are running, you can access the API Swagger documentation at:
 
-## 10. Summary Table
+(http://localhost:8989/webjars/swagger-ui/index.html)
+
+This provides a convenient interface to explore and test the backend APIs.
+
+---
+
+## 11. Summary Table
 
 | Step | Details |
 |------|---------|
