@@ -47,7 +47,7 @@ You will also learn how to import MongoDB collections and run the project locall
 
 Open a terminal or command prompt and run:
 
-git clone **[Spring Tool Suite (STS)]([Capstone](https://github.com/TheChiragKaushik/Capstone)**
+git clone **[Capstone](https://github.com/TheChiragKaushik/Capstone)**
 cd MedicationManagementTool
 
 
