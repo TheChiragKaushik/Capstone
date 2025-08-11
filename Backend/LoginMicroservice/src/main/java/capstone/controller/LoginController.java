@@ -1,12 +1,14 @@
 package capstone.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import capstone.entities.RequestBody.LoginRequest;
 import capstone.entities.RequestBody.SignUpRequest;
@@ -64,22 +66,25 @@ public class LoginController {
 		} else if (email.contains("@capstone.med")) {
 			return loginServicesRef.signUpPharmacy(signUpRequest);
 		} else {
-			return Mono.error(new IllegalArgumentException("Invalid user type"));
+			return Mono.error(new ResponseStatusException(
+	                HttpStatus.BAD_REQUEST, "Invalid user type"));
 		}
 	}
 
 	@PostMapping("/login")
 	public Mono<?> signInUser(@RequestBody LoginRequest loginRequest) {
-		String email = loginRequest.getEmail();
-		String password = loginRequest.getPassword();
-		if (email.contains("@capstone.com")) {
-			return loginServicesRef.signInPatient(email, password);
-		} else if (email.contains("@capstone.care")) {
-			return loginServicesRef.signInProvider(email, password);
-		} else if (email.contains("@capstone.med")) {
-			return loginServicesRef.signInPharmacy(email, password);
-		} else {
-			return Mono.error(new IllegalArgumentException("Invalid user type"));
-		}
+	    String email = loginRequest.getEmail();
+	    String password = loginRequest.getPassword();
+	    if (email.contains("@capstone.com")) {
+	        return loginServicesRef.signInPatient(email, password);
+	    } else if (email.contains("@capstone.care")) {
+	        return loginServicesRef.signInProvider(email, password);
+	    } else if (email.contains("@capstone.med")) {
+	        return loginServicesRef.signInPharmacy(email, password);
+	    } else {
+	        return Mono.error(new ResponseStatusException(
+	                HttpStatus.BAD_REQUEST, "Invalid user type"));
+	    }
 	}
+
 }

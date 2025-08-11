@@ -1,0 +1,408 @@
+[{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7d1"
+  },
+  "name": "Ibuprofen",
+  "description": "A nonsteroidal anti-inflammatory drug (NSAID) used to relieve pain, fever, and inflammation.",
+  "oneTablet": 200,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Pain Relievers (Analgesics)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7d2"
+  },
+  "name": "Acetaminophen",
+  "description": "Commonly used for pain and fever relief.",
+  "oneTablet": 500,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Pain Relievers (Analgesics)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7d3"
+  },
+  "name": "Amoxicillin",
+  "description": "A penicillin antibiotic used to treat a variety of bacterial infections.",
+  "oneTablet": 500,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antibiotics"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7d4"
+  },
+  "name": "Ciprofloxacin",
+  "description": "A fluoroquinolone antibiotic used for infections of the skin, bone, and urinary tract.",
+  "oneTablet": 250,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antibiotics"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7d5"
+  },
+  "name": "Acyclovir",
+  "description": "An antiviral drug used to treat herpes virus infections.",
+  "oneTablet": 400,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antivirals"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7d6"
+  },
+  "name": "Oseltamivir",
+  "description": "An antiviral used to treat and prevent influenza (flu).",
+  "oneTablet": 75,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antivirals"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7d7"
+  },
+  "name": "Fluconazole",
+  "description": "Used to treat various fungal and yeast infections.",
+  "oneTablet": 150,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antifungals"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7d8"
+  },
+  "name": "Terbinafine",
+  "description": "An antifungal medication used for treating athlete's foot and other fungal infections.",
+  "oneTablet": 250,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antifungals"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7d9"
+  },
+  "name": "Loratadine",
+  "description": "Relieves allergy symptoms like sneezing, itching, and runny nose.",
+  "oneTablet": 10,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antihistamines"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7da"
+  },
+  "name": "Cetirizine Syrup",
+  "description": "A liquid antihistamine for treating seasonal and perennial allergies.",
+  "oneTablet": null,
+  "unitMeasure": null,
+  "volumePerDose": 10,
+  "liquidUnitMeasure": "ml",
+  "type": "Antihistamines"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7db"
+  },
+  "name": "Sertraline",
+  "description": "A common selective serotonin reuptake inhibitor (SSRI) used for depression and anxiety.",
+  "oneTablet": 50,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antidepressants"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7dc"
+  },
+  "name": "Fluoxetine",
+  "description": "Used to treat depression, obsessive-compulsive disorder (OCD), and panic attacks.",
+  "oneTablet": 20,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antidepressants"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7dd"
+  },
+  "name": "Alprazolam",
+  "description": "A benzodiazepine used for anxiety and panic disorders.",
+  "oneTablet": 1,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antianxiety Medications"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7de"
+  },
+  "name": "Diazepam",
+  "description": "Used to treat anxiety disorders, alcohol withdrawal symptoms, and muscle spasms.",
+  "oneTablet": 5,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antianxiety Medications"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7df"
+  },
+  "name": "Lisinopril",
+  "description": "An ACE inhibitor used to treat high blood pressure.",
+  "oneTablet": 10,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antihypertensives (for Blood Pressure)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7e0"
+  },
+  "name": "Amlodipine",
+  "description": "A calcium channel blocker for high blood pressure and chest pain.",
+  "oneTablet": 5,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antihypertensives (for Blood Pressure)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7e1"
+  },
+  "name": "Metformin",
+  "description": "Used to improve blood sugar control in people with type 2 diabetes.",
+  "oneTablet": 500,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antidiabetics (for Diabetes)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7e2"
+  },
+  "name": "Glipizide",
+  "description": "Used to lower blood sugar in people with type 2 diabetes.",
+  "oneTablet": 5,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antidiabetics (for Diabetes)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7e3"
+  },
+  "name": "Atorvastatin",
+  "description": "Reduces 'bad' cholesterol and triglycerides.",
+  "oneTablet": 20,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Statins (for Cholesterol)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7e4"
+  },
+  "name": "Simvastatin",
+  "description": "A statin drug used to treat high cholesterol.",
+  "oneTablet": 40,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Statins (for Cholesterol)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7e5"
+  },
+  "name": "Naproxen",
+  "description": "A nonsteroidal anti-inflammatory drug (NSAID) for pain and inflammation.",
+  "oneTablet": 220,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Anti-inflammatories"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7e6"
+  },
+  "name": "Prednisone",
+  "description": "A corticosteroid used to reduce inflammation in the body.",
+  "oneTablet": 10,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Anti-inflammatories"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7e7"
+  },
+  "name": "Tums",
+  "description": "Calcium carbonate tablets for heartburn and indigestion.",
+  "oneTablet": 500,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antacids"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7e8"
+  },
+  "name": "Maalox",
+  "description": "Liquid antacid for the relief of heartburn, acid indigestion, and gas.",
+  "oneTablet": null,
+  "unitMeasure": null,
+  "volumePerDose": 15,
+  "liquidUnitMeasure": "ml",
+  "type": "Antacids"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7e9"
+  },
+  "name": "Gabapentin",
+  "description": "Used to treat seizures and nerve pain.",
+  "oneTablet": 300,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Anticonvulsants"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7ea"
+  },
+  "name": "Levetiracetam",
+  "description": "An anticonvulsant used to treat various types of seizures.",
+  "oneTablet": 500,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Anticonvulsants"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7eb"
+  },
+  "name": "Methotrexate",
+  "description": "Used to treat certain cancers and autoimmune diseases.",
+  "oneTablet": 2.5,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Antineoplastics (for Cancer)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7ec"
+  },
+  "name": "Doxorubicin (IV)",
+  "description": "A chemotherapy drug administered intravenously to treat various cancers.",
+  "oneTablet": null,
+  "unitMeasure": null,
+  "volumePerDose": 5,
+  "liquidUnitMeasure": "ml",
+  "type": "Antineoplastics (for Cancer)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7ed"
+  },
+  "name": "Levothyroxine",
+  "description": "Treats an underactive thyroid gland (hypothyroidism).",
+  "oneTablet": 25,
+  "unitMeasure": "mcg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Hormone Replacements"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7ee"
+  },
+  "name": "Estrogen Patch",
+  "description": "A transdermal patch for hormone replacement therapy.",
+  "oneTablet": null,
+  "unitMeasure": null,
+  "volumePerDose": 0.05,
+  "liquidUnitMeasure": "mg/day",
+  "type": "Hormone Replacements"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7ef"
+  },
+  "name": "Albuterol",
+  "description": "A fast-acting bronchodilator for asthma attacks.",
+  "oneTablet": 4,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Bronchodilators (for Respiratory issues)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7f0"
+  },
+  "name": "Albuterol Inhalation Solution",
+  "description": "Used in a nebulizer to relax airway muscles.",
+  "oneTablet": null,
+  "unitMeasure": null,
+  "volumePerDose": 2.5,
+  "liquidUnitMeasure": "mg/dose",
+  "type": "Bronchodilators (for Respiratory issues)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7f1"
+  },
+  "name": "Warfarin",
+  "description": "An anticoagulant (blood thinner) used to prevent blood clots.",
+  "oneTablet": 5,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Anticoagulants (Blood Thinners)"
+},
+{
+  "_id": {
+    "$oid": "688dba45c473f189eadea7f2"
+  },
+  "name": "Rivaroxaban",
+  "description": "An anticoagulant for deep vein thrombosis and pulmonary embolism.",
+  "oneTablet": 20,
+  "unitMeasure": "mg",
+  "volumePerDose": null,
+  "liquidUnitMeasure": null,
+  "type": "Anticoagulants (Blood Thinners)"
+}]

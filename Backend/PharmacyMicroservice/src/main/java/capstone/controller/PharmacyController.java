@@ -44,15 +44,20 @@ public class PharmacyController {
 
 	@GetMapping("/{pharmacyId}")
 	public Mono<PharmacyEO> getPharmacy(@PathVariable String pharmacyId) {
-		return Mono.fromCallable(() -> new ObjectId(pharmacyId)).flatMap(id -> pharmacyServicesRef.getPharmacyById(id))
-				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Pharmacy not found")))
-				.onErrorResume(IllegalArgumentException.class, e -> {
-					return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid pharmacyId format"));
-				}).onErrorResume(e -> {
-					return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-							"An unexpected error occurred"));
-				});
+	    return Mono.fromCallable(() -> new ObjectId(pharmacyId))
+	        .flatMap(id -> pharmacyServicesRef.getPharmacyById(id))
+	        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Pharmacy not found")))
+	        .onErrorResume(e -> {
+	            if (e instanceof IllegalArgumentException) {
+	                return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid pharmacyId format"));
+	            } else if (e instanceof ResponseStatusException) {
+	                return Mono.error(e);
+	            } else {
+	                return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"));
+	            }
+	        });
 	}
+
 
 	@PutMapping("/inventory/{pharmacyId}")
 	public Mono<UpdateResult> updatePharmacyInventory(

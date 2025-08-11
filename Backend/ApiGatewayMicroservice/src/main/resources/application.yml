@@ -11,22 +11,8 @@ spring:
               uri: http://localhost:9090
               predicates:
                 - Path=/api/admin/**
-              metadata:
-                cors:
-                  allowedOrigins: http://localhost:5173
-                  allowedMethods:
-                    - GET
-                    - POST
-                    - PUT
-                    - DELETE
-                    - OPTIONS
-                  allowedHeaders: "*"
-                  allowCredentials: true
-                  maxAge: 3600
-            - id: CustomNotificationMicroservice
-              uri: http://localhost:9091
-              predicates:
-                - Path=/api/custom/**
+              filters:
+                - RewritePath=/api/admin/v3/api-docs, /v3/api-docs
               metadata:
                 cors:
                   allowedOrigins: http://localhost:5173
@@ -43,6 +29,8 @@ spring:
               uri: http://localhost:9092
               predicates:
                 - Path=/api/logon/**
+              filters:
+                - RewritePath=/api/logon/v3/api-docs, /v3/api-docs
               metadata:
                 cors:
                   allowedOrigins: http://localhost:5173
@@ -59,6 +47,8 @@ spring:
               uri: http://localhost:9093
               predicates:
                 - Path=/api/patients/**
+              filters:
+                - RewritePath=/api/patients/v3/api-docs, /v3/api-docs
               metadata:
                 cors:
                   allowedOrigins: http://localhost:5173
@@ -75,6 +65,8 @@ spring:
               uri: http://localhost:9095
               predicates:
                 - Path=/api/pharmacy/**
+              filters:
+                - RewritePath=/api/pharmacy/v3/api-docs, /v3/api-docs
               metadata:
                 cors:
                   allowedOrigins: http://localhost:5173
@@ -91,6 +83,8 @@ spring:
               uri: http://localhost:9096
               predicates:
                 - Path=/api/providers/**
+              filters:
+                - RewritePath=/api/providers/v3/api-docs, /v3/api-docs
               metadata:
                 cors:
                   allowedOrigins: http://localhost:5173
@@ -107,6 +101,8 @@ spring:
               uri: http://localhost:9097
               predicates:
                 - Path=/api/**
+              filters:
+                - RewritePath=/api/v3/api-docs, /v3/api-docs
               metadata:
                 cors:
                   allowedOrigins: http://localhost:5173
@@ -123,7 +119,25 @@ spring:
               uri: http://localhost:9097
               predicates:
                 - Path=/ws/**
-              
 
 server:
   port: 8989
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    urls:
+      - name: Admin Microservice
+        url: /api/admin/v3/api-docs
+      - name: Login Microservice
+        url: /api/logon/v3/api-docs
+      - name: Patient Microservice
+        url: /api/patients/v3/api-docs
+      - name: Pharmacy Microservice
+        url: /api/pharmacy/v3/api-docs
+      - name: Provider Microservice
+        url: /api/providers/v3/api-docs
+      - name: Scheduled Notification Microservice
+        url: /api/v3/api-docs

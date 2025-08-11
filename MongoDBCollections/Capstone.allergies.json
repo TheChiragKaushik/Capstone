@@ -1,0 +1,146 @@
+[{
+  "_id": {
+    "$oid": "688f48cec473f189eadea806"
+  },
+  "name": "Peanut Allergy",
+  "type": "Food Allergy",
+  "description": "An allergy to peanuts, a common food allergen. Reactions can be severe and life-threatening.",
+  "sideEffects": [
+    "Hives or eczema",
+    "Swelling of the lips, face, tongue, or throat",
+    "Anaphylaxis",
+    "Shortness of breath",
+    "Wheezing"
+  ]
+},
+{
+  "_id": {
+    "$oid": "688f48cec473f189eadea807"
+  },
+  "name": "Seasonal Allergic Rhinitis",
+  "type": "Pollen Allergy",
+  "description": "Also known as hay fever, this is an allergic reaction to pollen from trees, grasses, or weeds.",
+  "sideEffects": [
+    "Sneezing",
+    "Runny or stuffy nose",
+    "Itchy, watery eyes",
+    "Itchy throat or ears"
+  ]
+},
+{
+  "_id": {
+    "$oid": "688f48cec473f189eadea808"
+  },
+  "name": "Penicillin Allergy",
+  "type": "Drug Allergy",
+  "description": "An allergic reaction to the antibiotic penicillin. This is one of the most common drug allergies.",
+  "sideEffects": [
+    "Skin rash or hives",
+    "Itching",
+    "Swelling",
+    "Fever",
+    "Shortness of breath"
+  ]
+},
+{
+  "_id": {
+    "$oid": "688f48cec473f189eadea809"
+  },
+  "name": "Latex Allergy",
+  "type": "Contact Allergy",
+  "description": "An allergy to natural rubber latex, often found in medical gloves, balloons, and other products.",
+  "sideEffects": [
+    "Skin rash or hives",
+    "Itching",
+    "Contact dermatitis",
+    "Anaphylaxis (in severe cases)"
+  ]
+},
+{
+  "_id": {
+    "$oid": "688f48cec473f189eadea80a"
+  },
+  "name": "Dust Mite Allergy",
+  "type": "Environmental Allergy",
+  "description": "An allergy to tiny bugs called dust mites, which live in house dust. This can trigger asthma symptoms.",
+  "sideEffects": [
+    "Sneezing",
+    "Runny nose",
+    "Nasal congestion",
+    "Coughing",
+    "Asthma flare-ups"
+  ]
+},
+{
+  "_id": {
+    "$oid": "688f48cec473f189eadea80b"
+  },
+  "name": "Egg Allergy",
+  "type": "Food Allergy",
+  "description": "An immune system reaction to proteins in eggs. It is one of the most common food allergies in children.",
+  "sideEffects": [
+    "Hives or skin rashes",
+    "Nasal congestion",
+    "Coughing or wheezing",
+    "Abdominal pain",
+    "Vomiting"
+  ]
+},
+{
+  "_id": {
+    "$oid": "688f48cec473f189eadea80c"
+  },
+  "name": "Cat Dander Allergy",
+  "type": "Animal Allergy",
+  "description": "An allergic reaction to proteins found in a cat's skin flakes, saliva, and urine. Symptoms can persist long after the cat is gone.",
+  "sideEffects": [
+    "Sneezing and runny nose",
+    "Itchy, watery eyes",
+    "Facial pain from sinus congestion",
+    "Asthma symptoms like coughing and wheezing"
+  ]
+},
+{
+  "_id": {
+    "$oid": "688f48cec473f189eadea80d"
+  },
+  "name": "Nickel Allergy",
+  "type": "Contact Allergy",
+  "description": "A common cause of allergic contact dermatitis. It occurs when the skin comes into contact with items containing nickel, such as jewelry or belt buckles.",
+  "sideEffects": [
+    "Rash or bumps on the skin",
+    "Severe itching",
+    "Dry patches of skin that may resemble a burn",
+    "Blisters and fluid drainage in severe cases"
+  ]
+},
+{
+  "_id": {
+    "$oid": "688f48cec473f189eadea80e"
+  },
+  "name": "Insect Sting Allergy",
+  "type": "Insect Allergy",
+  "description": "An allergic reaction to venom from insects like bees, wasps, hornets, or fire ants. Reactions can range from minor to severe.",
+  "sideEffects": [
+    "Large area of swelling around the sting site",
+    "Hives or itching over a large area",
+    "Shortness of breath",
+    "Anaphylaxis",
+    "Dizziness or drop in blood pressure"
+  ]
+},
+{
+  "_id": {
+    "$oid": "688f48cec473f189eadea80f"
+  },
+  "name": "Soy Allergy",
+  "type": "Food Allergy",
+  "description": "An allergy to soybeans and soy products. It's often seen in infants and young children and can be outgrown.",
+  "sideEffects": [
+    "Tingling in the mouth",
+    "Hives or itching",
+    "Stomach pain or diarrhea",
+    "Flushing of the skin",
+    "Wheezing"
+  ]
+}]
