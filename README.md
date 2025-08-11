@@ -49,7 +49,7 @@ Open a terminal or command prompt and run:
 
 git clone **[Capstone](https://github.com/TheChiragKaushik/Capstone)**  (https://github.com/TheChiragKaushik/Capstone)
 
-cd MedicationManagementTool
+cd Capstone
 
 
 ## 5. Import MongoDB Collections
