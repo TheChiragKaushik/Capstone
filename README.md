@@ -34,12 +34,7 @@ You will also learn how to import MongoDB collections and run the project locall
 
 1. Visit the VS Code website: [https://code.visualstudio.com/](https://code.visualstudio.com/)  
 2. Download and install VS Code for your operating system.  
-3. Launch VS Code.  
-4. (Optional but recommended) Install these extensions:
-   - **ESLint**
-   - **Prettier**
-   - **React Snippets**
-   - **Vite Support** (optional)
+3. Launch VS Code.
 
 ---
 
