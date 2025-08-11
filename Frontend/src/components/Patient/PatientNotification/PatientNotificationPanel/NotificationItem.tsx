@@ -248,7 +248,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     );
     dispatch(removeAppNotification(approvedRefillObject?.raiseRefillId ?? ""));
     dispatch(fetchAllNotifications(userId ?? ""));
-    // navigateToRoute?.navigate("refillRequests");
+    navigateToRoute?.navigate("refillRequests");
   };
 
   return (

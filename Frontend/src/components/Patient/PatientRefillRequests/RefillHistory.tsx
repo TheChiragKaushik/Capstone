@@ -48,7 +48,6 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
   useEffect(() => {
     if (patientRaiseRefillNotification !== null) {
       setCustomRaiseRefillNotificationId(patientRaiseRefillNotification);
-      dispatch(removePatientRaiseRefillNotificationId());
     }
   }, [
     patientRaiseRefillNotification,
@@ -88,6 +87,9 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
       );
       if (refillMedications.data) {
         setRefillMedications(refillMedications.data.refillMedications);
+        if (patientRaiseRefillNotification !== null) {
+          dispatch(removePatientRaiseRefillNotificationId());
+        }
       }
     } catch (error) {
       console.error(error);
@@ -96,7 +98,7 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
 
   useEffect(() => {
     fetchPatientRefillMedications();
-  }, []);
+  }, [patientId, patientRaiseRefillNotification]);
 
   const filteredRefillMedication = refillMedications?.filter((item) => {
     if (customRaiseRefillNotificationId !== null) {
@@ -231,7 +233,7 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
             </TableHead>
             <TableBody>
               {filteredRefillMedication &&
-              filteredRefillMedication.length > 0 ? (
+                filteredRefillMedication.length > 0 ? (
                 filteredRefillMedication
                   ?.slice()
                   .reverse()
@@ -288,7 +290,7 @@ const RefillHistory: React.FC<RefillHistoryProps> = ({ patientId }) => {
                             >
                               Raise Request
                               {expandedId ===
-                              refillMedication?.raiseRefillId ? (
+                                refillMedication?.raiseRefillId ? (
                                 <ArrowDropUpIcon />
                               ) : (
                                 <ArrowDropDownIcon />

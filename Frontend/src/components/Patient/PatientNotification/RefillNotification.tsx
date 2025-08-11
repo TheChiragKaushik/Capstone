@@ -163,7 +163,7 @@ const RefillNotification: React.FC<RefillNotificationProps> = ({
     dispatch(addPatientRaiseRefillNotificationId(notification?.raiseRefillId));
     dispatch(removeAppNotification(notification?.raiseRefillId ?? ""));
     dispatch(fetchAllNotifications(notification?.patientId ?? ""));
-    // navigateToRoute?.navigate("refillRequests");
+    navigateToRoute?.navigate("refillRequests");
   };
 
   return (
