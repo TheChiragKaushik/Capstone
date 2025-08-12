@@ -41,13 +41,13 @@ const Landing = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => handleRouting("login")}
-                className="bg-beige-200 text-brown-600 px-6 py-2 rounded-lg font-medium hover:bg-beige-300 focus:outline-none focus:ring-2 focus:ring-brown-400"
+                className="bg-beige-200 cursor-pointer text-brown-600 px-6 py-2 rounded-lg font-medium hover:bg-beige-300 focus:outline-none focus:ring-2 focus:ring-brown-400"
               >
                 Login
               </button>
               <button
                 onClick={() => handleRouting("signup")}
-                className="text-white bg-brown-500 hover:bg-brown-600 px-6 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-brown-400"
+                className="text-white cursor-pointer bg-brown-500 hover:bg-brown-600 px-6 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-brown-400"
               >
                 Sign Up
               </button>
@@ -73,7 +73,7 @@ const Landing = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => handleRouting("signup")}
-                  className="bg-brown-500 hover:bg-brown-600 text-white px-8 py-4 rounded-lg font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-brown-400"
+                  className="bg-brown-500 cursor-pointer hover:bg-brown-600 text-white px-8 py-4 rounded-lg font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-brown-400"
                 >
                   Get Started
                 </button>
@@ -494,7 +494,7 @@ const Landing = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => handleRouting("signup")}
-              className="text-brown-600 px-8 py-4 rounded-lg font-semibold text-lg bg-beige-200 hover:bg-brown-300 focus:outline-none focus:ring-2 focus:ring-white transition-all duration-200"
+              className="text-brown-600 cursor-pointer px-8 py-4 rounded-lg font-semibold text-lg bg-beige-200 hover:bg-brown-300 focus:outline-none focus:ring-2 focus:ring-white transition-all duration-200"
             >
               Start Now!
             </button>
